@@ -34,7 +34,7 @@
     swappy           # screenshot annotation
 
     # Wallpaper
-    swww             # animated wallpaper daemon (fixes the old "awww" typo)
+    awww             # animated wallpaper daemon (swww was renamed to awww in nixpkgs)
 
     # Brightness / volume / media
     brightnessctl

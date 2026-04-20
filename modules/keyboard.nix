@@ -57,7 +57,7 @@
   # ── TTY console keyboard ──────────────────────────────────────────────────
   # dvp = Programmer Dvorak — applies to ALL TTYs including root login
   console = {
-    keyMap     = "dvp";
+    useXkbConfig = true;  # derives keymap from services.xserver.xkb above
     font       = "Lat2-Terminus16";
     earlySetup = true;   # active in initrd so LUKS/root prompts use dvp
   };
