@@ -1,0 +1,25 @@
+{
+  "layer": "top",
+  "position": "top",
+  "spacing": 3,
+  "modules-left": ["hyprland/window"],
+  "modules-center": ["hyprland/workspaces#rw", "clock"],
+  "modules-right": ["tray", "network#speed"],
+  "hyprland/window": {
+    "format": "{}",
+    "max-length": 50
+  },
+  "hyprland/workspaces#rw": {
+    "format": "{icon}",
+    "format-icons": {
+      "default": "",
+      "active": ""
+    }
+  },
+  "clock": {
+    "format": "{:%H:%M}"
+  },
+  "network#speed": {
+    "format": "  {ifname}"
+  }
+}
