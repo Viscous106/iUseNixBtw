@@ -9,7 +9,6 @@
     ./modules/waybar.nix
     ./modules/git.nix
     ./modules/kitty.nix
-    ./modules/extras.nix
   ];
 
   home.username      = "viscous";
@@ -40,15 +39,15 @@
     cliphist      # clipboard history backend
     slurp         # region selection for screenshots
     grim          # screenshot tool
-    swww          # wallpaper daemon
-    rofi-wayland  # app launcher (Super+D)
-    swaync        # notification daemon
+    swww          # wallpaper daemon (swww-daemon binary)
+    rofi          # app launcher (Super+D)
+    swaynotificationcenter  # notification daemon (swaync CLI)
     playerctl     # media controls
     pamixer       # volume control
     brightnessctl # brightness control
     pavucontrol   # audio GUI (Super+Alt+S)
     blueman       # bluetooth GUI (Super+Shift+B)
-    warpd         # keyboard-driven mouse
+    # warpd — install manually if needed: nix profile install nixpkgs#warpd
   ];
 
   xdg.enable = true;
