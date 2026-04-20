@@ -1,4 +1,6 @@
 #!/bin/bash
+# NixOS: explicitly set PATH so wl-kbptr is found from Hyprland exec
+export PATH="/home/viscous/.nix-profile/bin:/etc/profiles/per-user/viscous/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
 
 BUTTON=${1:-left} # Default to left click if no argument is provided
 

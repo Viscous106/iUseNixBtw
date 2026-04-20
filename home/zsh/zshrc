@@ -1,0 +1,176 @@
+fastfetch
+
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+eval $(thefuck --alias)
+
+# === Error handler: Play sound on command not found ===
+command_not_found_handler() {
+    # Play sound asynchronously
+    (paplay ~/.config/hypr/configs/kya-cheda-bhosdi-made-with-Voicemod.mp3 &)
+    # Show the standard "command not found" error
+    echo "zsh: command not found: $1" >&2
+    return 127
+}
+
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+plugins=(
+    git
+    archlinux
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+)
+source $ZSH/oh-my-zsh.sh
+# Set-up icons for files/directories in terminal using lsd
+alias ls='lsd'
+alias l='ls -l'
+alias la='ls -a'
+alias lla='ls -la'
+alias lt='ls --tree'
+
+# Set-up FZF key bindings (CTRL R for fuzzy history finder)
+source <(fzf --zsh)
+
+HISTFILE=~/.config/zsh/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory
+eval "$(starship init zsh)"
+
+# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
+[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+
+alias bluefriends='pactl load-module module-combine-sink sink_name=combined'
+alias ff='fastfetch'
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+eval "$(zoxide init zsh)"
+alias n='nvim'
+alias speed='speedtest'	
+alias scrible='tjournal'
+export VISUAL=nvim
+export EDITOR=nvim
+
+
+# --- Automatic Python Virtualenv Activation ---
+auto_venv_activate() {
+  # If venv/bin/activate exists and we are not already in that venv
+  if [ -f "venv/bin/activate" ] && [ "$VIRTUAL_ENV" != "$(pwd)/venv" ]; then
+    echo "Activating virtual environment..."
+# source "venv/bin/activate"  # commented out by conda initialize
+  # If a venv is active but we are no longer in its directory tree
+  elif [ -n "$VIRTUAL_ENV" ] && [[ ! "$(pwd)/" == "$(dirname $VIRTUAL_ENV)"/* ]]; then
+    echo "Deactivating virtual environment..."
+    deactivate
+  fi
+}
+
+# Add the function to the chpwd hook, which runs on every directory change
+if [[ -z "${chpwd_functions[(r)auto_venv_activate]}" ]]; then
+  chpwd_functions+=(auto_venv_activate)
+fi
+# --- End Automatic Python Virtualenv Activation ---
+
+# Custom Keybindings
+# ------------------
+# Clear screen
+bindkey '\ed' clear-screen     # Alt+D to clear screen
+
+# GOPATH Setup
+export PATH="$PATH:$HOME/go/bin"
+fpath=(~/.zsh/completions $fpath)
+autoload -Uz compinit && compinit
+
+# Created by `pipx` on 2026-01-19 12:29:37
+export PATH="$PATH:/home/viscous/.local/bin"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Auto-start tmux and restore sessions
+if [ -z "$TMUX" ]; then
+    /home/viscous/.config/tmux/tmux-autostart.sh
+fi
+
+
+# --- Git & Worktree Management ---
+# Worktree aliases
+alias gwl='git worktree list'                    # List all worktrees
+alias gwa='git worktree add'                     # Add new worktree
+alias gwr='git worktree remove'                  # Remove worktree
+alias gwp='git worktree prune'                   # Prune stale worktree info
+
+# Quick git shortcuts
+alias gs='git status -sb'                        # Short status
+alias gd='git diff'                              # Diff
+alias gds='git diff --staged'                    # Staged diff
+alias gp='git pull --rebase'                     # Pull with rebase
+alias gco='git checkout'                         # Checkout shortcut
+alias gl="
+git log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(cyan)(%ar)%C(reset) %C(white)%s%C(reset) %C(blue)- %an%C(reset)%C(bold 203)%d%C(reset)'
+"
+alias ca='config add'
+alias cl="
+config log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(148)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold 117)- %an%C(reset)%C(bold 203)%d%C(reset)'
+"
+# Interactive branch switch with fzf (works in bare repos too)
+fzb() {
+  # Use for-each-ref which works in bare repos
+  local branch=$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null |
+    grep -v '/HEAD$' |
+    fzf --height 40% --reverse --tac --prompt="Branch > ") 
+  if [[ -n "$branch" ]]; then
+    # If in a bare repo, suggest using gws instead
+    if [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
+      echo "Bare repo detected. Use 'gws' to switch worktrees."
+      echo "Selected branch: $branch"
+    else
+      git checkout "$branch"
+    fi
+  fi
+}
+
+# Worktree switcher - cd to selected worktree
+gws() {
+  local target=$("$HOME/.config/hypr/scripts/worktree_switcher.sh" --print-only 2>/dev/null)
+  [[ -n "$target" && -d "$target" ]] && cd "$target" && echo "Switched to: $(basename "$target")"
+}
+
+# Worktree switcher - open in nvim
+gwn() {
+  "$HOME/.config/hypr/scripts/worktree_switcher.sh" --nvim
+}
+
+# Quick branch creation
+gnb() {
+  [[ -z "$1" ]] && echo "Usage: gnb <branch-name>" && return 1
+  git checkout -b "$1"
+}
+# --- End Git & Worktree Management ---
+
+# Generated for envman. Do not edit.
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+
+export TMUXIFIER="$HOME/.config/tmuxifier"
+source ~/.config/tmuxifier/init.sh
+
+# Tmuxifier productivity alias
+alias tmux-edit="cd ~/.config/tmuxifier/layouts && nvim"
+
+# Alias for tmuxifier
+alias tx="tmuxifier"
+
+export GPG_TTY=$(tty)
+
+# Play sound only when an interactive command exits with a non-zero status
+_cmd_ran=0
+preexec() { _cmd_ran=1 }
+precmd() {
+    local exit_code=$?
+    _cmd_ran=0
+}
+
+# --- Pyenv Setup ---
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
