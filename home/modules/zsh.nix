@@ -236,6 +236,5 @@
     pay-respects
     fastfetch
     speedtest-cli
-    thefuck     # for compatibility if any scripts use `fuck`
   ];
 }

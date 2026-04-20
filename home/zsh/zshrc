@@ -4,7 +4,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-eval $(thefuck --alias)
+eval "$(pay-respects shell --alias)"
 
 # === Error handler: Play sound on command not found ===
 command_not_found_handler() {
