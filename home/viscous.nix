@@ -29,6 +29,27 @@
   '';
 
   # ── XDG dirs ──────────────────────────────────────────────────────────────
+  # ── Extra user packages required by hypr scripts ─────────────────────────
+  home.packages = with pkgs; [
+    bc            # math in shell scripts (Brightness, Volume, etc.)
+    jq            # JSON parsing (WallpaperSelect, Weather, etc.)
+    imagemagick   # image manipulation (WallpaperEffects)
+    swappy        # screenshot annotation (ScreenShot.sh --swappy)
+    wl-clipboard  # wl-copy / wl-paste (clipboard manager)
+    cliphist      # clipboard history backend
+    slurp         # region selection for screenshots
+    grim          # screenshot tool
+    swww          # wallpaper daemon
+    rofi-wayland  # app launcher (Super+D)
+    swaync        # notification daemon
+    playerctl     # media controls
+    pamixer       # volume control
+    brightnessctl # brightness control
+    pavucontrol   # audio GUI (Super+Alt+S)
+    blueman       # bluetooth GUI (Super+Shift+B)
+    warpd         # keyboard-driven mouse
+  ];
+
   xdg.enable = true;
   xdg.userDirs = {
     enable            = true;
