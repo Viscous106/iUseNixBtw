@@ -9,6 +9,7 @@
     ./modules/waybar.nix
     ./modules/git.nix
     ./modules/kitty.nix
+    ./modules/extras.nix
   ];
 
   home.username      = "viscous";

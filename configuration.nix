@@ -5,6 +5,16 @@
   time.timeZone       = "Asia/Kolkata";
   i18n.defaultLocale  = "en_US.UTF-8";
 
+  # ── Keyboard — DVP (Dvorak Programmer) everywhere ─────────────────────────
+  # Applies to Wayland (via libxkbcommon), X11, and the Linux console (TTY).
+  services.xserver.xkb = {
+    layout  = "us";
+    variant = "dvp";
+  };
+
+  # Makes the TTY use the same xkb config as the desktop
+  console.useXkbConfig = true;
+
   # ── Nix settings ──────────────────────────────────────────────────────────
   nix = {
     settings = {
