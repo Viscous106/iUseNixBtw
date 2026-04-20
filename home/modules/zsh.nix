@@ -21,54 +21,141 @@
     ];
 
     shellAliases = {
+      # Editor
       v       = "nvim";
       vi      = "nvim";
+      n       = "nvim";
+
+      # ls (eza)
       ls      = "eza --icons --group-directories-first";
+      l       = "eza -l --icons --group-directories-first";
       ll      = "eza -la --icons --group-directories-first --git";
       la      = "eza -a --icons --group-directories-first";
+      lla     = "eza -la --icons --group-directories-first";
+      lt      = "eza --tree --icons";
       tree    = "eza --tree --icons --level=3";
+
+      # Better defaults
       cat     = "bat --style=numbers --color=always";
       grep    = "rg";
       find    = "fd";
-      gs      = "git status";
+
+      # Git
+      gs      = "git status -sb";
       gd      = "git diff";
-      gl      = "git log --oneline --graph --all";
+      gds     = "git diff --staged";
       ga      = "git add";
       gc      = "git commit";
-      gp      = "git push";
+      gp      = "git pull --rebase";
+      gco     = "git checkout";
       lg      = "lazygit";
+
+      # Worktree
+      gwl     = "git worktree list";
+      gwa     = "git worktree add";
+      gwr     = "git worktree remove";
+      gwp     = "git worktree prune";
+
+      # NixOS
       cfg     = "nvim /persist/nixos-config/";
       rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config#nix";
       update  = "nix flake update /persist/nixos-config && rebuild";
+
+      # Misc
+      ff      = "fastfetch";
+      speed   = "speedtest-cli";
     };
 
     initContent = ''
-      # Vi mode
+      # ── Startup ──────────────────────────────────────────────────────────────
+      fastfetch
+
+      # ── Vi mode ──────────────────────────────────────────────────────────────
       bindkey -v
       export KEYTIMEOUT=1
 
-      # Better vi mode indicator
+      # Cursor shape: block in normal, beam in insert
       function zle-keymap-select {
         if [[ ''${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
           echo -ne '\e[1 q'
-        elif [[ ''${KEYMAP} == main ]] || [[ ''${KEYMAP} == viins ]] || [[ ''${KEYMAP} = "" ]] || [[ $1 = 'beam' ]]; then
+        elif [[ ''${KEYMAP} == main ]] || [[ ''${KEYMAP} == viins ]] || \
+             [[ ''${KEYMAP} = "" ]] || [[ $1 = 'beam' ]]; then
           echo -ne '\e[5 q'
         fi
       }
       zle -N zle-keymap-select
       echo -ne '\e[5 q'
 
-      # FZF integration
+      # ── Custom keybindings ────────────────────────────────────────────────────
+      bindkey '\ed' clear-screen     # Alt+D to clear screen
+
+      # ── FZF ──────────────────────────────────────────────────────────────────
       source ${pkgs.fzf}/share/fzf/key-bindings.zsh
       source ${pkgs.fzf}/share/fzf/completion.zsh
       export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
       export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8'
 
-      # Zoxide (smarter cd)
+      # ── Zoxide (smarter cd) ───────────────────────────────────────────────────
       eval "$(${pkgs.zoxide}/bin/zoxide init zsh --cmd cd)"
 
-      # Load git identity from persist if available
+      # ── Pay-respects (thefuck successor) ────────────────────────────────────
+      eval "$(${pkgs.pay-respects}/bin/pay-respects shell --alias)"
+
+      # ── History ───────────────────────────────────────────────────────────────
+      HISTFILE="${config.xdg.configHome}/zsh/.zsh_history"
+      setopt appendhistory histignorealldups sharehistory
+
+      # ── Git pretty log ────────────────────────────────────────────────────────
+      gl() {
+        git log --graph --all --decorate --oneline \
+          --format=format:'%C(bold 141)%h%C(reset) - %C(cyan)(%ar)%C(reset) %C(white)%s%C(reset) %C(blue)- %an%C(reset)%C(bold 203)%d%C(reset)' "$@"
+      }
+
+      # ── FZF branch switcher ────────────────────────────────────────────────────
+      fzb() {
+        local branch
+        branch=$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null \
+          | grep -v '/HEAD$' \
+          | fzf --height 40% --reverse --tac --prompt="Branch > ")
+        if [[ -n "$branch" ]]; then
+          if [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
+            echo "Bare repo detected. Use 'gws' to switch worktrees."
+            echo "Selected branch: $branch"
+          else
+            git checkout "$branch"
+          fi
+        fi
+      }
+
+      # ── Quick branch creation ─────────────────────────────────────────────────
+      gnb() {
+        [[ -z "$1" ]] && echo "Usage: gnb <branch-name>" && return 1
+        git checkout -b "$1"
+      }
+
+      # ── Auto Python venv activation ───────────────────────────────────────────
+      auto_venv_activate() {
+        if [ -f "venv/bin/activate" ] && [ "$VIRTUAL_ENV" != "$(pwd)/venv" ]; then
+          echo "Activating virtual environment..."
+          source "venv/bin/activate"
+        elif [ -n "$VIRTUAL_ENV" ] && [[ ! "$(pwd)/" == "$(dirname $VIRTUAL_ENV)"/* ]]; then
+          echo "Deactivating virtual environment..."
+          deactivate
+        fi
+      }
+      if [[ -z "''${chpwd_functions[(r)auto_venv_activate]}" ]]; then
+        chpwd_functions+=(auto_venv_activate)
+      fi
+
+      # ── Git identity from persist ─────────────────────────────────────────────
       [ -f /persist/secrets/git-identity ] && source /persist/secrets/git-identity
+
+      # ── GPG TTY ───────────────────────────────────────────────────────────────
+      export GPG_TTY=$(tty)
+
+      # ── Editors ───────────────────────────────────────────────────────────────
+      export VISUAL=nvim
+      export EDITOR=nvim
     '';
 
     history = {
@@ -79,6 +166,7 @@
     };
   };
 
+  # ── Starship prompt ────────────────────────────────────────────────────────
   programs.starship = {
     enable               = true;
     enableZshIntegration = true;
@@ -109,6 +197,7 @@
     };
   };
 
+  # ── Packages available in the shell ───────────────────────────────────────
   home.packages = with pkgs; [
     fzf
     eza
@@ -125,5 +214,8 @@
     wget
     curl
     tree
+    pay-respects      # auto-correct last command (thefuck successor)
+    fastfetch        # system info on startup
+    speedtest-cli    # speed alias
   ];
 }

@@ -66,8 +66,7 @@
     # Misc desktop utils
     libnotify
     xdg-utils
-    qt6ct                # QT theme picker
-    qt5ct
+    qt6Packages.qt6ct    # QT theme picker
   ];
 
   # ── Fonts ─────────────────────────────────────────────────────────────────
