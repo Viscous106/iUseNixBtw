@@ -48,7 +48,12 @@
     brightnessctl # brightness control
     pavucontrol   # audio GUI (Super+Alt+S)
     blueman       # bluetooth GUI (Super+Shift+B)
-    # warpd — install manually if needed: nix profile install nixpkgs#warpd
+    wl-kbptr      # keyboard pointer (Meta+H / Meta+Shift+H)
+    psmisc        # provides killall (Meta+Shift+T: killall -SIGUSR1 waybar)
+    tmux          # terminal multiplexer
+    lsd           # ls replacement matching Arch aliases
+    nwg-displays  # monitor management (Meta+Alt+M)
+    pyenv         # Python version manager
   ];
 
   xdg.enable = true;
@@ -57,4 +62,9 @@
     createDirectories = true;
     setSessionVariables = true;
   };
+
+  # ── GTK dark mode ─────────────────────────────────────────────────────────
+  gtk.enable = true;
+  gtk.gtk3.extraConfig = { gtk-application-prefer-dark-theme = 1; };
+  gtk.gtk4.extraConfig = { gtk-application-prefer-dark-theme = 1; };
 }

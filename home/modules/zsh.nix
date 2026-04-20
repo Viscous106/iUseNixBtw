@@ -26,14 +26,13 @@
       vi      = "nvim";
       n       = "nvim";
 
-      # ls (eza)
-      ls      = "eza --icons --group-directories-first";
-      l       = "eza -l --icons --group-directories-first";
-      ll      = "eza -la --icons --group-directories-first --git";
-      la      = "eza -a --icons --group-directories-first";
-      lla     = "eza -la --icons --group-directories-first";
-      lt      = "eza --tree --icons";
-      tree    = "eza --tree --icons --level=3";
+      # ls (lsd — matching Arch setup)
+      ls      = "lsd";
+      l       = "lsd -l";
+      ll      = "lsd -la";
+      la      = "lsd -a";
+      lla     = "lsd -la";
+      lt      = "lsd --tree";
 
       # Better defaults
       cat     = "bat --style=numbers --color=always";
@@ -147,6 +146,16 @@
         chpwd_functions+=(auto_venv_activate)
       fi
 
+      # ── Tmux autostart ───────────────────────────────────────────────────────
+      if [ -z "$TMUX" ] && [ -n "$DISPLAY" ]; then
+        [ -f ~/.config/tmux/tmux-autostart.sh ] && bash ~/.config/tmux/tmux-autostart.sh
+      fi
+
+      # ── Pyenv ─────────────────────────────────────────────────────────────────
+      export PYENV_ROOT="$HOME/.pyenv"
+      [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+      command -v pyenv &>/dev/null && eval "$(pyenv init - zsh)"
+
       # ── Git identity from persist ─────────────────────────────────────────────
       [ -f /persist/secrets/git-identity ] && source /persist/secrets/git-identity
 
@@ -200,7 +209,8 @@
   # ── Packages available in the shell ───────────────────────────────────────
   home.packages = with pkgs; [
     fzf
-    eza
+    lsd           # ls replacement (matching Arch lsd aliases)
+    eza           # also keep eza for 'tree' alias
     zoxide
     ripgrep
     fd
