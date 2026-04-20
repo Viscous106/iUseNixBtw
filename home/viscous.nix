@@ -5,6 +5,7 @@
     ./modules/zsh.nix
     ./modules/neovim.nix
     ./modules/hyprland.nix
+    ./modules/hypridle.nix
     ./modules/waybar.nix
     ./modules/git.nix
     ./modules/kitty.nix
@@ -30,7 +31,8 @@
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   xdg.enable = true;
   xdg.userDirs = {
-    enable        = true;
+    enable            = true;
     createDirectories = true;
+    setSessionVariables = true;
   };
 }

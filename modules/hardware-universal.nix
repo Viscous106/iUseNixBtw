@@ -2,7 +2,7 @@
 
 {
   # ── Kernel ────────────────────────────────────────────────────────────────
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages;   # LTS — stable + smaller initrd than latest
 
   # Load USB + storage modules first — critical for a USB-booted system
   boot.initrd.availableKernelModules = [
@@ -16,7 +16,8 @@
     "btrfs"
   ];
 
-  boot.initrd.kernelModules = [
+  # GPU modules loaded after root is mounted — NOT in initrd (keeps initrd small)
+  boot.kernelModules = [
     "i915"
     "amdgpu"
     "radeon"
@@ -25,8 +26,9 @@
   ];
 
   # ── Firmware ──────────────────────────────────────────────────────────────
+  # enableRedistributableFirmware covers Intel/AMD/WiFi/GPU — plenty for portable use.
+  # enableAllFirmware was removed: it dumps the full ~1GB linux-firmware into the initrd.
   hardware.enableRedistributableFirmware = true;
-  hardware.enableAllFirmware             = true;
 
   # ── Graphics — generic modesetting works with all open-source GPU drivers ─
   services.xserver.videoDrivers = [ "modesetting" "fbdev" ];

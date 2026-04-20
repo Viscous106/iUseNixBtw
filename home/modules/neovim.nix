@@ -8,6 +8,7 @@
     vimAlias      = true;
     withNodeJs    = true;
     withPython3   = true;
+    withRuby      = false;
 
     extraPackages = with pkgs; [
       # Runtimes needed by LSPs
@@ -21,15 +22,15 @@
       lua-language-server
       nil                                    # Nix LSP
       nixd                                   # Alternative Nix LSP (better)
-      nodePackages.typescript-language-server
-      nodePackages.vscode-langservers-extracted  # html/css/json/eslint
+      typescript-language-server
+      vscode-langservers-extracted           # html/css/json/eslint
       pyright                                # Python
       rust-analyzer
       gopls
       # Formatters / linters
       stylua
       shfmt
-      nodePackages.prettier
+      prettier
       black
       isort
     ];

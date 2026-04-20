@@ -6,7 +6,7 @@
     enableCompletion      = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    dotDir                = ".config/zsh";
+    dotDir                = "${config.xdg.configHome}/zsh";
 
     plugins = [
       {
@@ -42,7 +42,7 @@
       update  = "nix flake update /persist/nixos-config && rebuild";
     };
 
-    initExtra = ''
+    initContent = ''
       # Vi mode
       bindkey -v
       export KEYTIMEOUT=1
