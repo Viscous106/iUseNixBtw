@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-/usr/bin/hyprctl reload
-killall waybar
+# NixOS: hyprctl is in PATH via $PATH, not /usr/bin/
+hyprctl reload
+pkill waybar || true
 waybar &
