@@ -152,9 +152,9 @@
 
       # ── Input ──────────────────────────────────────────────────────────────
       input = {
-        # us,us with dvp variant gives you SUPER+Space to toggle layout
-        kb_layout   = "us,us";
-        kb_variant  = "dvp,";
+        # Single Programmer Dvorak layout — no QWERTY anywhere
+        kb_layout   = "us";
+        kb_variant  = "dvp";
         kb_options  = "";
         repeat_rate  = 50;
         repeat_delay = 300;
@@ -326,8 +326,6 @@
         # Suspend on sleep key
         ", XF86Sleep,             exec, systemctl suspend"
 
-        # Keyboard layout cycle
-        ", code:202,              exec, hyprctl switchxkblayout all next"
 
         # Pavucontrol
         "$mainMod ALT, S,       exec, pavucontrol"

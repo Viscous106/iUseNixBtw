@@ -54,20 +54,19 @@
     };
   };
 
-  # ── TTY console keyboard ───────────────────────────────────────────────────
-  # dvp = Programmer Dvorak in the Linux console keymap database
+  # ── TTY console keyboard ──────────────────────────────────────────────────
+  # dvp = Programmer Dvorak — applies to ALL TTYs including root login
   console = {
-    keyMap     = "us";        # use standard us in TTY — keyd handles remapping
+    keyMap     = "dvp";
     font       = "Lat2-Terminus16";
-    earlySetup = true;
+    earlySetup = true;   # active in initrd so LUKS/root prompts use dvp
   };
 
-  # ── Xkb (consumed by Hyprland/Wayland via libxkbcommon) ───────────────────
-  # The hyprland.nix input section already sets kb_layout = "us,us"; kb_variant = "dvp,"
-  # so we mirror the same here for any X fallback / login managers
+  # ── Xkb (consumed by Hyprland/Wayland via libxkbcommon) ───────────────────────
+  # Single layout — no QWERTY fallback anywhere
   services.xserver.xkb = {
-    layout  = "us,us";
-    variant = "dvp,";
-    options = "";   # keyd handles caps:escape at the kernel level now
+    layout  = "us";
+    variant = "dvp";   # Programmer Dvorak, full system
+    options = "";      # keyd handles caps/mod remapping at kernel level
   };
 }
