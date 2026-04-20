@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Toggle screensaver idle on/off
+
+HYPRIDLE_CONF="$HOME/.config/hypr/configs/hypridle.conf"
+STATE_FILE="$HOME/.cache/hypr-screensaver/screensaver_idle_state"
+
+mkdir -p "$(dirname "$STATE_FILE")"
+
+# Check current state
+if [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE")" = "disabled" ]; then
+    # Enable screensaver
+    sed -i 's/^#SCREENSAVER_DISABLED# //' "$HYPRIDLE_CONF"
+    echo "enabled" > "$STATE_FILE"
+    notify-send "🎬 Screensaver Idle" "Enabled - activates after 1 min" -t 2000
+else
+    # Disable screensaver
+    sed -i '/^listener {$/,/^}$/ { /timeout = 60/,/^}$/ s/^/#SCREENSAVER_DISABLED# / }' "$HYPRIDLE_CONF"
+    echo "disabled" > "$STATE_FILE"
+    notify-send "🚫 Screensaver Idle" "Disabled - won't auto-start" -t 2000
+fi
+
+# Restart hypridle
+HYPRIDLE_PID=$(pgrep -f "hypridle.*configs/hypridle.conf")
+if [ -n "$HYPRIDLE_PID" ]; then
+    kill "$HYPRIDLE_PID"
+    sleep 0.5
+    hypridle -c "$HYPRIDLE_CONF" &> ~/.cache/hypridle.log &
+fi
