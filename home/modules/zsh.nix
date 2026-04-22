@@ -7,7 +7,7 @@
     enableCompletion      = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    dotDir                = ".config/zsh"; # Using string literal to avoid Nix variable interpolation issues
+    dotDir                = config.xdg.configHome + "/zsh";
 
     oh-my-zsh = {
       enable = true;
