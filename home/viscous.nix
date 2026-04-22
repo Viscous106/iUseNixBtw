@@ -33,7 +33,6 @@
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
-    gemini-cli
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager
