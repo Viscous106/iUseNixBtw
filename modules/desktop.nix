@@ -56,8 +56,8 @@
     polkit_gnome
 
     # File manager
-    xfce.thunar
-    xfce.thunar-volman
+    thunar
+    thunar-volman
     gvfs                 # needed for Thunar trash / network mounts
 
     # Volume GUI

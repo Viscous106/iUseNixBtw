@@ -46,7 +46,7 @@
     cliphist      # clipboard history backend
     slurp         # region selection for screenshots
     grim          # screenshot tool
-    swww          # wallpaper daemon (swww-daemon binary)
+    awww          # wallpaper daemon (awww-daemon binary)
     rofi          # app launcher (Super+D)
     swaynotificationcenter  # notification daemon (swaync CLI)
     playerctl     # media controls

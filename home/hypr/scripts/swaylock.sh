@@ -6,20 +6,20 @@ CACHE_DIR="$HOME/.cache/swaylock_monitors"
 mkdir -p "$CACHE_DIR"
 echo "=== Swaylock started at $(date) ===" >> "$LOG_FILE"
 
-# Get current wallpapers from swww for each monitor
+# Get current wallpapers from awww for each monitor
 declare -A MONITOR_WALLPAPERS
 SWAYLOCK_IMAGES=()
 
-if command -v swww > /dev/null; then
+if command -v awww > /dev/null; then
     while IFS= read -r line; do
-        # Parse swww query output: "eDP-1: ... currently displaying: image: /path/to/wallpaper.png"
+        # Parse awww query output: "eDP-1: ... currently displaying: image: /path/to/wallpaper.png"
         if [[ "$line" =~ ^:\ ([^:]+):.*currently\ displaying:\ image:\ (.+)$ ]]; then
             monitor="${BASH_REMATCH[1]}"
             wallpaper="${BASH_REMATCH[2]}"
             MONITOR_WALLPAPERS["$monitor"]="$wallpaper"
             echo "DEBUG: Monitor $monitor -> $wallpaper" >> "$LOG_FILE"
         fi
-    done < <(swww query 2>/dev/null)
+    done < <(awww query 2>/dev/null)
 fi
 
 # Process each monitor and prepare swaylock image arguments

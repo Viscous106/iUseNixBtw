@@ -12,7 +12,7 @@ wallpaper_current="$HOME/.config/hypr/configs/wallpaper_effects/.wallpaper_curre
 iDIR="$HOME/.config/swaync/images"
 iDIRi="$HOME/.config/swaync/icons"
 
-# swww transition config
+# awww transition config
 FPS=60
 TYPE="any"
 DURATION=2
@@ -175,7 +175,7 @@ modify_startup_config() {
   # Check if it's a live wallpaper (video)
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
     # For video wallpapers:
-    sed -i '/^\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^/#/' "$startup_config"
+    sed -i '/^\s*exec-once\s*=\s*awww-daemon\s*--format\s*xrgb\s*$/s/^/#/' "$startup_config"
     sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^#\s*//;' "$startup_config"
 
     # Update the livewallpaper variable with the selected video path (using $HOME)
@@ -185,7 +185,7 @@ modify_startup_config() {
     echo "Configured for live wallpaper (video)."
   else
     # For image wallpapers:
-    sed -i '/^\s*#\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
+    sed -i '/^\s*#\s*exec-once\s*=\s*awww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
 
     sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/#/' "$startup_config"
 
@@ -208,13 +208,13 @@ apply_image_wallpaper() {
   kill_wallpaper_for_image
 
   mkdir -p "$(dirname "$wallpaper_current")" # Ensure directory exists
-  if ! pgrep -x "swww-daemon" >/dev/null;
+  if ! pgrep -x "awww-daemon" >/dev/null;
     then
-    echo "Starting swww-daemon..."
-    swww-daemon --format xrgb &
+    echo "Starting awww-daemon..."
+    awww-daemon --format xrgb &
   fi
 
-  swww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
+  awww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
   echo "$image_path" > "$wallpaper_current"
 
   # Run additional scripts (pass the image path to avoid cache race conditions)
@@ -247,8 +247,8 @@ apply_video_wallpaper() {
         rm "$pid_file"
     fi
 
-    # Ensure swww is not controlling the monitor
-    swww clear "$monitor" >/dev/null 2>&1
+    # Ensure awww is not controlling the monitor
+    awww clear "$monitor" >/dev/null 2>&1
 
     # Apply video wallpaper using mpvpaper
     mpvpaper -o "no-audio --loop" "$monitor" "$video_path" &

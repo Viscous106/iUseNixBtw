@@ -2,15 +2,15 @@
 
 # This script restores wallpapers based on the state file
 
-# Exit if swww is not installed
-if ! command -v swww &>/dev/null; then
-    echo "swww not found, exiting."
+# Exit if awww is not installed
+if ! command -v awww &>/dev/null; then
+    echo "awww not found, exiting."
     exit 1
 fi
 
-# Initialize swww-daemon if not running
-if ! pgrep -x "swww-daemon" >/dev/null; then
-    swww-daemon --format xrgb &
+# Initialize awww-daemon if not running
+if ! pgrep -x "awww-daemon" >/dev/null; then
+    awww-daemon --format xrgb &
     sleep 1
 fi
 
@@ -40,7 +40,7 @@ for monitor in "${connected_monitors[@]}"; do
 
         if [ "$type" == "IMAGE" ]; then
             echo "Restoring image wallpaper on $monitor: $path"
-            swww img -o "$monitor" "$path"
+            awww img -o "$monitor" "$path"
         elif [ "$type" == "VIDEO" ]; then
             echo "Restoring video wallpaper on $monitor: $path"
             if command -v mpvpaper &>/dev/null; then

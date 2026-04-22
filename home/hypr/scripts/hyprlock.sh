@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hyprlock wallpaper sync script
-# Automatically uses current swww wallpaper for lockscreen
+# Automatically uses current awww wallpaper for lockscreen
 
 HYPRLOCK_CONF="$HOME/.config/hypr/hyprlock.conf"
 CACHE_DIR="$HOME/.cache/hyprlock"
@@ -10,11 +10,11 @@ mkdir -p "$CACHE_DIR"
 
 echo "=== Wallpaper sync at $(date) ===" >> "$LOG_FILE"
 
-# Get current wallpaper from swww
+# Get current wallpaper from awww
 WALLPAPER=""
-if command -v swww &> /dev/null; then
-    # Parse swww query to get current wallpaper
-    SWWW_OUTPUT=$(swww query 2>/dev/null | head -1)
+if command -v awww &> /dev/null; then
+    # Parse awww query to get current wallpaper
+    SWWW_OUTPUT=$(awww query 2>/dev/null | head -1)
     if [[ "$SWWW_OUTPUT" =~ image:\ (.+)$ ]]; then
         WALLPAPER="${BASH_REMATCH[1]}"
         echo "Found wallpaper: $WALLPAPER" >> "$LOG_FILE"

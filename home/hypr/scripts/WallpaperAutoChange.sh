@@ -31,7 +31,7 @@ while true; do
 		done \
 		| sort -n | cut -d':' -f2- \
 		| while read -r img; do
-			swww img -o $focused_monitor "$img"
+			awww img -o $focused_monitor "$img"
 			# Update the current wallpaper file for swaylock
 			mkdir -p "$(dirname "$HOME/.config/hypr/configs/wallpaper_effects/.wallpaper_current")" # Ensure directory exists
 			echo "$img" > "$HOME/.config/hypr/configs/wallpaper_effects/.wallpaper_current"

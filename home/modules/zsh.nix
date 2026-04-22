@@ -7,7 +7,7 @@
     enableCompletion      = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    dotDir                = ".config/zsh";
+    dotDir                = ".config/zsh"; # Using string literal to avoid Nix variable interpolation issues
 
     oh-my-zsh = {
       enable = true;
@@ -82,7 +82,7 @@
       scrible = "tjournal";
     };
 
-    initExtra = ''
+    initContent = ''
       fastfetch
 
       # p10k instant prompt
