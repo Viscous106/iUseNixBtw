@@ -18,9 +18,7 @@
       options   = "--delete-older-than 30d";
     };
   };
-
   nixpkgs.config.allowUnfree = true;
-
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
   boot.loader.grub.configurationLimit = 3;
 

@@ -47,3 +47,6 @@
         border-image: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet) 1;
     }
 }
+
+@define-color theme_base_color @base;
+@define-color theme_text_color @text;

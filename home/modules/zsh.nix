@@ -1,14 +1,25 @@
 { config, pkgs, ... }:
 
 {
+  # ── ZSH Configuration ───────────────────────────────────────────────────────
   programs.zsh = {
     enable                = true;
     enableCompletion      = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    dotDir                = "${config.xdg.configHome}/zsh";
+    dotDir                = ".config/zsh";
+
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "git" "archlinux" ];
+    };
 
     plugins = [
+      {
+        name = "powerlevel10k";
+        src = pkgs.zsh-powerlevel10k;
+        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      }
       {
         name = "zsh-fzf-history-search";
         src  = pkgs.fetchFromGitHub {
@@ -26,14 +37,12 @@
       vi      = "nvim";
       n       = "nvim";
 
-      # ls (eza)
-      ls      = "eza --icons --group-directories-first";
-      l       = "eza -l --icons --group-directories-first";
-      ll      = "eza -la --icons --group-directories-first --git";
-      la      = "eza -a --icons --group-directories-first";
-      lla     = "eza -la --icons --group-directories-first";
-      lt      = "eza --tree --icons";
-      tree    = "eza --tree --icons --level=3";
+      # ls (lsd)
+      ls      = "lsd";
+      l       = "ls -l";
+      la      = "ls -a";
+      lla     = "ls -la";
+      lt      = "ls --tree";
 
       # Better defaults
       cat     = "bat --style=numbers --color=always";
@@ -56,25 +65,36 @@
       gwr     = "git worktree remove";
       gwp     = "git worktree prune";
 
-      # NixOS
+      # NixOS / Config
       cfg     = "nvim /persist/nixos-config/";
       rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config#nix";
       update  = "nix flake update /persist/nixos-config && rebuild";
+      config  = "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME";
+      ca      = "config add";
+      cl      = "config log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(148)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold 117)- %an%C(reset)%C(bold 203)%d%C(reset)'";
 
       # Misc
       ff      = "fastfetch";
-      speed   = "speedtest-cli";
+      speed   = "speedtest";
+      bluefriends = "pactl load-module module-combine-sink sink_name=combined";
+      tx      = "tmuxifier";
+      tmux-edit = "cd ~/.config/tmuxifier/layouts && nvim";
+      scrible = "tjournal";
     };
 
-    initContent = ''
-      # ── Startup ──────────────────────────────────────────────────────────────
+    initExtra = ''
       fastfetch
+
+      # p10k instant prompt
+      if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+        source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
+      fi
 
       # ── Vi mode ──────────────────────────────────────────────────────────────
       bindkey -v
       export KEYTIMEOUT=1
 
-      # Cursor shape: block in normal, beam in insert
+      # Cursor shape
       function zle-keymap-select {
         if [[ ''${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
           echo -ne '\e[1 q'
@@ -90,22 +110,18 @@
       bindkey '\ed' clear-screen     # Alt+D to clear screen
 
       # ── FZF ──────────────────────────────────────────────────────────────────
-      source ${pkgs.fzf}/share/fzf/key-bindings.zsh
-      source ${pkgs.fzf}/share/fzf/completion.zsh
-      export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-      export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8'
+      source <(fzf --zsh)
 
-      # ── Zoxide (smarter cd) ───────────────────────────────────────────────────
-      eval "$(${pkgs.zoxide}/bin/zoxide init zsh --cmd cd)"
+      # ── Zoxide ───────────────────────────────────────────────────
+      eval "$(zoxide init zsh)"
 
-      # ── Pay-respects (thefuck successor) ────────────────────────────────────
-      eval "$(${pkgs.pay-respects}/bin/pay-respects shell --alias)"
-
-      # ── History ───────────────────────────────────────────────────────────────
-      HISTFILE="${config.xdg.configHome}/zsh/.zsh_history"
-      setopt appendhistory histignorealldups sharehistory
+      # ── Pay-respects ────────────────────────────────────
+      if command -v pay-respects >/dev/null 2>&1; then
+        eval "$(pay-respects zsh --alias)"
+      fi
 
       # ── Git pretty log ────────────────────────────────────────────────────────
+      unalias gl 2>/dev/null
       gl() {
         git log --graph --all --decorate --oneline \
           --format=format:'%C(bold 141)%h%C(reset) - %C(cyan)(%ar)%C(reset) %C(white)%s%C(reset) %C(blue)- %an%C(reset)%C(bold 203)%d%C(reset)' "$@"
@@ -113,10 +129,9 @@
 
       # ── FZF branch switcher ────────────────────────────────────────────────────
       fzb() {
-        local branch
-        branch=$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null \
-          | grep -v '/HEAD$' \
-          | fzf --height 40% --reverse --tac --prompt="Branch > ")
+        local branch=$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null |
+          grep -v '/HEAD$' |
+          fzf --height 40% --reverse --tac --prompt="Branch > ") 
         if [[ -n "$branch" ]]; then
           if [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
             echo "Bare repo detected. Use 'gws' to switch worktrees."
@@ -127,35 +142,43 @@
         fi
       }
 
+      # ── Worktree switcher ────────────────────────────────────────────────────
+      gws() {
+        local target=$("$HOME/.config/hypr/scripts/worktree_switcher.sh" --print-only 2>/dev/null)
+        [[ -n "$target" && -d "$target" ]] && cd "$target" && echo "Switched to: $(basename "$target")"
+      }
+      gwn() { "$HOME/.config/hypr/scripts/worktree_switcher.sh" --nvim; }
+
       # ── Quick branch creation ─────────────────────────────────────────────────
       gnb() {
         [[ -z "$1" ]] && echo "Usage: gnb <branch-name>" && return 1
         git checkout -b "$1"
       }
 
-      # ── Auto Python venv activation ───────────────────────────────────────────
-      auto_venv_activate() {
-        if [ -f "venv/bin/activate" ] && [ "$VIRTUAL_ENV" != "$(pwd)/venv" ]; then
-          echo "Activating virtual environment..."
-          source "venv/bin/activate"
-        elif [ -n "$VIRTUAL_ENV" ] && [[ ! "$(pwd)/" == "$(dirname $VIRTUAL_ENV)"/* ]]; then
-          echo "Deactivating virtual environment..."
-          deactivate
-        fi
-      }
-      if [[ -z "''${chpwd_functions[(r)auto_venv_activate]}" ]]; then
-        chpwd_functions+=(auto_venv_activate)
+      # ── p10k config ──────────────────────────────────────────────────────────
+      [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+
+      # ── Tmuxifier ────────────────────────────────────────────────────────────
+      export TMUXIFIER="$HOME/.config/tmuxifier"
+      [[ -d $TMUXIFIER ]] && source $TMUXIFIER/init.sh
+
+      # ── Pyenv Setup ──────────────────────────────────────────────────────────
+      export PYENV_ROOT="$HOME/.pyenv"
+      [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+      if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init - zsh)"
       fi
 
-      # ── Git identity from persist ─────────────────────────────────────────────
+      # ── Git identity ─────────────────────────────────────────────
       [ -f /persist/secrets/git-identity ] && source /persist/secrets/git-identity
 
       # ── GPG TTY ───────────────────────────────────────────────────────────────
       export GPG_TTY=$(tty)
 
-      # ── Editors ───────────────────────────────────────────────────────────────
-      export VISUAL=nvim
-      export EDITOR=nvim
+      # ── Tmux autostart ───────────────────────────────────────────────────────
+      if [ -z "$TMUX" ] && [ -f ~/.config/tmux/tmux-autostart.sh ]; then
+          bash ~/.config/tmux/tmux-autostart.sh
+      fi
     '';
 
     history = {
@@ -166,56 +189,7 @@
     };
   };
 
-  # ── Starship prompt ────────────────────────────────────────────────────────
-  programs.starship = {
-    enable               = true;
-    enableZshIntegration = true;
-    settings = {
-      add_newline = false;
-      format = "$directory$git_branch$git_status$nix_shell$character";
-      character = {
-        success_symbol = "[❯](bold #89b4fa)";
-        error_symbol   = "[❯](bold #f38ba8)";
-        vimcmd_symbol  = "[❮](bold #a6e3a1)";
-      };
-      directory = {
-        style             = "bold #cba6f7";
-        truncation_length = 3;
-        truncate_to_repo  = true;
-      };
-      git_branch = {
-        symbol = " ";
-        style  = "#f38ba8";
-      };
-      git_status = {
-        style = "#f9e2af";
-      };
-      nix_shell = {
-        symbol = "󱄅 ";
-        style  = "bold #89b4fa";
-      };
-    };
-  };
-
-  # ── Packages available in the shell ───────────────────────────────────────
-  home.packages = with pkgs; [
-    fzf
-    eza
-    zoxide
-    ripgrep
-    fd
-    bat
-    jq
-    yq-go
-    lazygit
-    delta
-    unzip
-    zip
-    wget
-    curl
-    tree
-    pay-respects      # auto-correct last command (thefuck successor)
-    fastfetch        # system info on startup
-    speedtest-cli    # speed alias
-  ];
+  # ── Helper Tools (Native Integrations) ──────────────────────────────────────
+  programs.fzf.enable = true;
+  programs.zoxide.enable = true;
 }

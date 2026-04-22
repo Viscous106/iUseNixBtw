@@ -36,3 +36,6 @@
 @define-color flamingo  #f2cdcd;
 @define-color rosewater #f5e0dc;
 
+
+@define-color theme_base_color @base;
+@define-color theme_text_color @text;

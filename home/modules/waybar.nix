@@ -16,6 +16,7 @@
     "waybar/ModulesVertical"   = { source = ../waybar/ModulesVertical;   force = true; };
     "waybar/ModulesWorkspaces" = { source = ../waybar/ModulesWorkspaces; force = true; };
     "waybar/UserModules"       = { source = ../waybar/UserModules;       force = true; };
+    "waybar/wallust"           = { source = ../waybar/wallust;           force = true; };
 
     "waybar/configs".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/waybar/configs";

@@ -7,6 +7,7 @@
     ./modules/hyprland.nix
     ./modules/hypridle.nix
     ./modules/waybar.nix
+    ./modules/extras.nix
     ./modules/git.nix
     ./modules/kitty.nix
     ./modules/zen.nix
@@ -32,6 +33,11 @@
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
+    gemini-cli
+    psmisc         # provides killall
+    lsd           # better ls
+    pyenv         # python version manager
+    pulseaudio    # provides paplay
     bc            # math in shell scripts (Brightness, Volume, etc.)
     jq            # JSON parsing (WallpaperSelect, Weather, etc.)
     imagemagick   # image manipulation (WallpaperEffects)

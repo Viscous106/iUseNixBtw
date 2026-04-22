@@ -1,6 +1,4 @@
- /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  
- /* wallust template - colors-rofi */
-
+/* ---- wallust template - colors-rofi ---- */
 * {
 active-background: #B0B0B0;
 active-foreground: #E3E3E3;
@@ -44,7 +42,4 @@ color12: #B0B0B0;
 color13: #B0B0B0;
 color14: #B0B0B0;
 color15: #CFCFCF;
-
-
 }
-
