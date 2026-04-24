@@ -11,6 +11,7 @@
     ./modules/git.nix
     ./modules/kitty.nix
     ./modules/zen.nix
+    ./modules/gpg.nix
   ];
 
   home.username      = "viscous";
@@ -27,15 +28,12 @@
       $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519.pub $HOME/.ssh/id_ed25519.pub || true
       $DRY_RUN_CMD chmod 700 $HOME/.ssh
       chmod 600 $HOME/.ssh/id_ed25519 2>/dev/null || true
-      $DRY_RUN_CMD ln -sf /persist/home/viscous/.claude.json $HOME/.claude.json || true
-      $DRY_RUN_CMD ln -sf /persist/home/viscous/.claude      $HOME/.claude      || true
     fi
   '';
 
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
-    claude-code-bin
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager
@@ -48,14 +46,17 @@
     cliphist      # clipboard history backend
     slurp         # region selection for screenshots
     grim          # screenshot tool
-    awww          # wallpaper daemon (awww-daemon binary)
+    awww          # wallpaper daemon (formerly swww)
     rofi          # app launcher (Super+D)
     swaynotificationcenter  # notification daemon (swaync CLI)
+    thunar        # file manager
+    xfce.thunar-volman # volume manager for Thunar
     playerctl     # media controls
     pamixer       # volume control
     brightnessctl # brightness control
     pavucontrol   # audio GUI (Super+Alt+S)
     blueman       # bluetooth GUI (Super+Shift+B)
+    tmux          # terminal multiplexer
     # warpd — install manually if needed: nix profile install nixpkgs#warpd
   ];
 
