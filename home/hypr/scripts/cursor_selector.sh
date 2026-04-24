@@ -3,18 +3,20 @@
 # Define the cursor options and their corresponding theme folder names
 # We use an associative array to map display name to folder name.
 declare -A cursor_themes=(
-    ["Bibata"]="Bibata-Modern-Ice"
+    ["Bibata Modern Ice"]="Bibata-Modern-Ice"
+    ["Bibata Modern Classic"]="Bibata-Modern-Classic"
     ["Hollow Knight"]="Hollow-Knight"
 )
 
 # Per-theme cursor sizes
 declare -A cursor_sizes=(
-    ["Bibata"]=32
+    ["Bibata Modern Ice"]=20
+    ["Bibata Modern Classic"]=20
     ["Hollow Knight"]=48
 )
 
 # Create a list of the display names for wofi
-options="Bibata\nHollow Knight"
+options="Bibata Modern Classic\nBibata Modern Ice\nHollow Knight"
 
 # Use wofi to prompt the user for a selection
 selected=$(echo -e "$options" | rofi -dmenu -p "Select Cursor Theme:" -i)

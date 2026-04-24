@@ -34,7 +34,9 @@
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
-    unstable.claude
+    unstable.claude-code
+    unstable.gemini-cli
+    inputs.antigravity.packages.${pkgs.system}.google-antigravity
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager
@@ -58,7 +60,22 @@
     pavucontrol   # audio GUI (Super+Alt+S)
     blueman       # bluetooth GUI (Super+Shift+B)
     tmux          # terminal multiplexer
-    # warpd — install manually if needed: nix profile install nixpkgs#warpd
+
+    # Cursor
+    bibata-cursors
+
+    # From Nix profile
+    antigen       # zsh plugin manager
+    bat           # better cat
+    cheese        # webcam app
+    fastfetch     # system info
+    gh            # github cli
+    mysql84       # mysql 8.4 database
+    hyprland-qtutils
+    mpv           # media player
+    nix-tree      # visualize nix dependencies
+    wl-kbptr      # wayland keyboard pointer
+    xev           # x11 event viewer
   ];
 
   xdg.enable = true;
@@ -66,5 +83,14 @@
     enable            = true;
     createDirectories = true;
     setSessionVariables = true;
+  };
+
+  # ── Pointer Cursor ────────────────────────────────────────────────────────
+  home.pointerCursor = {
+    package = pkgs.bibata-cursors;
+    name    = "Bibata-Modern-Classic";
+    size    = 20;
+    gtk.enable = true;
+    x11.enable = true;
   };
 }

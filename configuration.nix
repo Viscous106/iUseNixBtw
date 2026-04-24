@@ -19,6 +19,14 @@
     };
   };
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    (final: prev: {
+      unstable = import inputs.nixpkgs {
+        system = prev.system;
+        config.allowUnfree = true;
+      };
+    })
+  ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
   boot.loader.grub.configurationLimit = 3;
 

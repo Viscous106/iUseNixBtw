@@ -17,9 +17,14 @@
       };
     };
 
+    antigravity = {
+      url = "github:jacopone/antigravity-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
-  outputs = { self, nixpkgs, home-manager, zen-browser, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, ... }@inputs:
   let
     system = "x86_64-linux";
   in
