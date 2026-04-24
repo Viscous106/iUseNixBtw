@@ -6,8 +6,8 @@
 
     settings = {
       user = {
-        name  = "viscous";
-        email = "your@email.com";   # change or use /persist/secrets/git-identity
+        name  = "Yash Nitin Virulkar";
+        email = "virulkaryashed@gmail.com";
       };
 
       init.defaultBranch   = "main";
