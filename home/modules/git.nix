@@ -4,72 +4,51 @@
   programs.git = {
     enable = true;
 
+    # Using the modern 'settings' block to avoid warnings
     settings = {
       user = {
         name  = "Yash Nitin Virulkar";
         email = "virulkaryashed@gmail.com";
+        signingkey = "~/.ssh/id_ed25519";
       };
 
+      # ── Signing Settings ──────────────────────────────────────────────────
+      gpg.format = "ssh";
+      gpg.ssh.program = "${config.home.homeDirectory}/.config/hypr/scripts/git-sign-no-agent.sh";
+      commit.gpgsign = true;           # Force signing on every commit
+      tag.gpgsign = true;              # Force signing on every tag
+      
+      gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
+
+      # ── Basic Git Settings ────────────────────────────────────────────────
       init.defaultBranch   = "main";
       pull.rebase          = true;
       push.autoSetupRemote = true;
-      rerere.enabled       = true;   # reuse recorded conflict resolutions
+      rerere.enabled       = true;
 
       core = {
         editor   = "nvim";
         autocrlf = "input";
       };
 
-      gpg.format = "ssh";
-      user.signingkey = "~/.ssh/id_ed25519";
-      commit.gpgsign = true;
-      gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
-
-      merge.tool = "nvimdiff";
-      diff.tool  = "nvimdiff";
-
-      alias = {
-        st  = "status -sb";
-        lg  = "log --oneline --graph --all --decorate";
-        pu  = "push";
-        puf = "push --force-with-lease";
-        co  = "checkout";
-        br  = "branch";
-        aa  = "add -A";
-        ca  = "commit --amend --no-edit";
-        wip = "!git add -A && git commit -m 'wip: checkpoint'";
-      };
-
-      # Use SSH instead of HTTPS for GitHub/GitLab
+      # Use SSH instead of HTTPS
       "url \"git@github.com:\"".insteadOf = "https://github.com/";
-      "url \"git@gitlab.com:\"".insteadOf = "https://gitlab.com/";
     };
 
-    ignores = [
-      ".direnv"
-      ".envrc"
-      "*.DS_Store"
-      "*.swp"
-      "*.swo"
-      ".idea"
-      "*.iml"
-      ".vscode"
-      "node_modules"
-    ];
+    ignores = [ ".direnv" ".envrc" "*.swp" "node_modules" ];
   };
 
-  # delta is now a top-level HM program, separate from programs.git
+  # Delta handles its own package installation
   programs.delta = {
-    enable               = true;
-    enableGitIntegration = true;
+    enable = true;
     options = {
-      navigate     = true;
-      side-by-side = true;
-      dark         = true;
+      navigate = true;
       line-numbers = true;
       syntax-theme = "Catppuccin Mocha";
     };
   };
 
-  home.packages = with pkgs; [ delta ];
+  home.packages = with pkgs; [ 
+    # Delta is already included via programs.delta above
+  ];
 }
