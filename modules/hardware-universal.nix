@@ -108,6 +108,9 @@
     enable   = true;
     settings = {
       General.EnableNetworkConfiguration = false;  # let NetworkManager handle it
+      P2P.Enable                         = false;  # disable Wi-Fi Direct — prevents the
+                                                   # spurious NM "error setting IPv4 forwarding"
+                                                   # warning on the iwd P2P virtual device at boot
     };
   };
 

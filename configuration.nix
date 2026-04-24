@@ -4,7 +4,7 @@
   networking.hostName = "nix";
   time.timeZone       = "Asia/Kolkata";
   i18n.defaultLocale  = "en_US.UTF-8";
-
+  networking.networkmanager.enable=true;
   # ── Nix settings ──────────────────────────────────────────────────────────
   nix = {
     settings = {

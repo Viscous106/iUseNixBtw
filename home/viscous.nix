@@ -27,12 +27,15 @@
       $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519.pub $HOME/.ssh/id_ed25519.pub || true
       $DRY_RUN_CMD chmod 700 $HOME/.ssh
       chmod 600 $HOME/.ssh/id_ed25519 2>/dev/null || true
+      $DRY_RUN_CMD ln -sf /persist/home/viscous/.claude.json $HOME/.claude.json || true
+      $DRY_RUN_CMD ln -sf /persist/home/viscous/.claude      $HOME/.claude      || true
     fi
   '';
 
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
+    claude-code-bin
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager
