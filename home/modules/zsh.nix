@@ -90,8 +90,29 @@
         source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
       fi
 
+      # ── Vi mode ──────────────────────────────────────────────────────────────
+      bindkey -v
+      export KEYTIMEOUT=1
+
+      # Cursor shape
+      function zle-keymap-select {
+        if [[ ''${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
+          echo -ne '\e[1 q'
+        elif [[ ''${KEYMAP} == main ]] || [[ ''${KEYMAP} == viins ]] || \
+             [[ ''${KEYMAP} = "" ]] || [[ $1 = 'beam' ]]; then
+          echo -ne '\e[5 q'
+        fi
+      }
+      zle -N zle-keymap-select
+      echo -ne '\e[5 q'
+
       # ── Custom keybindings ────────────────────────────────────────────────────
       bindkey '\ed' clear-screen     # Alt+D to clear screen
+      bindkey '^H' backward-kill-word # Ctrl+Backspace (standard)
+      bindkey '^[[127;5u' backward-kill-word # Ctrl+Backspace (Kitty/CSI u)
+      bindkey '^[[3;5~' kill-word     # Ctrl+Delete
+      bindkey '^[[1;5C' forward-word  # Ctrl+Right
+      bindkey '^[[1;5D' backward-word # Ctrl+Left
 
       # ── FZF ──────────────────────────────────────────────────────────────────
       source <(fzf --zsh)

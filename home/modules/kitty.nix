@@ -54,6 +54,7 @@
     };
 
     keybindings = {
+      "ctrl+backspace"     = "send_text all \\x1b[127;5u";
       "ctrl+shift+t"       = "new_tab_with_cwd";
       "ctrl+shift+enter"   = "new_window_with_cwd";
       "ctrl+shift+h"       = "previous_tab";

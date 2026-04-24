@@ -21,8 +21,9 @@
       };
 
       gpg.format = "ssh";
-      user.signingkey = "~/.ssh/id_ed25519.pub";
+      user.signingkey = "~/.ssh/id_ed25519";
       commit.gpgsign = true;
+      gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
 
       merge.tool = "nvimdiff";
       diff.tool  = "nvimdiff";
