@@ -11,10 +11,12 @@
     setAsDefaultBrowser = true;
   };
 
+  # ── Persistent Profile ─────────────────────────────────────────────────────
+  # Ensures the Zen profile is stored on the persistent partition
+  xdg.configFile."zen".source = config.lib.file.mkOutOfStoreSymlink "/persist/home/viscous/.config/zen";
+
   # ── Profile migration note ─────────────────────────────────────────────────
   # Zen >= 18.18.6b expects config in ~/.config/zen (not ~/.zen).
-  # The activation script below handles the one-time migration automatically.
-  # It is idempotent: once ~/.config/zen exists it won't touch anything.
   home.activation.migrateZenProfile =
     let
       oldDir = "$HOME/.zen";
@@ -22,7 +24,7 @@
     in
     # entryAfter writeBoundary so home.file symlinks are already in place
     config.lib.dag.entryAfter [ "writeBoundary" ] ''
-      if [ -d "${oldDir}" ] && [ ! -d "${newDir}" ]; then
+      if [ -d "${oldDir}" ] && [ ! -d "${newDir}" ] && [ ! -L "${newDir}" ]; then
         $DRY_RUN_CMD mkdir -p "${newDir}"
         $DRY_RUN_CMD cp -a "${oldDir}/." "${newDir}/"
 
@@ -34,7 +36,6 @@
         done
 
         echo "Zen profile migrated: ${oldDir} → ${newDir}"
-        echo "Run 'zen-beta --safe-mode' once to let Zen finish its internal migration."
       fi
     '';
 }

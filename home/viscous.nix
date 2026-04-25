@@ -20,14 +20,22 @@
 
   programs.home-manager.enable = true;
 
-  # ── Symlink persisted SSH keys into ~/.ssh at every login ─────────────────
+  # ── Symlink persisted secrets and data into $HOME at every login ──────────
   home.activation.linkSecrets = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    # SSH keys and known_hosts
     if [ -d /persist/secrets/ssh ]; then
       $DRY_RUN_CMD mkdir -p $HOME/.ssh
       $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519     $HOME/.ssh/id_ed25519     || true
       $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519.pub $HOME/.ssh/id_ed25519.pub || true
+      $DRY_RUN_CMD [ -f /persist/secrets/ssh/known_hosts ] && $DRY_RUN_CMD ln -sf /persist/secrets/ssh/known_hosts $HOME/.ssh/known_hosts || true
       $DRY_RUN_CMD chmod 700 $HOME/.ssh
       chmod 600 $HOME/.ssh/id_ed25519 2>/dev/null || true
+    fi
+
+    # Keyrings (GNOME Keyring data)
+    $DRY_RUN_CMD mkdir -p $HOME/.local/share
+    if [ -d /persist/home/viscous/.local/share/keyrings ]; then
+      $DRY_RUN_CMD ln -sfn /persist/home/viscous/.local/share/keyrings $HOME/.local/share/keyrings || true
     fi
   '';
 
