@@ -1,0 +1,26 @@
+# Secret files
+.env
+.env.*
+secrets/
+*.secret
+*.key
+*.pem
+
+# Swap files and editor backups
+*.swp
+*~
+.swp
+.swo
+\#*\#
+.#*
+
+# Build and temporary files
+result
+result-*
+*.log
+node_modules/
+.direnv/
+.cache/
+
+# System specific
+flake.lock.backup

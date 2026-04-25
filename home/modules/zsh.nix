@@ -41,7 +41,7 @@
       ls      = "lsd";
       l       = "ls -l";
       la      = "ls -a";
-      lla     = "ls -la";
+      lla     = "ls-la";
       lt      = "ls --tree";
 
       # Better defaults
@@ -86,27 +86,12 @@
       fastfetch
 
       # p10k instant prompt
-      if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-        source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
+      if [[ -r "${"$"}{XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${"$"}{(%):-%n}.zsh" ]]; then
+        source "${"$"}{XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${"$"}{(%):-%n}.zsh"
       fi
 
-      # ── Vi mode ──────────────────────────────────────────────────────────────
-      bindkey -v
-      export KEYTIMEOUT=1
-
-      # Cursor shape
-      function zle-keymap-select {
-        if [[ ''${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
-          echo -ne '\e[1 q'
-        elif [[ ''${KEYMAP} == main ]] || [[ ''${KEYMAP} == viins ]] || \
-             [[ ''${KEYMAP} = "" ]] || [[ $1 = 'beam' ]]; then
-          echo -ne '\e[5 q'
-        fi
-      }
-      zle -N zle-keymap-select
-      echo -ne '\e[5 q'
-
       # ── Custom keybindings ────────────────────────────────────────────────────
+      bindkey -e                     # Emacs mode (standard shell feel)
       bindkey '\ed' clear-screen     # Alt+D to clear screen
       bindkey '^H' backward-kill-word # Ctrl+Backspace (standard)
       bindkey '^[[127;5u' backward-kill-word # Ctrl+Backspace (Kitty/CSI u)
@@ -180,6 +165,9 @@
 
       # ── GPG TTY ───────────────────────────────────────────────────────────────
       export GPG_TTY=$(tty)
+
+      # ── SSH Agent (GCR / GNOME Keyring) ──────────────────────────────────
+      export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
 
       # ── Tmux autostart ───────────────────────────────────────────────────────
       if [ -z "$TMUX" ] && [ -f ~/.config/tmux/tmux-autostart.sh ]; then

@@ -35,9 +35,8 @@
     isNormalUser   = true;
     shell          = pkgs.zsh;
     extraGroups    = [ "wheel" "networkmanager" "video" "audio" "input" ];
-    # Generate with: mkpasswd -m sha-512
-    # Placeholder — change before install or use: sudo nixos-enter --root /mnt -- passwd viscous
-    initialPassword = "changeme";
+    # Password hash generated with mkpasswd -m sha-512
+    initialHashedPassword = "$6$KAEKKvbZIFl93S.a$bH1h1M.sCzqmvX3SZkK6QcHfjP31vBadi4V/dpWPlL2zIeQ5ZQ85NwrE9sylDZ3Wb/YOeS8lSHtHeJhGbveic0";
   };
 
   security.sudo.wheelNeedsPassword = false;
@@ -55,6 +54,7 @@
 
   # ── Keyring ───────────────────────────────────────────────────────────────
   services.gnome.gnome-keyring.enable = true;
+  # components: ssh, secrets, pkcs11
   programs.seahorse.enable = true;
 
   # ── SSH ───────────────────────────────────────────────────────────────────
@@ -62,6 +62,8 @@
     enable = true;
     settings.PasswordAuthentication = false;
   };
+
+  security.pam.services.login.enableGnomeKeyring = true;
 
   programs.ssh = {
     startAgent  = false;

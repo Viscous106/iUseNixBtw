@@ -19,17 +19,25 @@
   home.stateVersion  = "25.05";
 
   programs.home-manager.enable = true;
-
   # ── Symlink persisted secrets and data into $HOME at every login ──────────
   home.activation.linkSecrets = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    # Ensure /persist/secrets exists or create a dummy structure for portability
+    if [ ! -d /persist/secrets ]; then
+       echo "Warning: /persist/secrets not found. Creating dummy structure for portability."
+       $DRY_RUN_CMD mkdir -p /persist/secrets/ssh
+       $DRY_RUN_CMD touch /persist/secrets/git-identity
+       $DRY_RUN_CMD touch /persist/secrets/claude_api
+       $DRY_RUN_CMD echo "# Add your git config here" > /persist/secrets/git-identity
+       $DRY_RUN_CMD echo "# export CLAUDE_API_KEY=your_key_here" > /persist/secrets/claude_api
+    fi
+
     # SSH keys and known_hosts
     if [ -d /persist/secrets/ssh ]; then
       $DRY_RUN_CMD mkdir -p $HOME/.ssh
-      $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519     $HOME/.ssh/id_ed25519     || true
-      $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519.pub $HOME/.ssh/id_ed25519.pub || true
-      $DRY_RUN_CMD [ -f /persist/secrets/ssh/known_hosts ] && $DRY_RUN_CMD ln -sf /persist/secrets/ssh/known_hosts $HOME/.ssh/known_hosts || true
       $DRY_RUN_CMD chmod 700 $HOME/.ssh
-      chmod 600 $HOME/.ssh/id_ed25519 2>/dev/null || true
+      [ -f /persist/secrets/ssh/id_ed25519 ]     && $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519     $HOME/.ssh/id_ed25519     || true
+      [ -f /persist/secrets/ssh/id_ed25519.pub ] && $DRY_RUN_CMD ln -sf /persist/secrets/ssh/id_ed25519.pub $HOME/.ssh/id_ed25519.pub || true
+      [ -f /persist/secrets/ssh/known_hosts ]   && $DRY_RUN_CMD ln -sf /persist/secrets/ssh/known_hosts   $HOME/.ssh/known_hosts   || true
     fi
 
     # Keyrings (GNOME Keyring data)
