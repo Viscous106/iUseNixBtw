@@ -7,10 +7,12 @@ target="$HOME/.config/hypr/configs/monitors.conf"
 # Check if external monitor is connected
 if hyprctl monitors | grep -q "HDMI-A-1"; then
     # External connected - use Extend profile as default
-    cp "$monitor_dir/Extend.conf" "$target"
+    # cp "$monitor_dir/Extend.conf" "$target"
+    echo "External monitor detected, skipping reset to preserve universal config."
 else
     # No external - use Laptop-Only profile
-    cp "$monitor_dir/Laptop-Only.conf" "$target"
+    # cp "$monitor_dir/Laptop-Only.conf" "$target"
+    echo "No external monitor detected, skipping reset to preserve universal config."
 fi
 
 # Reload Hyprland

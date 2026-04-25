@@ -7,10 +7,11 @@
 
   services.gpg-agent = {
     enable = true;
-    pinentryPackage = pkgs.pinentry-curses;
+    pinentryPackage = pkgs.pinentry-qt;
+    enableSSHSupport = true;
     
-    # These settings force GPG to ask for your password almost every time
-    defaultCacheTtl = 1;
-    maxCacheTtl = 1;
+    # Increase cache TTL to 2 hours (7200 seconds)
+    defaultCacheTtl = 7200;
+    maxCacheTtl = 7200;
   };
 }

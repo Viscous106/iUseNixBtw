@@ -60,7 +60,7 @@
   };
 
   programs.ssh = {
-    startAgent  = true;
+    startAgent  = false;
     agentTimeout = "4h";
     extraConfig = ''
       Host *
