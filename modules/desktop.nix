@@ -8,9 +8,11 @@
   };
 
   xdg.portal = {
-    enable        = true;
-    extraPortals  = [ pkgs.xdg-desktop-portal-hyprland pkgs.xdg-desktop-portal-gtk ];
-    config.common.default = "*";
+    enable       = true;
+    # xdg-desktop-portal-hyprland is added automatically by programs.hyprland.enable;
+    # adding it again here causes portal dispatcher conflicts that break image clipboard.
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config.common.default = [ "hyprland" "gtk" ];
   };
 
   # ── Waybar ────────────────────────────────────────────────────────────────

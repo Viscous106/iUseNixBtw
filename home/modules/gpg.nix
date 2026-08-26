@@ -7,7 +7,7 @@
 
   services.gpg-agent = {
     enable = true;
-    pinentryPackage = pkgs.pinentry-qt;
+    pinentry.package = pkgs.pinentry-qt;
     enableSshSupport = true;
     
     # Increase cache TTL to 2 hours (7200 seconds)

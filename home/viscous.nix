@@ -52,7 +52,9 @@
   home.packages = with pkgs; [
     unstable.claude-code
     unstable.gemini-cli
-    inputs.antigravity.packages.${pkgs.system}.google-antigravity
+    python3
+    pkgs.ghgrab
+    inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager
@@ -69,7 +71,7 @@
     rofi          # app launcher (Super+D)
     swaynotificationcenter  # notification daemon (swaync CLI)
     thunar        # file manager
-    xfce.thunar-volman # volume manager for Thunar
+    thunar-volman # volume manager for Thunar
     playerctl     # media controls
     pamixer       # volume control
     brightnessctl # brightness control

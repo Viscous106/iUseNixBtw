@@ -22,7 +22,7 @@
   nixpkgs.overlays = [
     (final: prev: {
       unstable = import inputs.nixpkgs {
-        system = prev.system;
+        system = prev.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
     })
@@ -57,6 +57,9 @@
   # components: ssh, secrets, pkcs11
   programs.seahorse.enable = true;
 
+  #tailscale
+  
+  
   # ── SSH ───────────────────────────────────────────────────────────────────
   services.openssh = {
     enable = true;

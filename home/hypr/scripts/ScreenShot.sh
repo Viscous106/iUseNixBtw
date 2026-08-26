@@ -81,28 +81,28 @@ countdown() {
 
 # take shots
 shotnow() {
-	cd ${dir} && grim - | tee "$file" | wl-copy
+	cd ${dir} && grim - | tee "$file" | wl-copy --type image/png
 	sleep 2
 	notify_view
 }
 
 shot5() {
 	countdown '5'
-	sleep 1 && cd ${dir} && grim - | tee "$file" | wl-copy
+	sleep 1 && cd ${dir} && grim - | tee "$file" | wl-copy --type image/png
 	sleep 1
 	notify_view
 }
 
 shot10() {
 	countdown '10'
-	sleep 1 && cd ${dir} && grim - | tee "$file" | wl-copy
+	sleep 1 && cd ${dir} && grim - | tee "$file" | wl-copy --type image/png
 	notify_view
 }
 
 shotwin() {
 	w_pos=$(hyprctl activewindow | grep 'at:' | cut -d':' -f2 | tr -d ' ' | tail -n1)
 	w_size=$(hyprctl activewindow | grep 'size:' | cut -d':' -f2 | tr -d ' ' | tail -n1 | sed s/,/x/g)
-	cd ${dir} && grim -g "$w_pos $w_size" - | tee "$file" | wl-copy
+	cd ${dir} && grim -g "$w_pos $w_size" - | tee "$file" | wl-copy --type image/png
 	notify_view
 }
 
@@ -112,7 +112,7 @@ shotarea() {
 
   # Copy with saving
 	if [[ -s "$tmpfile" ]]; then
-		wl-copy <"$tmpfile"
+		wl-copy --type image/png <"$tmpfile"
 		mv "$tmpfile" "$dir/$file"
 	fi
 	notify_view
@@ -130,11 +130,11 @@ shotactive() {
 
 shotswappy() {
 	tmpfile=$(mktemp)
-	grim -g "$(slurp)" - >"$tmpfile" 
+	grim -g "$(slurp)" - >"$tmpfile"
 
   # Copy without saving
   if [[ -s "$tmpfile" ]]; then
-		wl-copy <"$tmpfile"
+		wl-copy --type image/png <"$tmpfile"
     notify_view "swappy"
   fi
 }
