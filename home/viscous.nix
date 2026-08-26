@@ -26,6 +26,14 @@
     ./modules/gtk.nix
     ./modules/nwg-look.nix
     ./modules/nwg-displays.nix
+    ./modules/apps-browsers-comms.nix
+    ./modules/apps-desktop-shell.nix
+    ./modules/apps-media.nix
+    ./modules/apps-misc.nix
+    ./modules/dev-toolchains.nix
+    ./modules/fonts-extra.nix
+    ./modules/neovim-deps.nix
+    ./modules/python-env.nix
   ];
 
   home.username      = "viscous";

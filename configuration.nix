@@ -52,6 +52,13 @@
   # ── Shell ─────────────────────────────────────────────────────────────────
   programs.zsh.enable = true;
 
+  # ── nix-ld ────────────────────────────────────────────────────────────────
+  # Lets prebuilt dynamically-linked binaries run unmodified (Mason's
+  # downloaded LSP servers/debuggers, VS Code extensions, AppImages, etc.) —
+  # without this, anything not built by Nix itself typically fails to find
+  # its dynamic loader/libs on NixOS.
+  programs.nix-ld.enable = true;
+
   #tailscale
 
 

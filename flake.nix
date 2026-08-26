@@ -45,6 +45,9 @@
         ./modules/hardware-universal.nix
         ./modules/desktop.nix
         ./modules/keyboard.nix
+        ./modules/apps-gaming.nix
+        ./modules/apps-databases.nix
+        ./modules/apps-system.nix
 
         hyprland.nixosModules.default
 
