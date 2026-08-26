@@ -1,0 +1,58 @@
+[mgr]
+prepend_keymap = [
+    # Navigation
+    { on = "h", run = "leave",          desc = "Go to parent directory" },
+    { on = "l", run = "enter",          desc = "Enter directory" },
+    { on = "j", run = "arrow 1",        desc = "Move down" },
+    { on = "k", run = "arrow -1",       desc = "Move up" },
+    { on = "J", run = "arrow 5",        desc = "Move down 5" },
+    { on = "K", run = "arrow -5",       desc = "Move up 5" },
+    { on = "g g", run = "arrow -99999", desc = "Go to top" },
+    { on = "G",   run = "arrow 99999",  desc = "Go to bottom" },
+
+    # Jumping (zoxide/fzf)
+    { on = "z", run = "plugin zoxide",  desc = "Jump with zoxide" },
+    { on = "Z", run = "plugin fzf",     desc = "Jump with fzf" },
+
+    # Go to common dirs (Using absolute paths for reliability)
+    { on = ["g", "h"], run = "cd /home/viscous",            desc = "Go home" },
+    { on = ["g", "c"], run = "cd /home/viscous/.config",    desc = "Go to ~/.config" },
+    { on = ["g", "d"], run = "cd /home/viscous/Downloads",  desc = "Go to Downloads" },
+
+    # Neovim-style Leader Bindings (Leader is Space)
+    { on = [" ", "s", "f"], run = "search fd",         desc = "Search files (fd)" },
+    { on = [" ", "s", "g"], run = "search rg",         desc = "Search by grep (rg)" },
+    { on = [" ", "s", "h"], run = "help",              desc = "Search help" },
+    { on = [" ", "/"],      run = "find --smart",      desc = "Find in current dir" },
+    { on = [" ", "q"],      run = "quit",              desc = "Quit" },
+    
+    # Terminal (ToggleTerm style)
+    { on = [" ", "t", "h"], run = "shell $SHELL --block", desc = "Open terminal (block)" },
+    { on = [" ", "t", "f"], run = "shell $SHELL --block", desc = "Open terminal (float-ish)" },
+
+    # File ops
+    { on = "y", run = "yank",           desc = "Copy" },
+    { on = "x", run = "yank --cut",     desc = "Cut" },
+    { on = "p", run = "paste",          desc = "Paste" },
+    { on = "P", run = "paste --force",  desc = "Paste (overwrite)" },
+    { on = "d", run = "remove",         desc = "Trash file" },
+    { on = "D", run = "remove --permanently", desc = "Delete permanently" },
+    { on = "r", run = "rename --cursor=before_ext", desc = "Rename" },
+    { on = "a", run = "create",         desc = "Create file/dir" },
+
+    # Selection (m for mark to free up Space)
+    { on = "m",       run = "select --state=none", desc = "Toggle select" },
+    { on = "v",       run = "visual_mode",          desc = "Visual select mode" },
+    { on = "V",       run = "select_all --state=none", desc = "Select all" },
+
+    # Search
+    { on = "f", run = "search fd",      desc = "Search with fd" },
+    { on = "F", run = "search rg",      desc = "Search content with rg" },
+    { on = "/", run = "find --smart",   desc = "Find in current dir" },
+
+    # Misc
+    { on = ".", run = "hidden toggle",  desc = "Toggle hidden files" },
+    { on = "<Esc>", run = ["escape", "search_stop"], desc = "Escape" },
+    { on = "q", run = "quit",           desc = "Quit" },
+    { on = "~", run = "help",           desc = "Show help" },
+]

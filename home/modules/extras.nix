@@ -13,4 +13,8 @@
   # ── Tmux ──────────────────────────────────────────────────────────────────
   xdg.configFile."tmux".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/tmux";
+
+  # ── keyd app.conf — per-app passthrough rules for keyd-application-mapper ─
+  xdg.configFile."keyd/app.conf".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/keyd/app.conf";
 }

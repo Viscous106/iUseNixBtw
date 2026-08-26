@@ -1,0 +1,23 @@
+[mode_tile]
+label_color=#ff0f
+label_select_color=#0f0f
+unselectable_bg_color=#0002
+selectable_bg_color=#0004
+selectable_border_color=#ff06
+label_font_family=sans-serif
+label_font_size=8 50% 100
+label_symbols=abcdefghijklmnopqrstuvwxyz
+
+[mode_bisect]
+label_color=#ff0f
+label_font_size=20
+label_font_family=sans-serif
+label_padding=12
+pointer_size=20
+pointer_color=#0f0f
+unselectable_bg_color=#0002
+even_area_bg_color=#0004
+even_area_border_color=#ff06
+odd_area_bg_color=#0004
+odd_area_border_color=#0f06
+history_border_color=#fff6

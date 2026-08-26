@@ -12,6 +12,19 @@
     ./modules/kitty.nix
     ./modules/zen.nix
     ./modules/gpg.nix
+    ./modules/mpv.nix
+    ./modules/btop.nix
+    ./modules/yazi.nix
+    ./modules/swaylock.nix
+    ./modules/wlogout.nix
+    ./modules/cava.nix
+    ./modules/wl-kbptr.nix
+    ./modules/thefuck.nix
+    ./modules/qt5ct.nix
+    ./modules/qt6ct.nix
+    ./modules/gtk.nix
+    ./modules/nwg-look.nix
+    ./modules/nwg-displays.nix
   ];
 
   home.username      = "viscous";

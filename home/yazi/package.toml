@@ -1,0 +1,12 @@
+[[plugin.deps]]
+use = "yazi-rs/plugins:zoxide"
+rev = "598cdb6"
+hash = "99aa06d3014798d86001c324468d497f"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:fzf"
+rev = "598cdb6"
+hash = "99aa06d3014798d86001c324468d497f"
+
+[flavor]
+deps = []

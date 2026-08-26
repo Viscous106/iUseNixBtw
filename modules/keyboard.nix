@@ -3,6 +3,9 @@
 {
   # ── keyd — kernel-level key remapping ─────────────────────────────────────
   # Ported from your Arch /etc/keyd/default.conf
+  # keyd-application-mapper needs to be on PATH for the exec-once that starts it
+  environment.systemPackages = [ pkgs.keyd ];
+
   services.keyd = {
     enable = true;
 
@@ -35,14 +38,15 @@
           rightalt     = "layer(meta)";
         };
 
-        # ── Mouse layer (hold Space then use hjkl to scroll) ────────────────
+        # ── Mouse layer (hold Space for clicks + directional keys) ─────────
         "mouse_layer:C" = {
           capslock = "leftmouse";
           enter    = "rightmouse";
-          h        = "wheel(left)";
-          j        = "wheel(down)";
-          k        = "wheel(up)";
-          l        = "wheel(right)";
+          j        = "left";
+          p        = "right";
+          v        = "up";
+          c        = "down";
+          b        = "space";
         };
 
         # ── Capslock layer (physical Esc + modifier) ─────────────────────────
@@ -65,8 +69,8 @@
   # ── Xkb (consumed by Hyprland/Wayland via libxkbcommon) ───────────────────────
   # Single layout — no QWERTY fallback anywhere
   services.xserver.xkb = {
-    layout  = "us";
-    variant = "dvp";   # Programmer Dvorak, full system
+    layout  = "us,us";  # dvp primary, plain us fallback — matches live kb_layout
+    variant = "dvp,";   # switch with hyprctl switchxkblayout all next
     options = "";      # keyd handles caps/mod remapping at kernel level
   };
 }
