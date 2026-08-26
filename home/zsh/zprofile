@@ -1,0 +1,13 @@
+#if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+#       Hyprland 
+#fi
+
+if [ -z "$WAYLAND_DISPLAY" ] && [ -S "/run/user/$(id -u)/wayland-1" ]; then
+    export WAYLAND_DISPLAY=wayland-1
+fi
+
+# Created by `pipx` on 2026-01-19 12:29:37
+export PATH="$PATH:/home/viscous/.local/bin"
+
+# Added by Antigravity CLI installer
+export PATH="/home/viscous/.local/bin:$PATH"

@@ -2,6 +2,9 @@
 
 {
   # ── ZSH Configuration ───────────────────────────────────────────────────────
+  # Prompt is Starship (not powerlevel10k — Arch switched away from p10k).
+  # Most of the actual config is the real scripts from Arch's modular
+  # ~/.config/zsh/scripts/, live-editable at /persist/nixos-config/home/zsh/.
   programs.zsh = {
     enable                = true;
     enableCompletion      = true;
@@ -10,16 +13,13 @@
     dotDir                = config.xdg.configHome + "/zsh";
 
     oh-my-zsh = {
-      enable = true;
-      plugins = [ "git" "archlinux" ];
+      enable  = true;
+      plugins = [ "git" "archlinux" ]; # zsh-autosuggestions/zsh-syntax-highlighting
+                                        # are the standalone modules above instead
     };
 
+    # Bonus plugin, not part of Arch's setup but harmless/additive — kept.
     plugins = [
-      {
-        name = "powerlevel10k";
-        src = pkgs.zsh-powerlevel10k;
-        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-      }
       {
         name = "zsh-fzf-history-search";
         src  = pkgs.fetchFromGitHub {
@@ -31,66 +31,10 @@
       }
     ];
 
-    shellAliases = {
-      # Editor
-      v       = "nvim";
-      vi      = "nvim";
-      n       = "nvim";
-
-      # ls (lsd)
-      ls      = "lsd";
-      l       = "ls -l";
-      la      = "ls -a";
-      lla     = "ls-la";
-      lt      = "ls --tree";
-
-      # Better defaults
-      cat     = "bat --style=numbers --color=always";
-      grep    = "rg";
-      find    = "fd";
-
-      # Git
-      gs      = "git status -sb";
-      gd      = "git diff";
-      gds     = "git diff --staged";
-      ga      = "git add";
-      gc      = "git commit";
-      gp      = "git pull --rebase";
-      gco     = "git checkout";
-      lg      = "lazygit";
-
-      # Worktree
-      gwl     = "git worktree list";
-      gwa     = "git worktree add";
-      gwr     = "git worktree remove";
-      gwp     = "git worktree prune";
-
-      # NixOS / Config
-      cfg     = "nvim /persist/nixos-config/";
-      rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config#nix";
-      update  = "nix flake update /persist/nixos-config && rebuild";
-      config  = "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME";
-      ca      = "config add";
-      cl      = "config log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(148)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold 117)- %an%C(reset)%C(bold 203)%d%C(reset)'";
-
-      # Misc
-      ff      = "fastfetch";
-      speed   = "speedtest";
-      bluefriends = "pactl load-module module-combine-sink sink_name=combined";
-      tx      = "tmuxifier";
-      tmux-edit = "cd ~/.config/tmuxifier/layouts && nvim";
-      scrible = "tjournal";
-    };
-
     initContent = ''
-      fastfetch
-
-      # p10k instant prompt
-      if [[ -r "${"$"}{XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${"$"}{(%):-%n}.zsh" ]]; then
-        source "${"$"}{XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${"$"}{(%):-%n}.zsh"
-      fi
-
-      # ── Custom keybindings ────────────────────────────────────────────────────
+      # ── Custom keybindings ──────────────────────────────────────────────────
+      # Kitty/tmux Ctrl+Backspace CSI-u fix + Nix-side additions — not from
+      # Arch, no equivalent there, kept as harmless standalone terminal fixes.
       bindkey -e                     # Emacs mode (standard shell feel)
       bindkey '\ed' clear-screen     # Alt+D to clear screen
       bindkey '^H' backward-kill-word # Ctrl+Backspace (standard)
@@ -99,91 +43,99 @@
       bindkey '^[[1;5C' forward-word  # Ctrl+Right
       bindkey '^[[1;5D' backward-word # Ctrl+Left
 
-      # ── FZF ──────────────────────────────────────────────────────────────────
-      source <(fzf --zsh)
+      # ── Real Arch scripts, sourced verbatim (live-editable) ─────────────────
+      for _f in \
+        variable android-spawn clearandff git_worspace_tmux \
+        gpg-git keybinds optimisation startup \
+        tmux_copy_wayland_fix tmux_start
+      do
+        [ -f "$HOME/.config/zsh/scripts/$_f.sh" ] && source "$HOME/.config/zsh/scripts/$_f.sh"
+      done
+      unset _f
 
-      # ── Zoxide ───────────────────────────────────────────────────
-      eval "$(zoxide init zsh)"
-
-      # ── Pay-respects ────────────────────────────────────
+      # ── Pay-respects ─────────────────────────────────────────────────────────
+      # `thefuck` was removed from nixpkgs (Python 3.12+ incompatible) — Arch
+      # still has it, but nixpkgs forces pay-respects as the replacement here.
       if command -v pay-respects >/dev/null 2>&1; then
         eval "$(pay-respects zsh --alias)"
       fi
 
-      # ── Git pretty log ────────────────────────────────────────────────────────
-      unalias gl 2>/dev/null
-      gl() {
-        git log --graph --all --decorate --oneline \
-          --format=format:'%C(bold 141)%h%C(reset) - %C(cyan)(%ar)%C(reset) %C(white)%s%C(reset) %C(blue)- %an%C(reset)%C(bold 203)%d%C(reset)' "$@"
-      }
-
-      # ── FZF branch switcher ────────────────────────────────────────────────────
-      fzb() {
-        local branch=$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null |
-          grep -v '/HEAD$' |
-          fzf --height 40% --reverse --tac --prompt="Branch > ") 
-        if [[ -n "$branch" ]]; then
-          if [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
-            echo "Bare repo detected. Use 'gws' to switch worktrees."
-            echo "Selected branch: $branch"
-          else
-            git checkout "$branch"
-          fi
-        fi
-      }
-
-      # ── Worktree switcher ────────────────────────────────────────────────────
-      gws() {
-        local target=$("$HOME/.config/hypr/scripts/worktree_switcher.sh" --print-only 2>/dev/null)
-        [[ -n "$target" && -d "$target" ]] && cd "$target" && echo "Switched to: $(basename "$target")"
-      }
-      gwn() { "$HOME/.config/hypr/scripts/worktree_switcher.sh" --nvim; }
-
-      # ── Quick branch creation ─────────────────────────────────────────────────
-      gnb() {
-        [[ -z "$1" ]] && echo "Usage: gnb <branch-name>" && return 1
-        git checkout -b "$1"
-      }
-
-      # ── p10k config ──────────────────────────────────────────────────────────
-      [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
-
-      # ── Tmuxifier ────────────────────────────────────────────────────────────
-      export TMUXIFIER="$HOME/.config/tmuxifier"
-      [[ -d $TMUXIFIER ]] && source $TMUXIFIER/init.sh
-
-      # ── Pyenv Setup ──────────────────────────────────────────────────────────
-      export PYENV_ROOT="$HOME/.pyenv"
-      [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-      if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init - zsh)"
-      fi
-
-      # ── Git identity ─────────────────────────────────────────────
+      # ── Git identity / API keys (portable-drive secrets, not from Arch —
+      # Arch sets git identity via a plain ~/.gitconfig instead) ─────────────
       [ -f /persist/secrets/git-identity ] && source /persist/secrets/git-identity
       [ -f /persist/secrets/claude_api ] && source /persist/secrets/claude_api
 
-      # ── GPG TTY ───────────────────────────────────────────────────────────────
-      export GPG_TTY=$(tty)
-
-      # ── SSH Agent (GCR / GNOME Keyring) ──────────────────────────────────
-      export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
-
-      # ── Tmux autostart ───────────────────────────────────────────────────────
-      if [ -z "$TMUX" ] && [ -f ~/.config/tmux/tmux-autostart.sh ]; then
-          bash ~/.config/tmux/tmux-autostart.sh
-      fi
+      ff
     '';
-
-    history = {
-      size       = 50000;
-      save       = 50000;
-      ignoreDups = true;
-      share      = true;
-    };
   };
+
+  # ── Aliases ported verbatim from ~/.config/zsh/scripts/alias.sh, plus a few
+  # Nix-side additions (cfg/rebuild/update, better ls/cat/grep/find) ─────────
+  home.shellAliases = {
+    # From Arch's alias.sh
+    ls      = "lsd";
+    l       = "ls -l";
+    la      = "ls -a";
+    lla     = "ls -la";
+    lt      = "ls --tree";
+    bluefriends = "pactl load-module module-combine-sink sink_name=combined";
+    ff      = "fastfetch";
+    config  = "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME";
+    n       = "nvim";
+    speed   = "speedtest";
+    gs      = "git status -sb";
+    gd      = "git diff";
+    gp      = "git pull --rebase";
+    gl      = "git log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(cyan)(%ar)%C(reset) %C(white)%s%C(reset) %C(blue)- %an%C(reset)%C(bold 203)%d%C(reset)'";
+    ca      = "config add";
+    cl      = "config log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(148)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold 117)- %an%C(reset)%C(bold 203)%d%C(reset)'";
+
+    # Nix-side additions, not from Arch's alias.sh, kept as harmless extras
+    v       = "nvim";
+    vi      = "nvim";
+    cat     = "bat --style=numbers --color=always";
+    grep    = "rg";
+    find    = "fd";
+    gds     = "git diff --staged";
+    ga      = "git add";
+    gc      = "git commit";
+    gco     = "git checkout";
+    lg      = "lazygit";
+    gwl     = "git worktree list";
+    gwa     = "git worktree add";
+    gwr     = "git worktree remove";
+    gwp     = "git worktree prune";
+    cfg     = "nvim /persist/nixos-config/";
+    rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config#nix";
+    update  = "nix flake update /persist/nixos-config && rebuild";
+    tx      = "tmuxifier";
+    "tmux-edit" = "cd ~/.config/tmuxifier/layouts && nvim";
+    scrible = "tjournal";
+  };
+
+  # ── zshenv / zprofile — ported verbatim from Arch ────────────────────────
+  programs.zsh.envExtra = ''
+    . "$HOME/.cargo/env"
+    export STARSHIP_CONFIG="$HOME/.config/zsh/starship.toml"
+    export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
+  '';
+  programs.zsh.profileExtra = ''
+    if [ -z "$WAYLAND_DISPLAY" ] && [ -S "/run/user/$(id -u)/wayland-1" ]; then
+      export WAYLAND_DISPLAY=wayland-1
+    fi
+    export PATH="$PATH:$HOME/.local/bin"
+  '';
+
+  # ── Starship prompt config — raw file, live-editable ─────────────────────
+  xdg.configFile."zsh/starship.toml".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/zsh/starship.toml";
+
+  # ── Modular scripts — raw files, live-editable ───────────────────────────
+  xdg.configFile."zsh/scripts".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/zsh/scripts";
 
   # ── Helper Tools (Native Integrations) ──────────────────────────────────────
   programs.fzf.enable = true;
   programs.zoxide.enable = true;
+  home.packages = [ pkgs.starship pkgs.pay-respects ];
 }

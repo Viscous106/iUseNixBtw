@@ -1,0 +1,257 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+add_newline = true
+palette = 'p10k'
+
+format = """
+[░▒▓](fg:os_bg)\
+$os\
+[](fg:os_bg bg:dir_bg)\
+$directory\
+$git_branch\
+$git_status\
+$git_state\
+${custom.git_end}\
+${custom.dir_end}\
+$fill\
+$status\
+$cmd_duration\
+$jobs\
+$direnv\
+$python\
+$conda\
+$nodejs\
+$ruby\
+$golang\
+$java\
+$php\
+$perl\
+$lua\
+$scala\
+$haskell\
+$dart\
+$kubernetes\
+$terraform\
+$aws\
+$azure\
+$gcloud\
+$container\
+$nix_shell\
+${custom.fm_shell}\
+${custom.nordvpn}\
+$username\
+$hostname\
+${custom.todo}\
+${custom.taskwarrior}\
+${custom.timewarrior}\
+$time\
+$line_break$character"""
+
+[fill]
+symbol = '·'
+style = 'fg:240'
+
+[palettes.p10k]
+os_bg = '254'
+os_fg = '232'
+dir_bg = 'blue'
+dir_fg = '254'
+git_bg = 'green'
+git_fg = '232'
+
+# ───────────────────────── LEFT: os · dir · git ─────────────────────────
+[os]
+disabled = false
+format = '[ $symbol ]($style)'
+style = 'fg:os_fg bg:os_bg'
+[os.symbols]
+Arch = ''
+
+[directory]
+format = '[ $path ]($style)'
+style = 'fg:dir_fg bg:dir_bg'
+home_symbol = ' ~'
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = '…/'
+read_only = ' '
+read_only_style = 'fg:1 bg:dir_bg'
+
+[git_branch]
+symbol = ' '
+format = '[](fg:dir_bg bg:git_bg)[ $symbol$branch ](fg:git_fg bg:git_bg)'
+
+[git_status]
+format = '[$all_status$ahead_behind ](fg:git_fg bg:git_bg)'
+conflicted = '~${count} '
+ahead     = '⇡${count} '
+behind    = '⇣${count} '
+diverged  = '⇕⇡${ahead_count}⇣${behind_count} '
+up_to_date = ''
+untracked = '?${count} '
+stashed   = '*${count} '
+modified  = '!${count} '
+staged    = '+${count} '
+renamed   = '»${count} '
+deleted   = '✘${count} '
+
+[git_state]
+format = '[ ($state $progress_current/$progress_total) ](fg:0 bg:3)'
+
+# end-fade: green inside a git repo, blue otherwise (matches p10k dynamic last-segment)
+[custom.git_end]
+description = 'green end-fade when inside a git repo'
+when = 'git rev-parse --is-inside-work-tree >/dev/null 2>&1'
+format = '[▓▒░](fg:git_bg)'
+shell = ['sh']
+
+[custom.dir_end]
+description = 'blue end-fade when NOT inside a git repo'
+when = '! git rev-parse --is-inside-work-tree >/dev/null 2>&1'
+format = '[▓▒░](fg:dir_bg)'
+shell = ['sh']
+
+[character]
+success_symbol = '[❯](bold green)'
+error_symbol   = '[❯](bold red)'
+vicmd_symbol   = '[❮](bold green)'
+
+# ───────────────────────── RIGHT: status · time · env ─────────────────────────
+[status]
+disabled = false
+symbol = '✘'
+format = '[░▒▓](fg:1)[ $status $symbol ](fg:3 bg:1)'
+
+[cmd_duration]
+min_time = 3000
+format = '[░▒▓](fg:3)[ took $duration  ](fg:0 bg:3)'
+
+[jobs]
+symbol = '⚙'
+format = '[░▒▓](fg:0)[ $symbol$number ](fg:6 bg:0)'
+
+[direnv]
+disabled = false
+format = '[░▒▓](fg:3)[ $symbol$loaded ](fg:0 bg:3)'
+
+[python]
+format = '[░▒▓](fg:4)[ ${symbol}${version}(\($virtualenv\)) ](fg:0 bg:4)'
+
+[conda]
+format = '[░▒▓](fg:2)[ $symbol$environment ](fg:0 bg:2)'
+
+[nodejs]
+format = '[░▒▓](fg:2)[ $symbol$version ](fg:0 bg:2)'
+
+[ruby]
+format = '[░▒▓](fg:1)[ $symbol$version ](fg:0 bg:1)'
+
+[golang]
+format = '[░▒▓](fg:6)[ $symbol$version ](fg:0 bg:6)'
+
+[java]
+format = '[░▒▓](fg:1)[ $symbol$version ](fg:0 bg:1)'
+
+[php]
+format = '[░▒▓](fg:5)[ $symbol$version ](fg:0 bg:5)'
+
+[perl]
+format = '[░▒▓](fg:5)[ $symbol$version ](fg:0 bg:5)'
+
+[lua]
+format = '[░▒▓](fg:4)[ $symbol$version ](fg:0 bg:4)'
+
+[scala]
+format = '[░▒▓](fg:1)[ $symbol$version ](fg:0 bg:1)'
+
+[haskell]
+format = '[░▒▓](fg:5)[ $symbol$version ](fg:0 bg:5)'
+
+[dart]
+format = '[░▒▓](fg:6)[ $symbol$version ](fg:0 bg:6)'
+
+[kubernetes]
+disabled = false
+# p10k showed kubecontext only on kubectl/helm commands; Starship can't see the
+# pending command, so we approximate: show only inside a k8s/helm project dir.
+detect_files = ['Chart.yaml', 'kustomization.yaml', 'skaffold.yaml', 'helmfile.yaml', 'Tiltfile', 'k8s.yaml']
+detect_folders = ['k8s', 'kubernetes', 'manifests', 'helm', '.helm', 'charts']
+detect_extensions = []
+format = '[░▒▓](fg:5)[ at $symbol$context ](fg:0 bg:5)'
+
+[terraform]
+format = '[░▒▓](fg:5)[ $symbol$workspace ](fg:0 bg:5)'
+
+[aws]
+format = '[░▒▓](fg:3)[ $symbol$profile(\($region\)) ](fg:0 bg:3)'
+
+[azure]
+disabled = false
+format = '[░▒▓](fg:4)[ $symbol$subscription ](fg:0 bg:4)'
+
+[gcloud]
+# gcloud has no detect_files support (can't dir-scope like kubernetes), and it
+# would otherwise print your account on every prompt — so it's off by default.
+# Set disabled = false to show it whenever a gcloud account is configured.
+disabled = true
+format = '[░▒▓](fg:4)[ $symbol$account(@$domain) ](fg:0 bg:4)'
+
+[container]
+format = '[░▒▓](fg:6)[ $symbol$name ](fg:0 bg:6)'
+
+[nix_shell]
+format = '[░▒▓](fg:4)[ $symbol$state ](fg:0 bg:4)'
+
+[username]
+show_always = false
+format = '[░▒▓](fg:0)[ with $user ](fg:3 bg:0)'
+
+[hostname]
+ssh_only = true
+format = '[@$hostname ](fg:3 bg:0)'
+
+[time]
+disabled = false
+time_format = '%I:%M:%S %p'
+format = '[░▒▓](fg:7)[ at $time  ](fg:0 bg:7)'
+
+# ───────────── custom modules (p10k segments with no native equivalent) ─────────────
+
+# File-manager subshell indicator: yazi / ranger / nnn / lf / xplr
+[custom.fm_shell]
+description = 'shows when you spawn a shell from inside a file manager'
+when = '[ -n "${YAZI_LEVEL}${RANGER_LEVEL}${NNNLVL}${LF_LEVEL}${XPLR_PID}" ]'
+command = 'if [ -n "$YAZI_LEVEL" ]; then echo yazi; elif [ -n "$RANGER_LEVEL" ]; then echo ranger; elif [ -n "$NNNLVL" ]; then echo nnn; elif [ -n "$LF_LEVEL" ]; then echo lf; elif [ -n "$XPLR_PID" ]; then echo xplr; fi'
+format = '[░▒▓](fg:6)[  $output ](fg:0 bg:6)'
+shell = ['sh']
+
+# NordVPN connection status (only when connected)
+[custom.nordvpn]
+description = 'nordvpn country when connected'
+when = 'command -v nordvpn >/dev/null 2>&1 && nordvpn status 2>/dev/null | grep -q "Status: Connected"'
+command = 'nordvpn status 2>/dev/null | sed -n "s/^Country: //p"'
+format = '[░▒▓](fg:4)[  $output ](fg:0 bg:4)'
+shell = ['sh']
+
+# todo.txt pending task count
+[custom.todo]
+description = 'number of todo.txt tasks'
+when = 'command -v todo.sh >/dev/null 2>&1 && [ "$(todo.sh -p ls 2>/dev/null | grep -cE ^[0-9])" -gt 0 ]'
+command = 'todo.sh -p ls 2>/dev/null | grep -cE "^[0-9]"'
+format = '[░▒▓](fg:3)[ ✔ $output ](fg:0 bg:3)'
+shell = ['sh']
+
+# taskwarrior pending count
+[custom.taskwarrior]
+description = 'taskwarrior pending tasks'
+when = 'command -v task >/dev/null 2>&1 && [ "$(task +PENDING count 2>/dev/null)" -gt 0 ] 2>/dev/null'
+command = 'task +PENDING count 2>/dev/null'
+format = '[░▒▓](fg:3)[  $output ](fg:0 bg:3)'
+shell = ['sh']
+
+# timewarrior active tracking tag
+[custom.timewarrior]
+description = 'timewarrior active interval'
+when = 'command -v timew >/dev/null 2>&1 && [ "$(timew get dom.active 2>/dev/null)" = "1" ]'
+command = 'timew get dom.active.tag.1 2>/dev/null'
+format = '[░▒▓](fg:3)[  $output ](fg:0 bg:3)'
+shell = ['sh']
