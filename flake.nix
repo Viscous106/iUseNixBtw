@@ -27,7 +27,7 @@
     # deliberately NOT following our nixpkgs; Hyprland pins exact versions of
     # its own ecosystem libs (aquamarine, hyprutils, ...) and following our
     # nixpkgs risks a version mismatch across them.
-    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.url = "github:hyprwm/Hyprland/v0.56.2";
 
   };
 

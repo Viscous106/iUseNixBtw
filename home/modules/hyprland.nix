@@ -8,6 +8,8 @@
   wayland.windowManager.hyprland = {
     enable         = true;
     systemd.enable = true;
+    # Silences the "no settings/extraConfig" warning — intentional, see above.
+    extraConfig    = "# config lives in hyprland.lua, not here";
   };
 
   # ── Symlink config tree into ~/.config/hypr/ ────────────────────────────────
