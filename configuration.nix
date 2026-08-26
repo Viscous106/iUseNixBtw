@@ -52,24 +52,17 @@
   # ── Shell ─────────────────────────────────────────────────────────────────
   programs.zsh.enable = true;
 
-  # ── Keyring ───────────────────────────────────────────────────────────────
-  services.gnome.gnome-keyring.enable = true;
-  # components: ssh, secrets, pkcs11
-  programs.seahorse.enable = true;
-
   #tailscale
-  
-  
+
+
   # ── SSH ───────────────────────────────────────────────────────────────────
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
   };
 
-  security.pam.services.login.enableGnomeKeyring = true;
-
   programs.ssh = {
-    startAgent  = false;
+    startAgent  = true;
     agentTimeout = "4h";
     extraConfig = ''
       Host *
