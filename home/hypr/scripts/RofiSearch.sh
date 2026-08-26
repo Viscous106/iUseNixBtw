@@ -2,20 +2,8 @@
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
 # For Searching via web browsers
 
-# Define the path to the config file
-config_file=$HOME/.config/hypr/configs/01-UserDefaults.conf
-
-# Check if the config file exists
-if [[ ! -f "$config_file" ]]; then
-    echo "Error: Configuration file not found!"
-    exit 1
-fi
-
-# Process the config file in memory, removing the $ and fixing spaces
-config_content=$(sed 's/\$//g' "$config_file" | sed 's/ = /=/')
-
-# Source the modified content directly from the variable
-eval "$config_content"
+# Shell defaults — mirrors lua/user_defaults.lua (see configs/user-defaults.sh)
+source "$HOME/.config/hypr/configs/user-defaults.sh"
 
 # Check if $term is set correctly
 if [[ -z "$Search_Engine" ]]; then

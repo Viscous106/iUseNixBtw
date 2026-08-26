@@ -38,7 +38,7 @@ mkdir -p "$output_dir"
 case "$chosen_option" in
     "󰍹 Full Screen")
         notify "Starting full screen recording..."
-        wf-recorder -f "$output_file" &> /dev/null &
+        wf-recorder -a -f "$output_file" &> /dev/null &
         ;;
     "󰖵 Active Window")
         # Get the geometry of the active window
@@ -47,7 +47,7 @@ case "$chosen_option" in
         window_geo="${geometry} ${size}"
         
         notify "Starting active window recording..."
-        wf-recorder -g "$window_geo" -f "$output_file" &> /dev/null &
+        wf-recorder -a -g "$window_geo" -f "$output_file" &> /dev/null &
         ;;
     "󰩬 Select Region")
         # Select a region using slurp
@@ -60,6 +60,6 @@ case "$chosen_option" in
         fi
         
         notify "Starting selected region recording..."
-        wf-recorder -g "$geometry" -f "$output_file" &> /dev/null &
+        wf-recorder -a -g "$geometry" -f "$output_file" &> /dev/null &
         ;;
 esac

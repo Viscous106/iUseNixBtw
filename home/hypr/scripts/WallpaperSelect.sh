@@ -12,7 +12,7 @@ wallpaper_current="$HOME/.config/hypr/configs/wallpaper_effects/.wallpaper_curre
 iDIR="$HOME/.config/swaync/images"
 iDIRi="$HOME/.config/swaync/icons"
 
-# awww transition config
+# swww transition config
 FPS=60
 TYPE="any"
 DURATION=2
@@ -167,28 +167,18 @@ set_sddm_wallpaper() {
 }
 
 modify_startup_config() {
-  # Note: This function needs to be updated to handle per-monitor live wallpapers for persistence.
-  # The current implementation only supports one live wallpaper at a time on startup.
+  # Persistence across logins. Under the Lua config there is no Startup_Apps.conf
+  # to edit; instead we record the choice in a state file that wallpaper-restore.sh
+  # (run from lua/startup_apps.lua at hyprland.start) reads to pick swww vs mpvpaper.
   local selected_file="$1"
-  local startup_config="$HOME/.config/hypr/configs/Startup_Apps.conf"
+  local live_state="$HOME/.config/hypr/configs/wallpaper_effects/.live_wallpaper"
+  mkdir -p "$(dirname "$live_state")"
 
-  # Check if it's a live wallpaper (video)
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
-    # For video wallpapers:
-    sed -i '/^\s*exec-once\s*=\s*awww-daemon\s*--format\s*xrgb\s*$/s/^/#/' "$startup_config"
-    sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^#\s*//;' "$startup_config"
-
-    # Update the livewallpaper variable with the selected video path (using $HOME)
-    selected_file="${selected_file/#$HOME/\$HOME}" # Replace /home/user with $HOME
-    sed -i "s|^\$livewallpaper=.*|\$livewallpaper=\"$selected_file\"|" "$startup_config"
-
+    printf '%s\n' "$selected_file" > "$live_state"   # video path => live-wallpaper mode
     echo "Configured for live wallpaper (video)."
   else
-    # For image wallpapers:
-    sed -i '/^\s*#\s*exec-once\s*=\s*awww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
-
-    sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/#/' "$startup_config"
-
+    : > "$live_state"                                # empty => static image mode
     echo "Configured for static wallpaper (image)."
   fi
 }
@@ -208,13 +198,13 @@ apply_image_wallpaper() {
   kill_wallpaper_for_image
 
   mkdir -p "$(dirname "$wallpaper_current")" # Ensure directory exists
-  if ! pgrep -x "awww-daemon" >/dev/null;
+  if ! pgrep -x "swww-daemon" >/dev/null;
     then
-    echo "Starting awww-daemon..."
-    awww-daemon --format xrgb &
+    echo "Starting swww-daemon..."
+    swww-daemon --format xrgb &
   fi
 
-  awww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
+  swww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
   echo "$image_path" > "$wallpaper_current"
 
   # Run additional scripts (pass the image path to avoid cache race conditions)
@@ -247,8 +237,8 @@ apply_video_wallpaper() {
         rm "$pid_file"
     fi
 
-    # Ensure awww is not controlling the monitor
-    awww clear "$monitor" >/dev/null 2>&1
+    # Ensure swww is not controlling the monitor
+    swww clear "$monitor" >/dev/null 2>&1
 
     # Apply video wallpaper using mpvpaper
     mpvpaper -o "no-audio --loop" "$monitor" "$video_path" &

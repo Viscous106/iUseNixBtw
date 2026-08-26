@@ -22,9 +22,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Pinned nixpkgs-unstable's Hyprland (0.54.3) predates native Lua config
+    # support (live Arch is on 0.56.2). Track Hyprland's own flake instead —
+    # deliberately NOT following our nixpkgs; Hyprland pins exact versions of
+    # its own ecosystem libs (aquamarine, hyprutils, ...) and following our
+    # nixpkgs risks a version mismatch across them.
+    hyprland.url = "github:hyprwm/Hyprland";
+
   };
 
-  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, ... }@inputs:
   let
     system = "x86_64-linux";
   in
@@ -38,6 +45,8 @@
         ./modules/hardware-universal.nix
         ./modules/desktop.nix
         ./modules/keyboard.nix
+
+        hyprland.nixosModules.default
 
         home-manager.nixosModules.home-manager
         {

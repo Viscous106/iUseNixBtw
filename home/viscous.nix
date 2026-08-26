@@ -2,6 +2,7 @@
 
 {
   imports = [
+    inputs.hyprland.homeManagerModules.default
     ./modules/zsh.nix
     ./modules/neovim.nix
     ./modules/hyprland.nix

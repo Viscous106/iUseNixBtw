@@ -24,10 +24,10 @@ cleanup() {
 
 trap cleanup EXIT
 
-# Get current wallpaper from awww
+# Get current wallpaper from swww
 WALLPAPER=""
-if command -v awww &> /dev/null; then
-    SWWW_OUTPUT=$(awww query 2>/dev/null | head -1)
+if command -v swww &> /dev/null; then
+    SWWW_OUTPUT=$(swww query 2>/dev/null | head -1)
     if [[ "$SWWW_OUTPUT" =~ image:\ (.+)$ ]]; then
         WALLPAPER="${BASH_REMATCH[1]}"
         echo "Found wallpaper: $WALLPAPER" >> "$LOG_FILE"
