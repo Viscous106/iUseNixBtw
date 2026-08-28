@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Set a random wallpaper on all monitors at Hyprland startup
 
 wallDIR="$HOME/Pictures/wallpapers"

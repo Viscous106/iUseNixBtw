@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 set -euo pipefail
 
 # Hyprsunset toggle + Waybar status helper

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 # Define the cursor options and their corresponding theme folder names
 # We use an associative array to map display name to folder name.

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
 # Initialize J/K keybinds so they always cycle windows globally (no layout-specific behavior)
 # This avoids double-actions when layouts change.

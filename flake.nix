@@ -23,11 +23,15 @@
     };
 
     # Pinned nixpkgs-unstable's Hyprland (0.54.3) predates native Lua config
-    # support (live Arch is on 0.56.2). Track Hyprland's own flake instead —
-    # deliberately NOT following our nixpkgs; Hyprland pins exact versions of
-    # its own ecosystem libs (aquamarine, hyprutils, ...) and following our
-    # nixpkgs risks a version mismatch across them.
-    hyprland.url = "github:hyprwm/Hyprland/v0.56.2";
+    # support (live Arch is on 0.56.2). Track Hyprland's own flake instead.
+    # nixpkgs.follows added: Hyprland's own independently-locked nixpkgs drifted
+    # to a snapshot where harfbuzz/graphite2/libdatrie ABIs no longer match,
+    # breaking the hyprland-guiutils (hyprland-welcome) link step. Following our
+    # nixpkgs keeps one consistent snapshot across the whole closure.
+    hyprland = {
+      url = "github:hyprwm/Hyprland/v0.56.2";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
   };
 

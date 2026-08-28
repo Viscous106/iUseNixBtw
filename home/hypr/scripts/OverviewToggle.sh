@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Ensures Quickshell is running and toggles its overview.
 
 # Exit immediately if a command exits with a non-zero status.

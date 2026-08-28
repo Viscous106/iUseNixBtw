@@ -36,8 +36,9 @@
 
     # ── Theming ─────────────────────────────────────────────────────────────
     wallust                   # colorscheme generator (pywal-alternative)
-    gtk-engine-murrine        # murrine GTK2/3 theme engine
-    gtk2                      # needed by GTK2-era themes/engines
+    # gtk-engine-murrine + gtk2 removed: gtk-engine-murrine dropped from
+    # nixpkgs (depended on GTK2, which nixpkgs no longer packages); gtk2 was
+    # only kept here to support it, so both go together.
     libsForQt5.qtstyleplugin-kvantum   # Kvantum (Qt5 style engine + manager)
     qt6Packages.qtstyleplugin-kvantum  # Kvantum (Qt6 style engine + manager)
 

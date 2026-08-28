@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Advanced hyprlock launcher with mpvpaper live wallpaper support
 # This creates a true live wallpaper effect on the lockscreen
 

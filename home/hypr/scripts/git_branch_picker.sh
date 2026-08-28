@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Git branch switcher for tmux popup
 # Usage: git_branch_picker.sh
 

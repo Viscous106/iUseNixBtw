@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  #
 # Waybar modules source shell defaults (term / files / edit / Search_Engine).
 

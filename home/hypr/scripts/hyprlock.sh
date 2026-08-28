@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Hyprlock wallpaper sync script
 # Automatically uses current swww wallpaper for lockscreen
 

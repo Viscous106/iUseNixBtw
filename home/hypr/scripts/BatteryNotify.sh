@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 # Battery notification script with 15% threshold
 THRESHOLD=15

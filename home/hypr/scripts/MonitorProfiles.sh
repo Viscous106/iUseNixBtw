@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 if pidof rofi > /dev/null; then
   pkill rofi
 fi

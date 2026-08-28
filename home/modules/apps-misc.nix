@@ -35,7 +35,7 @@
                     # `toPythonApplication` (all-packages.nix) — NOT the
                     # `speedtest` attribute, which is an unrelated GTK4 app
     prettyping
-    postman         # AUR `postman-bin` -> nixpkgs `postman`
+    # postman       # disabled: upstream mirror (dl.pstmn.io) is unreliable; re-enable when fixed
 
     # GIS
     qgis

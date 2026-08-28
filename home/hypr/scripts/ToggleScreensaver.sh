@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Toggle screensaver idle on/off
 
 HYPRIDLE_CONF="$HOME/.config/hypr/configs/hypridle.conf"

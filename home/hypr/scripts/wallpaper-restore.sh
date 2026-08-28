@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Restore the last-used wallpaper at Hyprland startup.
 # Replaces the old Startup_Apps.conf swww/mpvpaper exec-once toggle. Run from
 # lua/startup_apps.lua on hyprland.start. State is written by WallpaperSelect.sh.

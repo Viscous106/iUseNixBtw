@@ -3,9 +3,7 @@
 //* .............CAMELLIA.......................*/
 //* ............................................*/
 //* --- 👍 designed by https://github.com/Krautt  👍 --- */
-
 {
- 
 "include": [
   "$HOME/.config/waybar/Modules",
   "$HOME/.config/waybar/ModulesWorkspaces",
@@ -25,7 +23,6 @@
 //"margin-bottom": 0,
 //"margin-left": 0,
 //"margin-right": 0,
-	
 "modules-left": [
 	"hyprland/workspaces#cam",
 	"custom/separator#line",
@@ -33,41 +30,33 @@
 	"group/notify",
 	"tray", 
 	"wlr/taskbar"],
-
 "modules-center": ["hyprland/window"], 
-	
 "modules-right": [
 	"custom/backlight",
 	"backlight/slider",
 	"custom/speaker",
 	"pulseaudio/slider",
-	"power-profiles-daemon",
 	"battery",
 	"clock#3", 
 	"network",
 	"custom/nightlight"],
-
 // Additional modules //
 "pulseaudio/slider": {
 	"min": 0,
 	"max": 100,
 	"orientation": "horizontal"
-	
 },
-
 "custom/speaker": {
 	"exec": "echo '🔊'",  
 	"interval": 1,
 	"format": "{}"
 },
-
 "backlight/slider": {
 	"min": 0,
 	"max": 100,
 	"orientation": "horizontal",
 	"device": "intel_backlight"
 },
-
 "custom/backlight": {
 	"exec": "echo '✨'",  
 	"interval": 1,

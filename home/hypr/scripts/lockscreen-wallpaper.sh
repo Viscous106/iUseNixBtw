@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Lockscreen video wallpaper manager
 # Easily change lockscreen video or sync with desktop
 

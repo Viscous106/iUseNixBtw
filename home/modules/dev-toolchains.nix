@@ -25,7 +25,11 @@
     sccache
 
     # ── JVM ─────────────────────────────────────────────────────────────
-    jdk11
+    # jdk11 + jdk21 both provide bin/jar, which collide in a single profile's
+    # buildEnv (home-manager-path build fails: "conflicting subpath"). Mark
+    # jdk11 lowPrio so jdk21's jar wins on PATH; jdk11 stays installed for
+    # anything that needs it via JAVA_HOME or a full store path.
+    (pkgs.lib.lowPrio jdk11)
     jdk21
 
     # ── JS/TS ───────────────────────────────────────────────────────────
@@ -42,8 +46,8 @@
     # nodejs_XX alongside it if you need a second pinned version.
 
     # ── Lua ─────────────────────────────────────────────────────────────
-    lua5_1  # lua51
-    lua5_2  # lua52
+    (pkgs.lib.setPrio 20 lua5_1)  # lua51 -- distinct low priority: lua5_1/5_2/5_4 all provide bin/lua, need a strict ranking, not tied lowPrio
+    (pkgs.lib.lowPrio lua5_2)  # lua52 -- lower than default (lua5_4 wins), higher than lua5_1 above
     lua5_4  # lua54
     luarocks
     lua51Packages.luacheck  # luacheck has no flat top-level attr; it only

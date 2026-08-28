@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Automatic monitor management for Hyprland — event-driven, no manual picker.
 #
 # Invoked from lua/monitors.lua on: hyprland.start, monitor.added, monitor.removed,

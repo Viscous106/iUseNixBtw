@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Auto-reset to safe monitor profile on boot
 
 monitor_dir="$HOME/.config/hypr/configs/Monitor_Profiles"

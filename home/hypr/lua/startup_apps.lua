@@ -17,6 +17,11 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
   hl.exec_cmd(scriptsDir .. "/KeybindsLayoutInit.sh")
 
+  -- seed ~/.cache/kb_layout so waybar's custom/keyboard poll (interval=1)
+  -- doesn't spam "No such file or directory" every second until the layout
+  -- switcher has been run once
+  hl.exec_cmd(scriptsDir .. "/InitKbLayout.sh")
+
   -- bar + dropdown terminal
   hl.exec_cmd("waybar")
   -- --prewarm: spawn it hidden in the scratchpad so the first SUPER+SHIFT+Return

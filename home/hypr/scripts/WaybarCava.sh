@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # WaybarCava.sh — safer single-instance handling, cleanup, and robustness
 # Original concept by JaKooLit; this variant focuses on lifecycle hardening.
 

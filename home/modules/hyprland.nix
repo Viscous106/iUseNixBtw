@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   # ── Hyprland window manager ─────────────────────────────────────────────────
@@ -10,6 +10,28 @@
     systemd.enable = true;
     # Silences the "no settings/extraConfig" warning — intentional, see above.
     extraConfig    = "# config lives in hyprland.lua, not here";
+    # wrapRuntimeDeps disabled: it only adds hyprland-guiutils (the welcome /
+    # dialog / donate-screen bin utilities) to Hyprland's runtime PATH -- not
+    # needed for the compositor itself. hyprland-guiutils currently fails to
+    # build (libstdc++ ABI mismatch: hyprtoolkit compiles with gcc16Stdenv,
+    # hyprland-guiutils with the ambient default stdenv -- an inconsistency
+    # in the upstream Hyprland flake overlay, not our config). Skipping it
+    # avoids depending on that broken build entirely.
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland.override {
+      wrapRuntimeDeps = false;
+      # Hyprland's CMakeLists.txt requires glaze 7.x (find_package(glaze 7...<8)),
+      # but current nixpkgs' glaze is 8.1.0 -- pinned back to 7.2.0 for this
+      # build only (doesn't affect the system-wide glaze package).
+      glaze-hyprland = pkgs.glaze.overrideAttrs (old: {
+        version = "7.2.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "stephenberry";
+          repo = "glaze";
+          rev = "v7.2.0";
+          hash = "sha256-f3NVRi3SXKo42hn0WCw7JsOK3EkdOVJIcuzhPorKjFY=";
+        };
+      });
+    };
   };
 
   # ── Symlink config tree into ~/.config/hypr/ ────────────────────────────────

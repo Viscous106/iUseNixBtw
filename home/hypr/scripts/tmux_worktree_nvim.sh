@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Git worktree switcher for tmux - opens selected worktree in nvim in MAIN pane
 # Usage: tmux_worktree_nvim.sh
 

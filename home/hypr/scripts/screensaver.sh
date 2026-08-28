@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Screensaver - displays video fullscreen (no password needed)
 # Press ANY KEY or MOVE MOUSE to exit
 # Continues playing even if lockscreen appears

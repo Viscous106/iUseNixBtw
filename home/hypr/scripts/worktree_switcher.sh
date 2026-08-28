@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 # Git Worktree Switcher (Bare Repo Optimized)
 # Shows only folder names and branch names

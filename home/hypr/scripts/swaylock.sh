@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 LOG_FILE="$HOME/.cache/swaylock_debug.log"
 CACHE_DIR="$HOME/.cache/swaylock_monitors"

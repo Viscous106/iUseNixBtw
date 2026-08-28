@@ -1,5 +1,4 @@
 /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
-
 // ### DEFAULT (Laptop)  - Top (old v3) ### //
 {
 "include": [
@@ -20,19 +19,16 @@
 "margin-top": 3,
 "margin-left": 8,
 "margin-right": 8,
-
 "modules-left": [
 	"custom/menu",
 	"custom/light_dark",
 	"custom/separator#dot-line",
-	"power-profiles-daemon",
 	"group/mobo_drawer",
 	"custom/separator#blank",
 	"group/laptop",
 	"custom/separator#line",
 	"custom/weather",
 	],
-
 "modules-center": [
 	"group/notify",
 	"custom/cava_mviz",
@@ -44,7 +40,6 @@
 	"idle_inhibitor",	
 	"custom/hint",	
 	], 
-
 "modules-right": [
 	"network#speed",
 	"group/connections",

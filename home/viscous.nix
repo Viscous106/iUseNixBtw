@@ -40,6 +40,15 @@
   home.homeDirectory = "/home/viscous";
   home.stateVersion  = "25.05";
 
+  # ── PATH for systemd user session (Hyprland + waybar subprocesses) ────────
+  # When Hyprland runs via systemd (systemd.enable = true), exec subprocesses
+  # don't inherit the interactive-shell PATH. Explicitly include NixOS package
+  # dirs so waybar execs (playerctl, swaync-client, bash shebangs, etc.) work.
+  home.sessionPath = [
+    "/etc/profiles/per-user/${config.home.username}/bin"
+    "/run/current-system/sw/bin"
+  ];
+
   programs.home-manager.enable = true;
   # ── Symlink persisted secrets and data into $HOME at every login ──────────
   home.activation.linkSecrets = config.lib.dag.entryAfter [ "writeBoundary" ] ''
@@ -74,7 +83,7 @@
   home.packages = with pkgs; [
     unstable.claude-code
     unstable.gemini-cli
-    python3
+    (pkgs.lib.lowPrio python3)  # redundant vs pythonWithLibs (home/modules/python-env.nix); kept for the plain interpreter, lowPrio to resolve bin/idle3.14 collision
     pkgs.ghgrab
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity
     psmisc         # provides killall

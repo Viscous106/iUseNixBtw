@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 # Git worktree switcher for tmux - switches to worktree in SAME pane
 # Usage: tmux_worktree.sh
 

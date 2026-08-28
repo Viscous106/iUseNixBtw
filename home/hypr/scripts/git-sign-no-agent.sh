@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 echo "Signing called with args: $@" >> /tmp/git-sign-debug.log
 unset SSH_AUTH_SOCK
 ssh-keygen "$@"

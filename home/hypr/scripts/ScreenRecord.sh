@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 # A rofi-based script to easily manage screen recording with wf-recorder.
 # Allows choosing between full screen, active window, or a selected region.

@@ -1,7 +1,5 @@
 /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
-
 // ### BOTTOM and RIGHT PANEL
-
 [{
 "include": [
   "$HOME/.config/waybar/Modules",
@@ -21,7 +19,6 @@
 "margin-left": 6,
 "margin-right": 6,
 "margin-bottom": 2,
-
 "modules-left": [
     "custom/menu",
     "cpu",
@@ -29,12 +26,10 @@
     "memory",
     "disk",
     ],
-    
 "modules-center": [
     //"hyprland/window",
     "hyprland/workspaces#roman",
 	],
-    
 "modules-right": [
     //"network",
     //"bluetooth",
@@ -43,14 +38,12 @@
     "backlight",
     "pulseaudio",
     //"wireplumber",
-    "power-profiles-daemon",
     "pulseaudio#microphone",
     "keyboard-state",
     "custom/nightlight",
     "custom/power",
     ],
 },
-
 {
 "include": [
   "$HOME/.config/waybar/Modules",
@@ -71,21 +64,17 @@
 "fixed-center": true,
 "ipc": true,
 //"gtk-layer-shell": true,
-   
 "modules-left": [
     "custom/lock",
     "idle_inhibitor",   
     ],
-    
 "modules-center": [
     "clock#vertical",
     ],
-    
 "modules-right": [
 	"mpris",
 	"group/notify",
     "tray",
     "custom/light_dark",
     ],
-    
 }]

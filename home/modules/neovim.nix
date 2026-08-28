@@ -12,7 +12,7 @@
 
     extraPackages = with pkgs; [
       # Runtimes needed by LSPs
-      nodejs_20
+      nodejs        # unsuffixed: tracks current default, avoids future EOL pins (nodejs_20 was removed)
       python3
       # Fuzzy search (Telescope dependency)
       ripgrep
