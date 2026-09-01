@@ -23,4 +23,6 @@ export VISUAL=nvim
 
 export EDITOR=nvim
 
+export PATH="/run/wrappers/bin:$PATH"
+
 export TMUXIFIER="$HOME/.config/tmuxifier" && source ~/.config/tmuxifier/init.sh

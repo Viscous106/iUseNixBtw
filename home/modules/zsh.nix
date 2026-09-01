@@ -115,6 +115,7 @@
 
   # ── zshenv / zprofile — ported verbatim from Arch ────────────────────────
   programs.zsh.envExtra = ''
+    export PATH="/run/wrappers/bin:$PATH"
     . "$HOME/.cargo/env"
     export STARSHIP_CONFIG="$HOME/.config/zsh/starship.toml"
     export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
