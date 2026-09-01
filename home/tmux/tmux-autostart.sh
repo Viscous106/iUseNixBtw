@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/run/current-system/sw/bin/bash
 
 # Start tmux server if not running
 if ! tmux list-sessions >/dev/null 2>&1; then

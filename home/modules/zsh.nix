@@ -65,7 +65,7 @@
       [ -f /persist/secrets/git-identity ] && source /persist/secrets/git-identity
       [ -f /persist/secrets/claude_api ] && source /persist/secrets/claude_api
 
-      ff
+      fastfetch
     '';
   };
 

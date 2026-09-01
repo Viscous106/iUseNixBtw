@@ -75,6 +75,10 @@
     # scripts/ — live editable without a rebuild
     "hypr/scripts".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/scripts";
+
+    # shaders/ — screen mode shaders (ScreenMode.sh)
+    "hypr/shaders".source = config.lib.file.mkOutOfStoreSymlink
+      "/persist/nixos-config/home/hypr/shaders";
   };
 
   # ── Hyprlock screen locker ──────────────────────────────────────────────────
