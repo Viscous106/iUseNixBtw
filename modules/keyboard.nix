@@ -6,12 +6,13 @@
   # keyd-application-mapper needs to be on PATH for the exec-once that starts it
   environment.systemPackages = [ pkgs.keyd ];
 
-  # keyd drops its control socket (/run/keyd/keyd.socket) to the "keyd" group,
-  # but the nixpkgs module never creates it — hence the startup warning
-  # `failed to set effective group to "keyd"` and an unreachable socket for
-  # keyd-application-mapper. Create the group and join it.
-  users.groups.keyd = { };
-  users.users.viscous.extraGroups = [ "keyd" ];
+  # NOTE: do NOT create a "keyd" group here. keyd only warns when the group is
+  # missing, but if it exists it calls setgid() — which the nixpkgs unit's
+  # sandbox blocks (`SystemCallFilter=~@privileged`, and CAP_SETGID is not in
+  # its CapabilityBoundingSet). keyd then dies with `setgid: Operation not
+  # permitted`, exit 255, and hits the restart limit. Creating the group only
+  # buys nicer perms on /run/keyd/keyd.socket for keyd-application-mapper;
+  # that needs the unit's sandbox loosened too, so leave both alone.
 
   # keyd exits with the signal number (15) on SIGTERM, so every `systemctl
   # stop` — including the restart in a nixos-rebuild switch — leaves the unit

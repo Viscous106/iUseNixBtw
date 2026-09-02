@@ -58,8 +58,13 @@
     options = [ "fmask=0022" "dmask=0022" ];
   };
 
-  # No swapfile — using zram instead (configured in hardware-universal.nix)
-  swapDevices = [];
+  # zram stays (hardware-universal.nix); this disk swap backs it up.
+  # 3.7 GiB of RAM with zram as the only swap wasn't enough to evaluate this
+  # flake — nix peaked at 2.0 GiB RSS and earlyoom SIGTERMed it ("error:
+  # interrupted by the user"). zram is compressed RAM, not extra memory, so it
+  # can't cover that. /swap is its own subvolume (kept out of @snapshots) and
+  # the file was made with `btrfs filesystem mkswapfile`, which sets NOCOW.
+  swapDevices = [{ device = "/swap/swapfile"; }];
 
   # ── CPU microcode — include both; kernel loads the right one ──────────────
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
