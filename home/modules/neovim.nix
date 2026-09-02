@@ -27,6 +27,7 @@
       ripgrep
       fd
       git
+      tree-sitter # CLI needed by nvim-treesitter to compile parsers
       # LSP servers — managed by Nix so they're always available
       lua-language-server
       nil                                    # Nix LSP

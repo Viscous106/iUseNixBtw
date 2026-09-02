@@ -113,6 +113,19 @@
   services.smartd.enable = true; # autodetect = true by default: SMART-monitors
                                   # every attached drive — a good fit for a
                                   # portable/USB boot drive.
+  services.smartd.devices = [
+    # The boot drive itself (an AVERTEK USB-NVMe stick behind a JMicron
+    # bridge, /dev/sda) hangs forever on smartd's default USB-NVMe
+    # passthrough probe, timing out the service on every boot
+    # (`systemctl --failed` showed smartd.service: Failed with result
+    # 'timeout'). `smartctl -d sat` answers instantly for this bridge.
+    # Listing it explicitly here (rather than overriding
+    # defaults.autodetected globally) keeps autodetect's default probe
+    # for every other drive — forcing "-d sat" globally broke SMART
+    # detection on the internal nvme0n1 drive instead ("Unable to
+    # monitor any SMART enabled devices").
+    { device = "/dev/sda"; options = "-d sat -a"; }
+  ];
 
   # ── VPN plugin wiring ─────────────────────────────────────────────────────
   # networkmanager-openvpn needs to go through networking.networkmanager's

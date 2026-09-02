@@ -947,6 +947,14 @@ return {
     '3rd/image.nvim',
     lazy = false,
     enabled = true,
+    -- Skip image.nvim's luarocks build step: it only builds the optional
+    -- `magick_rock` FFI processor, which needs a global Lua 5.1 + luarocks
+    -- setup we don't have. We use the default `magick_cli` processor
+    -- instead, which just shells out to `imagemagick`'s `magick` binary
+    -- (already in PATH via home/viscous.nix's environment.systemPackages).
+    -- Without this, every `:Lazy sync` prints a scary but harmless
+    -- "Could not find Lua 5.1" build failure.
+    build = false,
     config = function()
       require('image').setup {
         backend = 'kitty',

@@ -1,6 +1,6 @@
 clear-and-ff() { # clear && ff on alt + L
     clear
-    ff
+    fastfetch
     zle redisplay
 }
 zle -N clear-and-ff

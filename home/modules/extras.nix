@@ -37,6 +37,35 @@
   xdg.configFile."tmux".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/tmux";
 
+  # tmux-continuum's `@continuum-boot` feature auto-writes
+  # ~/.config/systemd/user/tmux.service the first time tmux starts, but only
+  # if that path doesn't already exist (see
+  # home/tmux/plugins/tmux-continuum/scripts/handle_tmux_automatic_start/
+  # systemd_enable.sh). Its stock template sets `KillMode=control-group` and
+  # adds `ExecStop=tmux kill-server` -- so *any* stop/restart of the unit
+  # (a home-manager switch, a login-session churn, a stray `systemctl --user
+  # restart tmux`) kills the whole tmux server and every session/pane in it.
+  # Declaring the unit here means home-manager keeps a symlink at that same
+  # path, so continuum's existence check always finds it and never
+  # regenerates the unsafe version. ExecStop still runs tmux-resurrect's
+  # save.sh so session state is saved on a real shutdown, but KillMode=none
+  # means systemd never signals the tmux server itself.
+  systemd.user.services.tmux = {
+    Unit = {
+      Description = "tmux default session (detached)";
+      Documentation = "man:tmux(1)";
+    };
+    Service = {
+      Type = "forking";
+      Environment = "DISPLAY=:0";
+      ExecStart = "${pkgs.tmux}/bin/tmux start-server";
+      ExecStop = "%h/.config/tmux/plugins/tmux-resurrect/scripts/save.sh";
+      KillMode = "none";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   # ── Tmuxifier — vendored verbatim from Arch (not a nixpkgs package) ────────
   xdg.configFile."tmuxifier".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/tmuxifier";
