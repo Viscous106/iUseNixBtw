@@ -89,7 +89,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-vim.g.netrw_browsex_viewer = 'zen-browser'
+vim.g.netrw_browsex_viewer = 'zen-beta'
 
 -- Start a server for this nvim instance
 vim.fn.serverstart()
@@ -1071,7 +1071,7 @@ require('lazy').setup({
     build = 'cd app && yarn install --frozen-lockfile',
     config = function()
       vim.g.mkdp_filetypes = { 'markdown' }
-      vim.g.mkdp_browser = 'zen-browser'
+      vim.g.mkdp_browser = 'zen-beta'
       -- You might want to add keymaps here, e.g.,
       vim.api.nvim_set_keymap('n', '<leader>md', '<Plug>MarkdownPreviewToggle', { noremap = true, silent = true })
     end,

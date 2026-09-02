@@ -11,6 +11,10 @@
     setAsDefaultBrowser = true;
   };
 
+  # The flake installs the binary as `zen-beta`, but setAsDefaultBrowser leaves
+  # $BROWSER as `zen-browser`, which is not on PATH. Point it at the real name.
+  home.sessionVariables.BROWSER = "zen-beta";
+
   # ── Persistent Profile ─────────────────────────────────────────────────────
   # Ensures the Zen profile is stored on the persistent partition
   xdg.configFile."zen".source = config.lib.file.mkOutOfStoreSymlink "/persist/home/viscous/.config/zen";
