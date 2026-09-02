@@ -91,4 +91,31 @@
   # up config-xpui.ini/Themes, so there's no active theme to port) ─────────
   xdg.configFile."spicetify".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/spicetify";
+
+  # ── Swappy (screenshot annotation) ─────────────────────────────────────────
+  xdg.configFile."swappy".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/swappy";
+
+  # ── Claude Code — vendored from Arch ────────────────────────────────────────
+  # CLAUDE_CONFIG_DIR is set to ~/.config/claude in home/modules/zsh.nix, and
+  # on Arch itself ~/.config/claude (not ~/.claude, which turned out to hold
+  # only a legacy/secondary settings.json + hooks there too) is where the
+  # real settings.json — model, statusLine, plugins, voice — actually lives.
+  # Only symlink the static config pieces individually (CLAUDE.md,
+  # settings.json, hooks, statusline helpers) — the rest of ~/.config/claude
+  # is live session/runtime state (history, projects, caches) that must stay
+  # real files, not vendored into git.
+  xdg.configFile."claude/CLAUDE.md".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/claude/CLAUDE.md";
+  xdg.configFile."claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/claude/settings.json";
+  xdg.configFile."claude/hooks".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/claude/hooks";
+  xdg.configFile."claude/helpers".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/claude/helpers";
+  # statusline-command.sh: the older starship/p10k-converted statusline —
+  # kept vendored for parity even though Arch's settings.json actually wires
+  # up helpers/statusline.sh instead, not this one.
+  xdg.configFile."claude/statusline-command.sh".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/claude/statusline-command.sh";
 }

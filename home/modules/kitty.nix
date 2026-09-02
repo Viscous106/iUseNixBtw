@@ -5,12 +5,12 @@
     enable = true;
 
     settings = {
-      # ── Font ─────────────────────────────────────────────────────────
-      font_family       = "JetBrainsMono Nerd Font Mono";
-      bold_font         = "JetBrainsMono Nerd Font Mono Bold";
-      italic_font       = "JetBrainsMono Nerd Font Mono Italic";
-      bold_italic_font  = "JetBrainsMono Nerd Font Mono Bold Italic";
-      font_size         = 13;
+      # ── Font — matches Arch exactly ─────────────────────────────────────
+      font_family       = "FiraCode Nerd Font";
+      bold_font         = "auto";
+      italic_font       = "auto";
+      bold_italic_font  = "auto";
+      font_size         = 16.0;
 
       # ── Catppuccin Mocha ──────────────────────────────────────────────
       foreground             = "#cdd6f4";
@@ -31,12 +31,15 @@
       cursor_text_color = "#1e1e2e";
       url_color        = "#f5e0dc";
 
-      # ── Window ────────────────────────────────────────────────────────
-      background_opacity      = "0.95";
-      dynamic_background_color = "yes";
+      # ── Window — opacity/scroll/cursor-trail match Arch ─────────────────
+      background_opacity      = "0.9";
+      dynamic_background_opacity = "1";
       window_padding_width    = 8;
       hide_window_decorations = "yes";
       confirm_os_window_close = 0;
+      cursor_trail            = 1;
+      linux_display_server    = "auto";
+      wheel_scroll_min_lines  = 1;
 
       # ── Tab bar ───────────────────────────────────────────────────────
       tab_bar_min_tabs      = 2;
@@ -48,7 +51,7 @@
       # ── Misc ──────────────────────────────────────────────────────────
       enable_audio_bell   = "no";
       visual_bell_duration = "0.0";
-      scrollback_lines    = 10000;
+      scrollback_lines    = 2000;
       copy_on_select      = "clipboard";
       strip_trailing_spaces = "smart";
     };

@@ -1,0 +1,28 @@
+{
+  "theme": "dark",
+  "skipWorkflowUsageWarning": true,
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/viscous/.config/claude/hooks/claude-notify.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/viscous/.config/claude/hooks/claude-notify.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
