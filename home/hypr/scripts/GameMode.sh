@@ -18,7 +18,10 @@ if [ "$HYPRGAMEMODE" = 1 ] ; then
         keyword decoration:rounding 0"
 	
 	hyprctl keyword "windowrule opacity 1 override 1 override 1 override, ^(.*)$"
-    hyprctl keyword input:kb_layout us	
+    # NOTE: kb_layout and kb_variant must keep the same number of entries.
+    # Setting layout to a single "us" while kb_variant is still "dvp," makes
+    # xkb reject the keymap ("Invalid keyboard layout passed"), so set both.
+    hyprctl --batch "keyword input:kb_layout us,us; keyword input:kb_variant dvp,"
     awww kill
     notify-send -e -u low -i "$notif" " Gamemode:" " enabled"
     sleep 0.1

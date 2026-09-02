@@ -10,8 +10,13 @@
   # pattern as the home-manager mkOutOfStoreSymlink dotfiles) rather than
   # letting the module regenerate a config from devices/config/extraDefCfg —
   # Arch's config.kbd is a complete file already.
+  # Disabled: keyd (modules/keyboard.nix) is the remapper now, and both grab
+  # the same physical keyboard (i8042). kanata's only binding — caps tap=esc,
+  # hold=lctl — is already covered by keyd's `capslock = overload(alt, esc)`,
+  # with Ctrl-hold living on tab/backslash there. Set back to true (and drop
+  # keyd) to swap remappers; running both double-remaps caps.
   services.kanata = {
-    enable = true;
+    enable = false;
     keyboards.default.configFile = "/persist/nixos-config/home/kanata/config.kbd";
   };
 

@@ -47,8 +47,8 @@ INT_POS_SOLO="0x0"          # nothing else on screen, so the origin is free
 LOCK="${XDG_RUNTIME_DIR:-/tmp}/hypr-monitor-auto.lock"
 exec 9>"$LOCK"
 case "$1" in
-  closed|open) flock -w 5 9 || exit 0 ;;
-  *)           flock -n   9 || exit 0 ;;
+  closed|open|rotate) flock -w 5 9 || exit 0 ;;
+  *)                  flock -n   9 || exit 0 ;;
 esac
 
 # --- Lua-parser call conventions --------------------------------------------
@@ -56,7 +56,20 @@ esac
 # plain `hyprctl dispatch <name> <args>` forms are rejected — everything has to go
 # through `hyprctl eval` against the same hl.* API used in lua/monitors.lua.
 hy() { hyprctl eval "$1" >/dev/null; }
-mon_set()    { hy "hl.monitor({ output = \"$1\", mode = \"$2\", position = \"$3\", scale = 1, disabled = false })"; }
+# scripts/auto-rotate.sh owns the internal panel's rotation and records the
+# current transform in $XDG_RUNTIME_DIR/hypr-rotation. Re-applying the panel
+# without it would silently un-rotate a folded tablet on every lid event and
+# every HDMI hotplug. Externals are never rotated.
+int_transform() {
+  local t
+  t=$(cat "${XDG_RUNTIME_DIR:-/tmp}/hypr-rotation" 2>/dev/null)
+  case "$t" in 0|1|2|3|4|5|6|7) echo "$t" ;; *) echo 0 ;; esac
+}
+mon_set() {
+  local t=0
+  [ "$1" = "$INT" ] && t=$(int_transform)
+  hy "hl.monitor({ output = \"$1\", mode = \"$2\", position = \"$3\", scale = 1, disabled = false, transform = $t })"
+}
 focus_mon()  { hy "hl.dispatch(hl.dsp.focus{ monitor = \"$1\" })"; }
 ws_to_mon()  { hy "hl.dispatch(hl.dsp.workspace.move{ workspace = \"$1\", monitor = \"$2\" })"; }
 

@@ -6,11 +6,31 @@
   # keyd-application-mapper needs to be on PATH for the exec-once that starts it
   environment.systemPackages = [ pkgs.keyd ];
 
+  # keyd drops its control socket (/run/keyd/keyd.socket) to the "keyd" group,
+  # but the nixpkgs module never creates it — hence the startup warning
+  # `failed to set effective group to "keyd"` and an unreachable socket for
+  # keyd-application-mapper. Create the group and join it.
+  users.groups.keyd = { };
+  users.users.viscous.extraGroups = [ "keyd" ];
+
+  # keyd exits with the signal number (15) on SIGTERM, so every `systemctl
+  # stop` — including the restart in a nixos-rebuild switch — leaves the unit
+  # in `failed`. Treat 15 as a clean exit.
+  systemd.services.keyd.serviceConfig.SuccessExitStatus = "15";
+
   services.keyd = {
     enable = true;
 
     keyboards.default = {
-      ids = [ "*" ];   # apply to all keyboards
+      # "*" minus the virtual devices that "*" would otherwise sweep in:
+      # ids come from `keyd monitor`. Both the real keyboard and kanata's
+      # virtual output report 0001:0001, so the trailing hash is required.
+      ids = [
+        "*"
+        "-2333:6666:e7fb73a9"   # ydotoold virtual device — keyd would re-remap
+                                # hyprwhspr's injected keystrokes
+        "-0000:0000:39ecd0ee"   # sof-glkrt5682max Headset Jack — not a keyboard
+      ];
 
       settings = {
         # ── Main layer ──────────────────────────────────────────────────────
@@ -31,7 +51,7 @@
           rightshift   = "oneshot(shift)";
 
           # Esc activates capslock_layer (for physical Esc key)
-          esc          = "layer(capslock_layer)";
+          esc          = "overload(capslock_layer, esc)";
 
           # Alt keys activate meta layer
           leftalt      = "layer(meta)";

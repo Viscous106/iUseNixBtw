@@ -51,6 +51,14 @@ hl.on("hyprland.start", function()
   -- idle daemon (hyprlock) — hypridle keeps its own .conf
   hl.exec_cmd("hypridle -c " .. os.getenv("HOME") .. "/.config/hypr/configs/hypridle.conf")
 
+  -- convertible: accelerometer rotation + tablet-mode input muting.
+  -- `init` first, so the session always starts unrotated with the keyboard live
+  -- even if the last session died mid-fold; it then corrects itself if we
+  -- actually booted folded. The daemon self-locks, so a config reload that
+  -- re-fires hyprland.start will not stack a second one.
+  hl.exec_cmd(scriptsDir .. "/auto-rotate.sh init")
+  hl.exec_cmd(scriptsDir .. "/auto-rotate.sh daemon")
+
   -- resume screen colour mode (monitor layout is handled automatically by lua/monitors.lua)
   hl.exec_cmd(scriptsDir .. "/ScreenMode.sh init")
 end)
