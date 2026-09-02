@@ -1,0 +1,42 @@
+/* Screen comfort / media profiles — see ~/.config/hypr/scripts/ScreenMode.sh */
+
+@import "~/.config/rofi/config.rasi"
+
+/* ---- Mainbox ---- */
+mainbox {
+  children:
+    [ "inputbar", "listview"];
+}
+
+/* ---- Window ---- */
+window {
+  width: 42%;
+  height: inherit;
+}
+
+/* ---- Entry ---- */
+entry {
+  width: 43%;
+  placeholder: " 󰈈 Screen profile";
+  horizontal-align: 0.5;
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 7;
+  fixed-height: false;
+  margin: 10px;
+  scrollbar: false;
+  cycle: true;
+}
+
+/* ---- Elements ---- */
+element-icon {
+  size: 0%;
+}
+element-text {
+  horizontal-align: 0.0;
+  vertical-align: 0.5;
+  margin: 5px 20px 5px 20px;
+}

@@ -47,6 +47,7 @@
         ./configuration.nix
         ./hardware-configuration.nix
         ./modules/hardware-universal.nix
+        ./modules/hardware-nvidia.nix
         ./modules/desktop.nix
         ./modules/keyboard.nix
         ./modules/apps-gaming.nix

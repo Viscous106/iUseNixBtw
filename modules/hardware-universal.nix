@@ -72,7 +72,10 @@
   hardware.firmware = with pkgs; [ linux-firmware ];
 
   # ── Graphics — generic modesetting (works with every open-source driver) ─
-  services.xserver.videoDrivers = [ "modesetting" "fbdev" ];
+  # mkDefault so a machine-specific module (see modules/hardware-nvidia.nix)
+  # can override this with a real vendor driver without a "conflicting
+  # definitions" error.
+  services.xserver.videoDrivers = lib.mkDefault [ "modesetting" "fbdev" ];
   hardware.graphics = {
     enable      = true;
     enable32Bit = true;   # needed for Steam / Wine / 32-bit Vulkan

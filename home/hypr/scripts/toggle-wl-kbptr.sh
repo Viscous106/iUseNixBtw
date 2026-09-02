@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/run/current-system/sw/bin/bash
 
 BUTTON=${1:-left} # Default to left click if no argument is provided
 
