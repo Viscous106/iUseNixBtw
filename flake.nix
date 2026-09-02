@@ -54,6 +54,8 @@
         ./modules/apps-databases.nix
         ./modules/apps-system.nix
         ./modules/peripherals.nix
+        ./modules/audio-glkrt5682max.nix
+        ./modules/touchscreen.nix
 
         hyprland.nixosModules.default
 
