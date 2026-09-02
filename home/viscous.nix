@@ -34,6 +34,10 @@
     ./modules/fonts-extra.nix
     ./modules/neovim-deps.nix
     ./modules/python-env.nix
+    ./modules/hyprwhspr.nix
+    ./modules/ydotoold.nix
+    ./modules/scaler.nix
+    ./modules/battery-notify.nix
   ];
 
   home.username      = "viscous";

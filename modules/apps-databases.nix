@@ -110,6 +110,15 @@
   # fight over the `docker` command name.
   virtualisation.podman.enable = true;
 
+  # ── libvirt/QEMU ───────────────────────────────────────────────────────────
+  # Arch had libvirtd + virtlogd enabled (VM passthrough scripts under
+  # ~/.config/hypr/scripts/vm-passthrough.sh reference it) but this was never
+  # ported. virtualisation.libvirtd.enable brings up both libvirtd and
+  # virtlogd; qemu is the default backend. viscous needs to be in the
+  # `libvirtd` group to manage VMs without sudo (added in configuration.nix).
+  virtualisation.libvirtd.enable = true;
+  programs.virt-manager.enable = true;
+
   # ── Plain CLI/VM-tooling packages ─────────────────────────────────────────
   # All verified present in pkgs/by-name/ under these exact attribute names:
   #   lazydocker  (pkgs/by-name/la/lazydocker)

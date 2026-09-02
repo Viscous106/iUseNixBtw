@@ -62,7 +62,13 @@ hl.bind(mod .. " + SHIFT + M", hl.dsp.exec_cmd(sd .. "/ScreenMode.sh menu"))
 hl.bind(mod .. " + SHIFT + CTRL + M", hl.dsp.exec_cmd(sd .. "/ScreenMode.sh next")) -- cycle without the menu
 hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
 hl.bind(mod .. " + SHIFT + O", hl.dsp.exec_cmd(sd .. "/ZshChangeTheme.sh"))
-hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("killall -SIGUSR1 waybar"))
+-- SIGUSR1 toggles waybar visibility (on-sigusr1 defaults to "toggle") — this
+-- is the same mechanism JaKooLit's Arch dotfiles use. `killall -SIGUSR1 waybar`
+-- silently did nothing here because NixOS's makeWrapper renames the real
+-- binary's kernel comm to ".waybar-wrapped"; killall/pkill -x match against
+-- comm, so the signal never reached the process. Match the full cmdline
+-- (still "waybar") instead.
+hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("pkill -SIGUSR1 -f '^waybar$'"))
 hl.bind(mod .. " + SHIFT + U", hl.dsp.window.move({ workspace = "special", follow = true }))
 hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd(sd .. "/WallpaperEffects.sh"))
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(sd .. "/ScreenShot.sh --now"))

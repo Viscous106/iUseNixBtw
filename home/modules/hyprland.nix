@@ -7,8 +7,26 @@
   # hyprland.lua INSTEAD of hyprland.conf when it exists, so no extraConfig.
   wayland.windowManager.hyprland = {
     enable         = true;
-    systemd.enable = true;
-    # Silences the "no settings/extraConfig" warning — intentional, see above.
+    # systemd.enable MUST stay false. It works by injecting an `exec-once` into
+    # ~/.config/hypr/hyprland.conf that runs `dbus-update-activation-environment`
+    # and `systemctl --user start hyprland-session.target`. But Hyprland loads
+    # hyprland.lua INSTEAD of hyprland.conf (see the binary's own log lines:
+    # "Using lua config found at" / "Lua config not found, using legacy config at"),
+    # so that exec-once was never executed and the whole systemd session bootstrap
+    # silently did nothing:
+    #   * hyprland-session.target never started, and since it BindsTo
+    #     graphical-session.target, graphical-session.target never activated;
+    #   * so every unit WantedBy/PartOf graphical-session.target (hypridle.service,
+    #     tray.target) was permanently dead;
+    #   * and HYPRLAND_INSTANCE_SIGNATURE / XDG_SESSION_TYPE / DISPLAY never reached
+    #     the systemd + dbus activation environment.
+    # Arch has no such systemd wiring at all — everything is launched by the
+    # exec-once hooks in lua/startup_apps.lua, which now exports the full variable
+    # set itself. Setting this false is what makes NixOS match Arch exactly.
+    systemd.enable = false;
+    # Silences the "no settings/extraConfig" warning. Hyprland never reads the
+    # resulting hyprland.conf (hyprland.lua wins) — it exists only to keep the
+    # home-manager module quiet.
     extraConfig    = "# config lives in hyprland.lua, not here";
     # wrapRuntimeDeps disabled: it only adds hyprland-guiutils (the welcome /
     # dialog / donate-screen bin utilities) to Hyprland's runtime PATH -- not
@@ -88,8 +106,12 @@
   };
 
   # ── Hypridle idle daemon ────────────────────────────────────────────────────
-  services.hypridle = {
-    enable   = true;
-    settings = {}; # config managed via xdg.configFile above
-  };
+  # Deliberately NOT using services.hypridle. Its unit is WantedBy/PartOf
+  # graphical-session.target, which never activates here (see systemd.enable
+  # above), so the service could never start — and if it ever did, it would run a
+  # SECOND hypridle alongside the one lua/startup_apps.lua execs directly with
+  # `hypridle -c ~/.config/hypr/configs/hypridle.conf`. Arch runs exactly one
+  # hypridle, started from the Lua config; this matches that.
+  # The package itself is installed via modules/desktop.nix systemPackages.
+  services.hypridle.enable = false;
 }

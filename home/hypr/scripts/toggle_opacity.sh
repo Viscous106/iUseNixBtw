@@ -12,7 +12,7 @@ TRANSPARENT=0.3
 # Get the address of the currently focused window
 # This uses hyprctl clients -j to get a JSON list of all windows,
 # then jq to filter for the focused window and extract its address.
-ACTIVE_WINDOW_ADDRESS=$(/usr/bin/hyprctl activewindow | /usr/bin/awk '/Window/ {print $2}')
+ACTIVE_WINDOW_ADDRESS=$(hyprctl activewindow | awk '/Window/ {print $2}')
 
 # Check if an active window was found
 if [ -z "$ACTIVE_WINDOW_ADDRESS" ]; then
@@ -37,8 +37,8 @@ fi
 
 # Set the new opacity for the active window
 # The 'alpha' property is used to control the window's transparency.
-/usr/bin/hyprctl setprop address:"$ACTIVE_WINDOW_ADDRESS" alphaoverride 1
-/usr/bin/hyprctl setprop address:"$ACTIVE_WINDOW_ADDRESS" alpha "$NEW_OPACITY"
+hyprctl setprop address:"$ACTIVE_WINDOW_ADDRESS" alphaoverride 1
+hyprctl setprop address:"$ACTIVE_WINDOW_ADDRESS" alpha "$NEW_OPACITY"
 
 # Save the new opacity state to the file for the next toggle
 echo "$NEW_OPACITY" > "$STATE_FILE"

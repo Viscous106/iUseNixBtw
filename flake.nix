@@ -52,6 +52,7 @@
         ./modules/apps-gaming.nix
         ./modules/apps-databases.nix
         ./modules/apps-system.nix
+        ./modules/peripherals.nix
 
         hyprland.nixosModules.default
 

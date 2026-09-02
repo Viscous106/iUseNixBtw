@@ -34,7 +34,7 @@
   users.users.viscous = {
     isNormalUser   = true;
     shell          = pkgs.zsh;
-    extraGroups    = [ "wheel" "networkmanager" "video" "audio" "input" ];
+    extraGroups    = [ "wheel" "networkmanager" "video" "audio" "input" "libvirtd" ];
     # Password hash generated with mkpasswd -m sha-512
     initialHashedPassword = "$6$KAEKKvbZIFl93S.a$bH1h1M.sCzqmvX3SZkK6QcHfjP31vBadi4V/dpWPlL2zIeQ5ZQ85NwrE9sylDZ3Wb/YOeS8lSHtHeJhGbveic0";
   };
@@ -52,6 +52,16 @@
   # ── Shell ─────────────────────────────────────────────────────────────────
   programs.zsh.enable = true;
 
+  # ── Session variables ─────────────────────────────────────────────────────
+  # Arch sets these in /etc/environment, which PAM injects into every session —
+  # including the Hyprland session started from the TTY. NixOS had no equivalent,
+  # so VISUAL was simply unset inside Hyprland (EDITOR only survived because
+  # lua/user_defaults.lua calls hl.env("EDITOR", "nvim")). This restores parity.
+  environment.variables = {
+    EDITOR = "nvim";
+    VISUAL = "nvim";
+  };
+
   # ── nix-ld ────────────────────────────────────────────────────────────────
   # Lets prebuilt dynamically-linked binaries run unmodified (Mason's
   # downloaded LSP servers/debuggers, VS Code extensions, AppImages, etc.) —
@@ -59,7 +69,12 @@
   # its dynamic loader/libs on NixOS.
   programs.nix-ld.enable = true;
 
-  #tailscale
+  # ── Tailscale ─────────────────────────────────────────────────────────────
+  # Arch had tailscaled actively running; this was left as a bare comment
+  # marker and never actually enabled. `services.tailscale.enable` installs
+  # the package and starts tailscaled — still needs `sudo tailscale up` once
+  # to authenticate this machine.
+  services.tailscale.enable = true;
 
 
   # ── SSH ───────────────────────────────────────────────────────────────────

@@ -17,11 +17,16 @@
 
     # mpv companions
     mpvpaper            # use mpv as a live-wallpaper renderer
-    mpvScripts.mpris    # MPRIS media-control plugin for mpv
-                         # NOTE: installing the script package alone doesn't
-                         # wire it into mpv; whoever edits modules/mpv.nix
-                         # still needs to add it via programs.mpv.scripts or
-                         # symlink it into the mpv scripts dir.
+    mpvScripts.mpris    # MPRIS media-control plugin for mpv — the built
+                         # mpris.so is vendored directly into
+                         # home/mpv/scripts/ (mpv.nix symlinks that whole
+                         # dir), so it loads with no further wiring.
+
+    # Spotify + spicetify (Arch's ~/.config/spicetify only has the
+    # Marketplace custom app installed — no config-xpui.ini/Themes were ever
+    # set up, so there's no active theme, just the base packages + app)
+    spotify
+    spicetify-cli
 
     # Wallpaper (see redundancy note in report — awww/swww is the daemon
     # actually driving wallpapers on this system; swaybg was still an

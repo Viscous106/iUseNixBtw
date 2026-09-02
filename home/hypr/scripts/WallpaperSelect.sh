@@ -46,14 +46,14 @@ rofi_override="element-icon{size:${adjusted_icon_size}%;}"
 
 # Kill existing wallpaper daemons for video
 kill_wallpaper_for_video() {
-  pkill mpvpaper 2>/dev/null
+  pkill -f 'mpvpaper' 2>/dev/null
   pkill swaybg 2>/dev/null
   pkill hyprpaper 2>/dev/null
 }
 
 # Kill existing wallpaper daemons for image
 kill_wallpaper_for_image() {
-  pkill mpvpaper 2>/dev/null
+  pkill -f 'mpvpaper' 2>/dev/null
   pkill swaybg 2>/dev/null
   pkill hyprpaper 2>/dev/null
 }
@@ -198,13 +198,13 @@ apply_image_wallpaper() {
   kill_wallpaper_for_image
 
   mkdir -p "$(dirname "$wallpaper_current")" # Ensure directory exists
-  if ! pgrep -x "swww-daemon" >/dev/null;
+  if ! awww query &>/dev/null;
     then
-    echo "Starting swww-daemon..."
-    swww-daemon --format xrgb &
+    echo "Starting awww-daemon..."
+    awww-daemon &
   fi
 
-  swww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
+  awww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
   echo "$image_path" > "$wallpaper_current"
 
   # Run additional scripts (pass the image path to avoid cache race conditions)
@@ -237,8 +237,8 @@ apply_video_wallpaper() {
         rm "$pid_file"
     fi
 
-    # Ensure swww is not controlling the monitor
-    swww clear "$monitor" >/dev/null 2>&1
+    # Ensure awww is not controlling the monitor
+    awww clear "$monitor" >/dev/null 2>&1
 
     # Apply video wallpaper using mpvpaper
     mpvpaper -o "no-audio --loop" "$monitor" "$video_path" &

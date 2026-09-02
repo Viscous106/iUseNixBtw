@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Inputs and paths
 passed_path="${1:-}"
-cache_dir="$HOME/.cache/swww/"
+cache_dir="$HOME/.cache/awww/"
 rofi_link="$HOME/.config/rofi/.current_wallpaper"
 wallpaper_current="$HOME/.config/hypr/configs/wallpaper_effects/.wallpaper_current"
 
@@ -40,7 +40,7 @@ else
   if [[ -f "$cache_file" ]]; then
     # The first non-filter line is the original wallpaper path
     # wallpaper_path="$(grep -v 'Lanczos3' "$cache_file" | head -n 1)"
-    wallpaper_path=$(swww query | grep $current_monitor | awk '{print $9}')
+    wallpaper_path=$(awww query | grep $current_monitor | awk '{print $9}')
   fi
 fi
 

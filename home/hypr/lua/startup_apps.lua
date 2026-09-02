@@ -13,8 +13,15 @@ hl.on("hyprland.start", function()
   hl.exec_cmd(scriptsDir .. "/wallpaper-restore.sh")
 
   -- environment / session
-  hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-  hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+  -- HYPRLAND_INSTANCE_SIGNATURE is what xdg-desktop-portal-hyprland uses to find
+  -- the compositor socket when dbus activates it — without it in the activation
+  -- environment the portal comes up unable to talk to Hyprland (screenshare and
+  -- the file picker break). XDG_SESSION_TYPE is what portals/toolkits check to
+  -- decide wayland vs x11. Both were previously missing on every session.
+  -- (DISPLAY is deliberately left out: XWayland may not be up yet at exec-once
+  -- time, and exporting an unset variable just errors.)
+  hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
+  hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
   hl.exec_cmd(scriptsDir .. "/KeybindsLayoutInit.sh")
 
   -- bar + dropdown terminal
@@ -24,7 +31,10 @@ hl.on("hyprland.start", function()
   hl.exec_cmd(scriptsDir .. "/Dropterminal.sh --prewarm kitty")
 
   -- polkit agent
-  hl.exec_cmd(scriptsDir .. "/Polkit.sh")
+  -- Polkit.sh hardcodes /usr/lib and /usr/libexec paths that don't exist on
+  -- NixOS; Polkit-NixOS.sh (already in this repo) finds the real /nix/store
+  -- path instead and is the one that actually works here.
+  hl.exec_cmd(scriptsDir .. "/Polkit-NixOS.sh")
 
   -- tray / network / notifications / widgets
   hl.exec_cmd("nm-applet --indicator")

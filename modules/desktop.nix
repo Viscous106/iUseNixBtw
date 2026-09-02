@@ -35,7 +35,16 @@
   };
 
   # ── Waybar ────────────────────────────────────────────────────────────────
-  programs.waybar.enable = true;
+  # Do NOT enable programs.waybar here — home/modules/waybar.nix installs waybar
+  # as a plain package with our own symlinked config/style, launched via
+  # startup_apps.lua's exec-once, matching the original Arch behavior exactly.
+  # Enabling programs.waybar also generates a competing systemd user service:
+  # it overrides style.css and, worse, runs with a minimal systemd-generated
+  # PATH (coreutils/findutils/gnugrep/gnused/systemd only) that lacks
+  # bash/python3/cava/playerctl/swaync-client, so every waybar module script
+  # fails at startup. Masked live via `systemctl --user mask waybar.service`
+  # to stop it immediately; this makes the fix declarative too.
+  programs.waybar.enable = false;
 
   # ── System-level desktop packages ─────────────────────────────────────────
   environment.systemPackages = with pkgs; [
@@ -63,7 +72,12 @@
     playerctl
 
     # Network / Bluetooth tray
-    networkmanagerapplet
+    networkmanagerapplet   # provides nm-applet
+    # NOTE: lua/startup_apps.lua also execs `nm-tray`, which Arch has but NixOS
+    # cannot provide — nixpkgs removed nm-tray on 2025-08-30 ("only works with
+    # Plasma 5"); referencing it now throws at eval time. The exec-once simply
+    # no-ops here. Nothing is lost: `nm-applet --indicator`, launched on the line
+    # above it in startup_apps.lua, provides the same NetworkManager tray icon.
     blueman
 
     # Notifications (swaync = SwayNC, a nicer notification + control-centre)

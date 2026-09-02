@@ -45,7 +45,7 @@ declare -A effects=(
 
 # Function to apply no effects
 no-effects() {
-    swww img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
+    awww img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
     wait $!
     wallust run "$wallpaper_current" -s &&
     wait $!
@@ -78,12 +78,13 @@ main() {
             eval "${effects[$choice]}"
             
             # intial kill process
-            for pid in swaybg mpvpaper; do
-            killall -SIGUSR1 "$pid"
-            done
+            killall -SIGUSR1 swaybg
+            # mpvpaper is a makeWrapper stub on NixOS -- killall matches comm,
+            # which is wrong here; match the full cmdline instead.
+            pkill -SIGUSR1 -f 'mpvpaper'
 
             sleep 1
-            swww img -o "$focused_monitor" "$wallpaper_output" $SWWW_PARAMS &
+            awww img -o "$focused_monitor" "$wallpaper_output" $SWWW_PARAMS &
 
             sleep 2
   

@@ -54,7 +54,7 @@ main() {
 
     case "$choice" in
         "no panel")
-            pgrep -x "waybar" && pkill waybar || true
+            pgrep -f '^waybar$' >/dev/null && pkill -f '^waybar$' || true
             ;;
         *)
             apply_config "$choice"
