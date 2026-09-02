@@ -83,13 +83,6 @@
   xdg.configFile."kanata".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/kanata";
 
-  # ── OpenRGB (GUI settings + effect) — Arch has both a capitalised data
-  # dir and a lowercase one (custom shader effects) side by side.
-  xdg.configFile."OpenRGB".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/OpenRGB";
-  xdg.configFile."openrgb".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/openrgb";
-
   # ── OBS Studio ──────────────────────────────────────────────────────────
   xdg.configFile."obs-studio".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/obs-studio";
@@ -98,10 +91,4 @@
   # up config-xpui.ini/Themes, so there's no active theme to port) ─────────
   xdg.configFile."spicetify".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/spicetify";
-
-  # ── scaler-content — a personal project, vendored as the live working
-  # copy (matches WorkingDirectory=%h/Viscous/scaler-content in
-  # home/modules/scaler.nix); secrets live at /persist/secrets/scaler-listen-env.
-  home.file."Viscous/scaler-content".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/scaler-content";
 }

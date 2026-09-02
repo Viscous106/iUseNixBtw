@@ -80,7 +80,9 @@
     lt      = "ls --tree";
     bluefriends = "pactl load-module module-combine-sink sink_name=combined";
     ff      = "fastfetch";
-    config  = "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME";
+    # On Arch this managed ~/.dotfiles as a bare repo over $HOME. On NixOS the
+    # config itself is a normal git repo, so `config` just operates on it directly.
+    config  = "git -C /persist/nixos-config";
     n       = "nvim";
     speed   = "speedtest";
     gs      = "git status -sb";
@@ -138,5 +140,8 @@
   # ── Helper Tools (Native Integrations) ──────────────────────────────────────
   programs.fzf.enable = true;
   programs.zoxide.enable = true;
-  home.packages = [ pkgs.starship pkgs.pay-respects ];
+  # tmuxifier is a real nixpkgs package now (was vendored as a raw git clone
+  # from Arch before that was true) — see home/tmuxifier for just the
+  # personal layouts that vendoring left behind.
+  home.packages = [ pkgs.starship pkgs.pay-respects pkgs.tmuxifier ];
 }

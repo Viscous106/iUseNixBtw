@@ -24,3 +24,9 @@ node_modules/
 
 # System specific
 flake.lock.backup
+
+# Removed local-only content — no longer vendored in this repo (deleted, not
+# tracked; OpenRGB app-generated state and a github-less personal project)
+home/OpenRGB/
+home/openrgb/
+home/scaler-content/

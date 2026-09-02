@@ -45,7 +45,7 @@ eval "$(starship init zsh)"
 
 alias bluefriends='pactl load-module module-combine-sink sink_name=combined'
 alias ff='fastfetch'
-alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias config='git -C /persist/nixos-config'
 eval "$(zoxide init zsh)"
 alias n='nvim'
 alias speed='speedtest'	

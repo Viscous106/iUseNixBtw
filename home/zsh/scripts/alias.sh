@@ -6,7 +6,7 @@ alias lla='ls -la'
 alias lt='ls --tree'
 alias bluefriends='pactl load-module module-combine-sink sink_name=combined'
 alias ff='fastfetch'
-alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias config='git -C /persist/nixos-config'
 alias n='nvim'
 alias speed='speedtest'
 alias gs='git status -sb'                        # Short status

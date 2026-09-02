@@ -11,6 +11,11 @@
 #   git clone <this-repo-url> nixos-config && cd nixos-config
 #   sudo ./setup.sh
 #
+#   If `git` itself isn't on the ISO (some minimal variants omit it), grab it
+#   from Nix first: `nix-shell -p git --run 'git clone <this-repo-url> nixos-config'`.
+#   Everything setup.sh itself needs (partitioning/mkfs tools) is checked and
+#   self-provided via nix-shell below — no other manual setup required.
+#
 # What it does:
 #   1. Partitions the disk you choose (GPT: 1GiB EFI + rest as btrfs)  — DESTRUCTIVE
 #   2. Creates the @, @home, @nix, @persist, @snapshots btrfs subvolumes
@@ -29,6 +34,42 @@ set -euo pipefail
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run this as root (sudo ./setup.sh) — it partitions disks and calls nixos-install." >&2
   exit 1
+fi
+
+# ── Dependency self-heal ─────────────────────────────────────────────────────
+# A first-time install can't assume anything beyond a bare NixOS ISO. If any
+# tool this script (or `nixos-install --flake`, which needs git to read a
+# flake's tracked files) uses isn't already on PATH, re-exec everything inside
+# a nix-shell that provides it — so this works the same on a minimal ISO as
+# a graphical one, without the user having to hunt down packages by hand.
+# Placed after the root check (not before) so the re-exec runs as root, since
+# `sudo` resets PATH and would otherwise drop a nix-shell set up beforehand.
+declare -A _SETUP_CMD_TO_PKG=(
+  [git]=git             [wipefs]=util-linux     [sgdisk]=gptfdisk
+  [partprobe]=parted    [mkfs.fat]=dosfstools   [mkfs.btrfs]=btrfs-progs
+  [btrfs]=btrfs-progs   [mount]=util-linux      [umount]=util-linux
+  [ping]=iputils        [lsblk]=util-linux      [sed]=gnused
+)
+_SETUP_MISSING_PKGS=()
+for _cmd in "${!_SETUP_CMD_TO_PKG[@]}"; do
+  command -v "$_cmd" >/dev/null 2>&1 || _SETUP_MISSING_PKGS+=("${_SETUP_CMD_TO_PKG[$_cmd]}")
+done
+if [ "${#_SETUP_MISSING_PKGS[@]}" -gt 0 ]; then
+  if [ -n "${NIXOS_SETUP_REEXEC:-}" ]; then
+    echo "Still missing after a nix-shell re-exec: ${_SETUP_MISSING_PKGS[*]} — something" >&2
+    echo "is wrong with that nix-shell invocation itself; can't continue." >&2
+    exit 1
+  fi
+  if ! command -v nix-shell >/dev/null 2>&1; then
+    echo "Missing: ${_SETUP_MISSING_PKGS[*]} — and no nix-shell to fetch them with." >&2
+    echo "This really doesn't look like a NixOS installer environment." >&2
+    exit 1
+  fi
+  mapfile -t _SETUP_MISSING_PKGS < <(printf '%s\n' "${_SETUP_MISSING_PKGS[@]}" | sort -u)
+  echo "Missing on this system: ${_SETUP_MISSING_PKGS[*]}"
+  echo "Re-running this script inside a nix-shell that provides them ..."
+  exec nix-shell -p "${_SETUP_MISSING_PKGS[@]}" \
+    --run "NIXOS_SETUP_REEXEC=1 exec bash $(printf '%q' "${BASH_SOURCE[0]}") ${*@Q}"
 fi
 
 if ! command -v nixos-install >/dev/null 2>&1; then
