@@ -16,6 +16,38 @@ There are two situations this covers:
 
 This doc is only about the first case.
 
+## Hardware caveat: NVIDIA is hard-coded, not auto-detected
+
+Everything above is genuinely portable *except* the GPU driver. This repo's
+reference machine has an RTX 4050 wired as the only display-capable GPU, and
+`modules/hardware-nvidia.nix` — unconditionally imported by `flake.nix` —
+forces that with `lib.mkForce [ "nvidia" ]` plus a pinned
+`hardware.nvidia.package`. `modules/hardware-universal.nix` only sets a
+`mkDefault` fallback (`modesetting`/`fbdev`), which `hardware-nvidia.nix`
+always wins over.
+
+`setup.sh` now asks about this directly — partway through the run it prompts:
+
+```
+Does THIS laptop have that same NVIDIA GPU? [y/N]
+```
+
+Answer `N` (or just press enter) on any machine that isn't that exact RTX
+4050 setup, and it comments out the `./modules/hardware-nvidia.nix` line in
+the *copied* `flake.nix` (at `/mnt/persist/nixos-config/flake.nix`) before
+running `nixos-install` — your original repo checkout is untouched. That
+falls back to `hardware-universal.nix`'s generic `modesetting`/`fbdev`
+driver, which works on any GPU. Answer `y` only if the new laptop has this
+same NVIDIA GPU wired the same way (internal display only reachable through
+NVIDIA); everything else in `hardware-universal.nix` (kernel, initrd
+modules, network, audio, TLP, zram, etc.) is already hardware-agnostic and
+needs no prompt.
+
+If you're re-running `nixos-install` directly (see "If something goes wrong
+mid-install" below) rather than through `setup.sh`, there's no prompt — edit
+`/mnt/persist/nixos-config/flake.nix` by hand first if you need to drop
+`hardware-nvidia.nix`.
+
 ## Prerequisites
 
 1. Boot the machine from an **official NixOS installer ISO** (minimal or

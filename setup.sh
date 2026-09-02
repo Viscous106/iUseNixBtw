@@ -119,11 +119,37 @@ else
   mount -o fmask=0022,dmask=0022                    "$EFI_PART"  /mnt/boot
 fi
 
+# ── GPU driver selection ─────────────────────────────────────────────────────
+# modules/hardware-nvidia.nix hard-forces the NVIDIA driver for this repo's
+# reference machine (RTX 4050 Max-Q) — it is NOT auto-detected. Including it
+# on a laptop without that exact GPU can leave Hyprland with no working
+# display driver (CPU-rendered via llvmpipe at best, black screen at worst).
+echo
+echo "── GPU configuration ───────────────────────────────────────────────────"
+echo "modules/hardware-nvidia.nix force-enables the NVIDIA driver (RTX 4050"
+echo "Max-Q, this repo's reference machine). It is not auto-detected."
+echo
+read -rp "Does THIS laptop have that same NVIDIA GPU? [y/N] " NVIDIA_ANSWER
+NVIDIA_ANSWER="${NVIDIA_ANSWER:-N}"
+if [[ "$NVIDIA_ANSWER" =~ ^[Yy]$ ]]; then
+  echo "Keeping modules/hardware-nvidia.nix enabled."
+else
+  echo "Will disable modules/hardware-nvidia.nix after copying the repo —"
+  echo "falls back to hardware-universal.nix's generic modesetting driver."
+fi
+
 # ── Copy the repo into place ─────────────────────────────────────────────────
 echo "── Copying repo to /mnt/persist/nixos-config ─────────────────────────"
 mkdir -p /mnt/persist/nixos-config
 cp -a "$REPO_DIR"/. /mnt/persist/nixos-config/
 rm -rf /mnt/persist/nixos-config/result  # stale build symlink, if present
+
+if [[ ! "$NVIDIA_ANSWER" =~ ^[Yy]$ ]]; then
+  echo "Disabling modules/hardware-nvidia.nix in the copied flake.nix ..."
+  sed -i \
+    's|^\([[:space:]]*\)\./modules/hardware-nvidia\.nix|\1# ./modules/hardware-nvidia.nix (disabled by setup.sh — no matching NVIDIA GPU)|' \
+    /mnt/persist/nixos-config/flake.nix
+fi
 
 # Empty secrets scaffold — home-manager's activation script also does this on
 # first login, but creating it now avoids a warning during the first build.
