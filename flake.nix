@@ -38,36 +38,48 @@
   outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, ... }@inputs:
   let
     system = "x86_64-linux";
-  in
-  {
-    nixosConfigurations.nix = nixpkgs.lib.nixosSystem {
+
+    # Everything both machines share. The ONLY difference between the portable
+    # USB install and the internal encrypted NVMe install is which
+    # hardware-configuration is appended to this list.
+    commonModules = [
+      ./configuration.nix
+      ./modules/hardware-universal.nix
+      ./modules/hardware-nvidia.nix
+      ./modules/desktop.nix
+      ./modules/keyboard.nix
+      ./modules/apps-gaming.nix
+      ./modules/apps-databases.nix
+      ./modules/apps-system.nix
+      ./modules/peripherals.nix
+      ./modules/audio-glkrt5682max.nix
+      ./modules/touchscreen.nix
+
+      hyprland.nixosModules.default
+
+      home-manager.nixosModules.home-manager
+      {
+        home-manager.useGlobalPkgs    = true;
+        home-manager.useUserPackages  = true;
+        home-manager.extraSpecialArgs = { inherit inputs; };
+        home-manager.backupFileExtension = "backup";
+        home-manager.users.viscous    = import ./home/viscous.nix;
+      }
+    ];
+
+    mkHost = hardware: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { inherit inputs; };
-      modules = [
-        ./configuration.nix
-        ./hardware-configuration.nix
-        ./modules/hardware-universal.nix
-        ./modules/hardware-nvidia.nix
-        ./modules/desktop.nix
-        ./modules/keyboard.nix
-        ./modules/apps-gaming.nix
-        ./modules/apps-databases.nix
-        ./modules/apps-system.nix
-        ./modules/peripherals.nix
-        ./modules/audio-glkrt5682max.nix
-        ./modules/touchscreen.nix
-
-        hyprland.nixosModules.default
-
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs    = true;
-          home-manager.useUserPackages  = true;
-          home-manager.extraSpecialArgs = { inherit inputs; };
-          home-manager.backupFileExtension = "backup";
-          home-manager.users.viscous    = import ./home/viscous.nix;
-        }
-      ];
+      modules = commonModules ++ [ hardware ];
     };
+  in
+  {
+    # Portable USB drive: btrfs by-label, GRUB-as-removable, no NVRAM writes.
+    nixosConfigurations.nix = mkHost ./hardware-configuration.nix;
+
+    # Internal NVMe: LUKS2 + btrfs, systemd-boot. hostName is forced to
+    # "laptop" there, so `nixos-rebuild switch --flake /persist/nixos-config`
+    # resolves to this host automatically once you are booted from it.
+    nixosConfigurations.laptop = mkHost ./hardware-configuration-laptop.nix;
   };
 }
