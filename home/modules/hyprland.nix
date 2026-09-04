@@ -7,6 +7,11 @@
   # hyprland.lua INSTEAD of hyprland.conf when it exists, so no extraConfig.
   wayland.windowManager.hyprland = {
     enable         = true;
+    # Pinned explicitly: home-manager's default flipped hyprlang -> lua for
+    # stateVersion >= 26.05. We must stay on "hyprlang" — under "lua" the module
+    # generates its own hypr/hyprland.lua, which would collide with the
+    # mkOutOfStoreSymlink for that exact path in xdg.configFile below.
+    configType     = "hyprlang";
     # systemd.enable MUST stay false. It works by injecting an `exec-once` into
     # ~/.config/hypr/hyprland.conf that runs `dbus-update-activation-environment`
     # and `systemctl --user start hyprland-session.target`. But Hyprland loads
@@ -35,7 +40,7 @@
     # hyprland-guiutils with the ambient default stdenv -- an inconsistency
     # in the upstream Hyprland flake overlay, not our config). Skipping it
     # avoids depending on that broken build entirely.
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland.override {
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland.override {
       wrapRuntimeDeps = false;
       # Hyprland's CMakeLists.txt requires glaze 7.x (find_package(glaze 7...<8)),
       # but current nixpkgs' glaze is 8.1.0 -- pinned back to 7.2.0 for this

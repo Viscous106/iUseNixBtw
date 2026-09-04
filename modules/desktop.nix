@@ -9,7 +9,7 @@
     # -- this is the system-level programs.hyprland package (separate from
     # home-manager's wayland.windowManager.hyprland), and it also pulled in the
     # broken hyprland-guiutils build unless overridden here independently.
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland.override {
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland.override {
       wrapRuntimeDeps = false;
       # Hyprland's CMakeLists.txt requires glaze 7.x (find_package(glaze 7...<8)),
       # but current nixpkgs' glaze is 8.1.0 -- pinned back to 7.2.0 for this

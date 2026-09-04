@@ -18,10 +18,10 @@
     nano
 
     # Office / spelling
-    libreoffice-fresh   # matches the AUR package name exactly (the "fresh"
-                        # release branch has its own attribute, verified at
-                        # pkgs/applications/office/libreoffice, distinct from
-                        # `libreoffice` == libreoffice-still)
+    libreoffice-stable  # upstream renamed the branches; `libreoffice-fresh` is
+                        # now an alias that warns. Verified identical: both
+                        # -fresh and -stable resolve to the same derivation
+                        # (libreoffice-26.2.5.2-wrapped), so this is a no-op.
     hunspellDicts.en_US # AUR `hunspell-en_us`; nixpkgs ships dictionaries under
                         # the hunspellDicts attribute set, not as flat packages
                         # (pkgs/by-name/hu/hunspell/dictionaries.nix)
