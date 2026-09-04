@@ -202,8 +202,8 @@ vim.keymap.set('n', '<leader>cl', '<cmd>messages clear<CR>', { desc = '[C]lear m
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Split window keymaps
-vim.keymap.set('n', '<leader>sv', '<cmd>vsplit<CR>', { desc = 'Split window vertically' })
-vim.keymap.set('n', '<leader>sh', '<cmd>split<CR>', { desc = 'Split window horizontally' })
+vim.keymap.set('n', '<leader>\\', '<cmd>vsplit<CR>', { desc = 'Split window vertically' })
+vim.keymap.set('n', '<leader>-', '<cmd>split<CR>', { desc = 'Split window horizontally' })
 
 -- Custom keymap for viewing Jupyter notebooks (interactive viewer)
 vim.keymap.set('n', '<localleader>jv', function()
@@ -404,7 +404,8 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>h', group = '[H]arpoon' },
+        { '<leader>g', group = '[G]it' },
         { '<leader>F', group = '[F]lutter' },
         { '<leader>L', group = '[L]eetCode' },
       },

@@ -388,11 +388,6 @@ return {
           winblend = 0,
         },
       }
-
-      -- Additional keymaps
-      vim.keymap.set('n', '<leader>tf', ':ToggleTerm direction=float<CR>', { desc = '[T]erminal [F]loat' })
-      vim.keymap.set('n', '<leader>th', ':ToggleTerm direction=horizontal<CR>', { desc = '[T]erminal [H]orizontal' })
-      vim.keymap.set('n', '<leader>tv', ':ToggleTerm direction=vertical<CR>', { desc = '[T]erminal [V]ertical' })
     end,
   },
 
@@ -790,9 +785,11 @@ return {
         desc = '[S]pectre open',
       },
       {
-        '<leader>sw',
-        '<cmd>Spectre<CR>',
-        desc = '[S]pectre search [w]ord',
+        '<leader>sW',
+        function()
+          require('spectre').open_visual { select_word = true }
+        end,
+        desc = '[S]pectre search current [W]ord',
       },
     },
     opts = {
