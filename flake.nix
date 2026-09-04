@@ -21,7 +21,6 @@
       url = "github:jacopone/antigravity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     # Pinned nixpkgs-unstable's Hyprland (0.54.3) predates native Lua config
     # support (live Arch is on 0.56.2). Track Hyprland's own flake instead.
     # nixpkgs.follows added: Hyprland's own independently-locked nixpkgs drifted
@@ -32,7 +31,6 @@
       url = "github:hyprwm/Hyprland/v0.56.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 
   outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, ... }@inputs:

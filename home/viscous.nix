@@ -89,6 +89,7 @@
     pkgs.ghgrab
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-ide  # IDE (upstream renamed google-antigravity -> the 2.0 base app)
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli  # `agy` terminal CLI
+    fd
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager

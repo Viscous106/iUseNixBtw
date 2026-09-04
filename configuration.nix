@@ -25,6 +25,10 @@
         system = prev.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
+
+      # nixpkgs dropped `opera` on 2025-05-19 (it is a `throw` in aliases.nix
+      # now), so we repack Opera's own official .deb. See pkgs/opera.nix.
+      opera = final.callPackage ./pkgs/opera.nix { };
     })
   ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───

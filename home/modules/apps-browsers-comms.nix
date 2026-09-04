@@ -13,9 +13,11 @@
     epiphany        # GNOME Web
     tor-browser     # AUR was tor-browser-alpha-bin; nixpkgs only packages the stable
                     # channel (currently 15.0.9) — no alpha variant is available.
-    # NOTE: `opera-beta` (AUR) has NO nixpkgs equivalent — the `opera` attribute
-    # was removed from nixpkgs on 2025-05-19 ("removed due to lack of
-    # maintenance"); nixpkgs/pkgs/top-level/aliases.nix now makes it a throw.
+    opera           # NOT from nixpkgs — the `opera` attribute was removed on
+                    # 2025-05-19 ("removed due to lack of maintenance") and is
+                    # a `throw` in aliases.nix. This is our own repack of
+                    # Opera's official .deb: see pkgs/opera.nix, wired in via
+                    # the overlay in configuration.nix.
 
     # Communications
     telegram-desktop

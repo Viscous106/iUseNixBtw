@@ -47,21 +47,34 @@
   # restart tmux`) kills the whole tmux server and every session/pane in it.
   # Declaring the unit here means home-manager keeps a symlink at that same
   # path, so continuum's existence check always finds it and never
-  # regenerates the unsafe version. ExecStop still runs tmux-resurrect's
-  # save.sh so session state is saved on a real shutdown, but KillMode=none
-  # means systemd never signals the tmux server itself.
+  # regenerates the unsafe version. ExecStop still saves session state on a
+  # real shutdown (via the guarded tmux-save-if-running.sh wrapper), but
+  # KillMode=none means systemd never signals the tmux server itself.
   systemd.user.services.tmux = {
     Unit = {
       Description = "tmux default session (detached)";
       Documentation = "man:tmux(1)";
     };
     Service = {
-      Type = "forking";
-      Environment = "DISPLAY=:0";
-      ExecStart = "${pkgs.tmux}/bin/tmux start-server";
-      ExecStop = "%h/.config/tmux/plugins/tmux-resurrect/scripts/save.sh";
+      # Was Type=forking + `ExecStart=tmux start-server`. That combination lost
+      # every saved session on every boot:
+      #   1. `start-server` leaves a server with *zero* sessions, and tmux exits
+      #      immediately in that state.
+      #   2. systemd saw the main PID die ~1s in and ran ExecStop.
+      #   3. ExecStop was tmux-resurrect's save.sh, which does not check for a
+      #      running server -- it wrote a zero-byte save file anyway and
+      #      repointed ~/.local/share/tmux/resurrect/last at it.
+      #   4. tmux-continuum's @continuum-restore then restored that empty file.
+      # oneshot + RemainAfterExit means ExecStop only runs on a real stop of the
+      # unit, never because the server happened to exit on its own.
+      Type = "oneshot";
+      RemainAfterExit = true;
+      Environment = [ "DISPLAY=:0" "TMUX_BIN=${pkgs.tmux}/bin/tmux" ];
+      # Idempotent: home-manager restarts this unit while a server is live.
+      ExecStart = "%h/.config/tmux/tmux-service-start.sh";
+      # Guarded wrapper, NOT save.sh directly -- see point 3 above.
+      ExecStop = "%h/.config/tmux/tmux-save-if-running.sh";
       KillMode = "none";
-      RestartSec = 2;
     };
     Install.WantedBy = [ "default.target" ];
   };
