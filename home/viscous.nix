@@ -88,7 +88,8 @@
     unstable.gemini-cli
     (pkgs.lib.lowPrio python3)  # redundant vs pythonWithLibs (home/modules/python-env.nix); kept for the plain interpreter, lowPrio to resolve bin/idle3.14 collision
     pkgs.ghgrab
-    inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity
+    inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-ide  # IDE (upstream renamed google-antigravity -> the 2.0 base app)
+    inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli  # `agy` terminal CLI
     psmisc         # provides killall
     lsd           # better ls
     pyenv         # python version manager
@@ -139,6 +140,7 @@
 
   # ── Pointer Cursor ────────────────────────────────────────────────────────
   home.pointerCursor = {
+    enable  = true;   # implicit enable via this block is deprecated in home-manager
     package = pkgs.bibata-cursors;
     name    = "Bibata-Modern-Classic";
     size    = 20;
