@@ -8,6 +8,7 @@
 
 live_state="$HOME/.config/hypr/configs/wallpaper_effects/.live_wallpaper"
 
+# Kept for the manual fallback documented above; no longer called on startup.
 start_awww() {
   # awww-daemon is a makeWrapper stub on NixOS, so its live kernel comm isn't
   # "awww-daemon" -- use `awww query` to detect a live daemon instead of an
@@ -30,5 +31,11 @@ if [ -s "$live_state" ]; then
   fi
 fi
 
-# static image mode (or missing/invalid live wallpaper)
-start_awww
+# Static image mode: caelestia owns it. Its wallpaper service restores the last
+# image itself from ~/.local/state, so starting awww here would put a second
+# wallpaper surface on the background layer fighting the shell's own.
+# Video is still ours — caelestia cannot do it: services/Wallpapers.qml filters
+# on FileSystemModel.Images and modules/background/Wallpaper.qml renders through
+# CachingImage, with no mpv/video/AnimatedImage path anywhere in the shell.
+# Make sure no stale mpvpaper from a previous live session is left covering it.
+pkill -f 'mpvpaper' 2>/dev/null || true

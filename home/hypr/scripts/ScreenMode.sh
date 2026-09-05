@@ -35,8 +35,12 @@ SHADER_DIR="$HOME/.config/hypr/shaders/screenmode"
 ROFI_THEME="$HOME/.config/rofi/config-screenmode.rasi"
 mkdir -p "$STATE_DIR" "$SHADER_DIR"
 
-# Set SCREENMODE_BACKLIGHT=0 to make profiles colour-only and leave brightness alone.
-USE_BACKLIGHT="${SCREENMODE_BACKLIGHT:-1}"
+# Profiles are COLOUR-ONLY: they set chromaticity via the screen shader and never
+# touch the backlight. Brightness is controlled by hand (XF86MonBrightness keys ->
+# caelestia). The backlight% column in PROFILES below is therefore inert; it is
+# kept so the table stays a complete description of each profile, and so setting
+# SCREENMODE_BACKLIGHT=1 restores the old couple-brightness-to-profile behaviour.
+USE_BACKLIGHT="${SCREENMODE_BACKLIGHT:-0}"
 
 # id|label|icon|kelvin|backlight%|shader-kind|blurb
 #   shader-kind: none | chroma | vivid
@@ -246,9 +250,9 @@ cmd_set() {
   local line
   line="$(profile_line "$1")" || { echo "unknown profile: $1" >&2; cmd_list >&2; exit 2; }
   apply_profile "$1" || { notify-send -u critical "Screen mode" "Failed to apply $1" || true; exit 1; }
-  notify-send -u low -h "string:x-canonical-private-synchronous:screenmode" \
+  notify-send -u low \
     "$(field "$line" 3)  $(field "$line" 2)" \
-    "$(field "$line" 4)K · $(field "$line" 5)% brightness
+    "$(field "$line" 4)K
 $(field "$line" 7)" || true
 }
 
@@ -268,9 +272,9 @@ cmd_status() {
   local line m
   m="$(current_profile)"
   line="$(profile_line "$m")"
-  printf '{"text":"%s","alt":"%s","class":"%s","tooltip":"%s — %sK, %s%% brightness\\n%s"}\n' \
+  printf '{"text":"%s","alt":"%s","class":"%s","tooltip":"%s — %sK\\n%s"}\n' \
     "$(field "$line" 3)" "$m" "$m" "$(field "$line" 2)" \
-    "$(field "$line" 4)" "$(field "$line" 5)" "$(field "$line" 7)"
+    "$(field "$line" 4)" "$(field "$line" 7)"
 }
 
 cmd_list() {

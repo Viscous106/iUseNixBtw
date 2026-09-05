@@ -10,7 +10,11 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("keyd-application-mapper -d")
 
   -- wallpaper daemon / live-wallpaper restore (picks swww or mpvpaper from saved state)
-  hl.exec_cmd(scriptsDir .. "/wallpaper-restore.sh")
+  -- qs-wallpaper-restore is upstream's own restore script (wrapped in
+  -- pkgs/qs-wallpaper-picker.nix). It reapplies the last wallpaper the picker
+  -- set, choosing awww for images and mpvpaper for video, which is what the
+  -- local wallpaper-restore.sh was reimplementing by hand.
+  hl.exec_cmd("qs-wallpaper-restore")
 
   -- environment / session
   -- HYPRLAND_INSTANCE_SIGNATURE is what xdg-desktop-portal-hyprland uses to find

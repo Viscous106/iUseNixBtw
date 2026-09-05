@@ -70,6 +70,22 @@
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.cpu.amd.updateMicrocode   = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+  # ── SMART on the USB boot stick ───────────────────────────────────────────
+  # Host-specific, which is why it lives here and not in modules/apps-system.nix
+  # (that module is shared with the internal-NVMe host, where /dev/sda does not
+  # exist and an explicitly-listed missing device makes smartd exit 16).
+  #
+  # This boot drive is an AVERTEK USB-NVMe stick behind a JMicron bridge.
+  # smartd's default USB-NVMe passthrough probe hangs on it and times the
+  # service out every boot; `smartctl -d sat` answers instantly. Listing just
+  # this device — rather than overriding defaults.autodetected globally — keeps
+  # autodetect's normal probe for every other drive, since forcing "-d sat"
+  # globally broke detection on nvme0n1 ("Unable to monitor any SMART enabled
+  # devices").
+  services.smartd.devices = [
+    { device = "/dev/sda"; options = "-d sat -a"; }
+  ];
+
   # ── Platform ──────────────────────────────────────────────────────────────
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

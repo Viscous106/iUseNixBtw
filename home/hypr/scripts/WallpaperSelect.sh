@@ -198,13 +198,15 @@ apply_image_wallpaper() {
   kill_wallpaper_for_image
 
   mkdir -p "$(dirname "$wallpaper_current")" # Ensure directory exists
-  if ! awww query &>/dev/null;
-    then
-    echo "Starting awww-daemon..."
-    awww-daemon &
-  fi
 
-  awww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
+  # Caelestia owns static wallpapers now, so awww is no longer started at login
+  # and `awww img` had nothing to talk to. Hand the chosen image to caelestia
+  # instead: it paints it and regenerates the Material colour scheme from it,
+  # which the old awww path never did. The rofi picker above is untouched — it
+  # stays the fast, directly-selectable menu; only the apply step moved.
+  # Video wallpapers still go through apply_video_wallpaper/mpvpaper below,
+  # because caelestia is images-only.
+  caelestia wallpaper -f "$image_path"
   echo "$image_path" > "$wallpaper_current"
 
   # Run additional scripts (pass the image path to avoid cache race conditions)

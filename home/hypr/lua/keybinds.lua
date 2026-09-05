@@ -43,8 +43,12 @@ hl.bind(mod .. " + U", hl.dsp.workspace.toggle_special())
 -- The wl-paste/cliphist watchers in startup_apps.lua still populate history;
 -- only the picker UI moves from rofi to caelestia.
 hl.bind(mod .. " + V", hl.dsp.exec_cmd("caelestia shell picker openClip"))
--- caelestia wallpaper also regenerates the colour scheme from the new image.
-hl.bind(mod .. " + W", hl.dsp.exec_cmd("caelestia wallpaper"))
+-- Wallpaper picker: qs-wallpaper-picker, a standalone Quickshell selector that
+-- opens straight onto a thumbnail grid — arrows to move, Enter to apply, Escape
+-- to close, typing filters. It is launched on demand rather than being a daemon,
+-- so it costs nothing while closed. Handles video as well as images, which
+-- caelestia cannot (see pkgs/qs-wallpaper-picker.nix).
+hl.bind(mod .. " + W", hl.dsp.exec_cmd("qs-wallpaper-picker"))
 -- move focus
 hl.bind(mod .. " + left",  hl.dsp.focus({ direction = "l" }))
 hl.bind(mod .. " + right", hl.dsp.focus({ direction = "r" }))
@@ -111,7 +115,10 @@ hl.bind(mod .. " + ALT + R", hl.dsp.exec_cmd(sd .. "/Refresh.sh"))
 hl.bind(mod .. " + ALT + S", hl.dsp.exec_cmd("pavucontrol"))
 -- ToggleAGS.sh never existed in this repo, so this bind has always been dead.
 hl.bind(mod .. " + ALT + T", hl.dsp.exec_cmd("caelestia shell notifs toggleDnd"))
-hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd(sd .. "/WallpaperRandom.sh"))
+-- WallpaperRandom.sh drove awww, which is no longer started at login now that
+-- caelestia owns static wallpapers — so this bind had gone dead. The CLI does
+-- random natively and regenerates the colour scheme with it.
+hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd("caelestia wallpaper -r"))
 -- swap windows
 hl.bind(mod .. " + ALT + left",  hl.dsp.window.swap({ direction = "l" }))
 hl.bind(mod .. " + ALT + right", hl.dsp.window.swap({ direction = "r" }))

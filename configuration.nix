@@ -29,6 +29,11 @@
       # nixpkgs dropped `opera` on 2025-05-19 (it is a `throw` in aliases.nix
       # now), so we repack Opera's own official .deb. See pkgs/opera.nix.
       opera = final.callPackage ./pkgs/opera.nix { };
+
+      # Quickshell wallpaper selector — a fast keyboard-first picker bound to
+      # SUPER+W. Not in nixpkgs; see pkgs/qs-wallpaper-picker.nix for why it
+      # needs wrapping rather than being run from a git clone.
+      qs-wallpaper-picker = final.callPackage ./pkgs/qs-wallpaper-picker.nix { };
     })
   ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
