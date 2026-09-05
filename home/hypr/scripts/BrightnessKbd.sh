@@ -24,9 +24,12 @@ get_icon() {
 		icon="$iDIR/brightness-100.png"
 	fi
 }
-# Notify
+# Notify - no-op. Same stacking problem as Volume.sh: the synchronous-replace
+# hint is swaync-only. NOTE: unlike volume and screen brightness, caelestia has
+# no OSD for the KEYBOARD backlight (its brightness service targets monitors),
+# so these keys now change the backlight with no on-screen feedback.
 notify_user() {
-	notify-send -e -h string:x-canonical-private-synchronous:brightness_notif -h int:value:$current -h boolean:SWAYNC_BYPASS_DND:true -u low -i "$icon" "Keyboard" "Brightness:$current%"
+	:
 }
 
 # Change brightness

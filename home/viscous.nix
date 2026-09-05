@@ -7,7 +7,6 @@
     ./modules/neovim.nix
     ./modules/hyprland.nix
     ./modules/hypridle.nix
-    ./modules/waybar.nix
     ./modules/caelestia-quickshell.nix
     ./modules/extras.nix
     ./modules/git.nix
@@ -44,10 +43,11 @@
   home.homeDirectory = "/home/viscous";
   home.stateVersion  = "25.05";
 
-  # ── PATH for systemd user session (Hyprland + waybar subprocesses) ────────
+  # ── PATH for systemd user session (Hyprland + shell subprocesses) ─────────
   # When Hyprland runs via systemd (systemd.enable = true), exec subprocesses
   # don't inherit the interactive-shell PATH. Explicitly include NixOS package
-  # dirs so waybar execs (playerctl, swaync-client, bash shebangs, etc.) work.
+  # dirs so the shell's execs (the `caelestia` CLI invoked from keybinds,
+  # playerctl, bash shebangs, etc.) resolve.
   home.sessionPath = [
     "/etc/profiles/per-user/${config.home.username}/bin"
     "/run/current-system/sw/bin"

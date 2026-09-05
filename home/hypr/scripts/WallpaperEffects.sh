@@ -49,7 +49,7 @@ no-effects() {
     wait $!
     wallust run "$wallpaper_current" -s &&
     wait $!
-    # Refresh rofi, waybar, wallust palettes
+    # Refresh rofi, wallust palettes
 	sleep 2
 	"$SCRIPTSDIR/Refresh.sh"
 
@@ -90,7 +90,7 @@ main() {
   
             wallust run "$wallpaper_output" -s &
             sleep 1
-            # Refresh rofi, waybar, wallust palettes
+            # Refresh rofi, wallust palettes
             "${SCRIPTSDIR}/Refresh.sh"
             notify-send -u low -i "$iDIR/ja.png" "$choice" "effects applied"
         else

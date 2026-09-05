@@ -71,7 +71,6 @@ else
     sudo pacman -S --noconfirm --needed \
         hyprland hyprlock hypridle hyprpicker \
         xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
-        waybar \
         swaynotificationcenter \
         wl-clipboard cliphist \
         swappy grim slurp \

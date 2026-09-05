@@ -27,8 +27,8 @@ hl.on("hyprland.start", function()
   -- bar + dropdown terminal
   -- Caelestia (Quickshell) replaces waybar. It is one process for the whole
   -- shell: bar, notification daemon, launcher and OSDs — which is why swaync
-  -- is no longer started below. waybar is still installed and its config tree
-  -- is untouched, so swapping this line back is the full rollback.
+  -- is no longer started below. Waybar and its config tree have been removed
+  -- entirely; recovering it means reverting the commit that deleted them.
   hl.exec_cmd("caelestia-shell")
   -- --prewarm: spawn it hidden in the scratchpad so the first SUPER+SHIFT+Return
   -- is instant. Without the flag it slides into view at login.
