@@ -58,6 +58,18 @@
       # enableDynamicColors in the picker's Settings.qml to hand that job to
       # matugen (already on the picker's PATH).
       background.wallpaperEnabled = false;
+
+      # SUPER+SHIFT+T toggles the bar via `drawers toggle bar`, which flips
+      # ScreenState.bar. modules/bar/BarWrapper.qml computes
+      #   shouldBeVisible: … && (bar.persistent || screenState.bar || isHovered)
+      # so while persistent is true that is unconditionally true and the toggle
+      # can never hide the bar — which is exactly what it looked like was broken.
+      # showOnHover off too, so the bar responds ONLY to the keybind and does not
+      # slide back in whenever the pointer nears the left edge.
+      # ScreenState.bar defaults to false, so scripts/caelestia-bar-init.sh shows
+      # the bar once at login; see that file.
+      bar.persistent = false;
+      bar.showOnHover = false;
     };
   };
 

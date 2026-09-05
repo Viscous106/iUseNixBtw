@@ -34,6 +34,9 @@ hl.on("hyprland.start", function()
   -- is no longer started below. Waybar and its config tree have been removed
   -- entirely; recovering it means reverting the commit that deleted them.
   hl.exec_cmd("caelestia-shell")
+  -- ScreenState.bar starts false once bar.persistent is off, so the bar would
+  -- come up hidden. This shows it once, after waiting for the shell's IPC.
+  hl.exec_cmd(scriptsDir .. "/caelestia-bar-init.sh")
   -- --prewarm: spawn it hidden in the scratchpad so the first SUPER+SHIFT+Return
   -- is instant. Without the flag it slides into view at login.
   hl.exec_cmd(scriptsDir .. "/Dropterminal.sh --prewarm kitty")
