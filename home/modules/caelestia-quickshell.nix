@@ -84,6 +84,13 @@
   # Fast keyboard-first Quickshell picker on SUPER+W, handling images and video.
   # See pkgs/qs-wallpaper-picker.nix. It reads its library from QS_WALLPAPER_DIR
   # (upstream default is ~/Wallpapers, which is not where this library lives).
-  home.packages = [ pkgs.qs-wallpaper-picker ];
+  home.packages = [
+    pkgs.qs-wallpaper-picker
+    # `caelestia clipboard` (SUPER+V) shells out to `fuzzel --dmenu` to render
+    # the picker and to cliphist to read/decode history — see the CLI's
+    # subcommands/clipboard.py. cliphist and wl-copy were already installed;
+    # fuzzel was not, so the command would have died on a missing binary.
+    pkgs.fuzzel
+  ];
   home.sessionVariables.QS_WALLPAPER_DIR = "${config.home.homeDirectory}/Pictures/wallpapers";
 }

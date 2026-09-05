@@ -40,9 +40,13 @@ hl.bind(mod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + S", hl.dsp.exec_cmd(sd .. "/RofiSearch.sh"))
 hl.bind(mod .. " + U", hl.dsp.workspace.toggle_special())
--- The wl-paste/cliphist watchers in startup_apps.lua still populate history;
--- only the picker UI moves from rofi to caelestia.
-hl.bind(mod .. " + V", hl.dsp.exec_cmd("caelestia shell picker openClip"))
+-- Clipboard history. NOT `shell picker openClip`: the "picker" IPC target is
+-- modules/areapicker/AreaPicker.qml, whose own CustomShortcut is described as
+-- "Open screenshot tool" — openClip means "screenshot a region straight to the
+-- clipboard", not "browse the clipboard". `caelestia clipboard` is the real
+-- history browser; it reads cliphist (still fed by the wl-paste watchers in
+-- startup_apps.lua) and renders it with fuzzel.
+hl.bind(mod .. " + V", hl.dsp.exec_cmd("caelestia clipboard"))
 -- Wallpaper picker: qs-wallpaper-picker, a standalone Quickshell selector that
 -- opens straight onto a thumbnail grid — arrows to move, Enter to apply, Escape
 -- to close, typing filters. It is launched on demand rather than being a daemon,
