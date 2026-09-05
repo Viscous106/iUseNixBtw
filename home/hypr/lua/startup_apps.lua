@@ -25,7 +25,11 @@ hl.on("hyprland.start", function()
   hl.exec_cmd(scriptsDir .. "/KeybindsLayoutInit.sh")
 
   -- bar + dropdown terminal
-  hl.exec_cmd("waybar")
+  -- Caelestia (Quickshell) replaces waybar. It is one process for the whole
+  -- shell: bar, notification daemon, launcher and OSDs — which is why swaync
+  -- is no longer started below. waybar is still installed and its config tree
+  -- is untouched, so swapping this line back is the full rollback.
+  hl.exec_cmd("caelestia-shell")
   -- --prewarm: spawn it hidden in the scratchpad so the first SUPER+SHIFT+Return
   -- is instant. Without the flag it slides into view at login.
   hl.exec_cmd(scriptsDir .. "/Dropterminal.sh --prewarm kitty")
@@ -39,8 +43,14 @@ hl.on("hyprland.start", function()
   -- tray / network / notifications / widgets
   hl.exec_cmd("nm-applet --indicator")
   hl.exec_cmd("nm-tray")
-  hl.exec_cmd("swaync")
-  hl.exec_cmd(scriptsDir .. "/StartAGS.sh")
+  -- swaync disabled: caelestia ships its own notification daemon, and whichever
+  -- process claims org.freedesktop.Notifications first wins — leaving swaync
+  -- here means caelestia's notification centre silently receives nothing.
+  -- hl.exec_cmd("swaync")
+  -- StartAGS.sh does not exist in this repo (it was never carried over from the
+  -- Arch dots), so this line has always been a no-op. Left commented rather than
+  -- deleted to keep the diff against the upstream dots readable.
+  -- hl.exec_cmd(scriptsDir .. "/StartAGS.sh")
   hl.exec_cmd("kdeconnect")
   hl.exec_cmd("blueman-applet")
 

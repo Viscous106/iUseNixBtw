@@ -8,6 +8,7 @@
     ./modules/hyprland.nix
     ./modules/hypridle.nix
     ./modules/waybar.nix
+    ./modules/caelestia-quickshell.nix
     ./modules/extras.nix
     ./modules/git.nix
     ./modules/kitty.nix

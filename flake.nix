@@ -31,6 +31,18 @@
       url = "github:hyprwm/Hyprland/v0.56.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Quickshell-based desktop shell (bar + notifications + launcher + lock),
+    # replacing waybar/swaync. Fetched over git+https rather than github: because
+    # the github: fetcher goes through api.github.com and gets 403'd by the
+    # unauthenticated rate limit. Its own flake pins quickshell (from outfoxxed's
+    # git, it is a different build to nixpkgs' quickshell) plus the caelestia CLI
+    # and m3shapes; nixpkgs.follows keeps that whole closure on our single
+    # snapshot instead of instantiating a second nixpkgs.
+    caelestia-shell = {
+      url = "git+https://github.com/caelestia-dots/shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, ... }@inputs:
