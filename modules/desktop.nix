@@ -78,9 +78,13 @@
     # Polkit agent (GUI auth popups)
     polkit_gnome
 
-    # File manager
-    thunar
-    thunar-volman
+    # File manager: NOT listed here — see programs.thunar below. Installing the
+    # thunar package plainly is what broke plugins: thunar only scans
+    # $THUNARX_DIRS, or its OWN store lib/thunarx-3 when that is unset. Its store
+    # path ships just apr/sbr/uca/wallpaper, so thunar-archive-plugin sitting in
+    # the user profile was never loaded — right-click "Extract Here" simply did
+    # not exist. programs.thunar builds a wrapper with THUNARX_DIRS pointing at
+    # the plugins listed there.
     gvfs                 # needed for Thunar trash / network mounts
 
     # Volume GUI
@@ -114,6 +118,26 @@
   # ── Thunar (GVFS daemon for trash / mounts) ───────────────────────────────
   services.gvfs.enable = true;
   services.tumbler.enable = true;   # thumbnail service for Thunar
+
+  # ── Thunar ────────────────────────────────────────────────────────────────
+  # programs.thunar wraps thunar with THUNARX_DIRS set to these plugins' output
+  # dirs. That is the only way plugins load on NixOS — see the note in
+  # environment.systemPackages above.
+  programs.thunar = {
+    enable = true;
+    plugins = with pkgs.xfce; [
+      thunar-archive-plugin      # right-click create/extract (xarchiver is the
+                                 # backend, already installed in
+                                 # home/modules/apps-desktop-shell.nix)
+      thunar-volman              # auto-handling of removable media
+      thunar-media-tags-plugin   # audio tag viewing/editing + bulk rename by tag
+    ];
+  };
+
+  # Thunar's bulk-rename and "open terminal here" both shell out; xfconf stores
+  # Thunar's own settings (view mode, zoom, sidebar width) which otherwise reset
+  # every launch.
+  programs.xfconf.enable = true;
 
   # ── Bluetooth ─────────────────────────────────────────────────────────────
   hardware.bluetooth.enable      = true;

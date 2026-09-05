@@ -23,5 +23,16 @@
   home.packages = with pkgs; [
     flat-remix-icon-theme
     adwaita-icon-theme
+
+    # ── GTK theme ─────────────────────────────────────────────────────────────
+    # share/themes was empty: no GTK theme was installed at all, so GTK3 apps
+    # (Thunar among them) fell back to GTK's built-in Adwaita. home/gtk-3.0/gtk.css
+    # defines libadwaita-style variables — accent_color, window_bg_color,
+    # headerbar_bg_color, sidebar_bg_color and friends — which built-in GTK3
+    # Adwaita does not consume, so most of that palette was simply ignored and
+    # Thunar came out half-styled.
+    # adw-gtk3 is the GTK3 port of libadwaita's stylesheet and reads exactly those
+    # names, so the existing gtk.css starts applying as it was written to.
+    adw-gtk3
   ];
 }

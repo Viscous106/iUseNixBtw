@@ -53,7 +53,8 @@
     # ── Archive managers / Thunar integration ───────────────────────────────
     kdePackages.ark           # ark — KDE archive manager
     xarchiver                 # lightweight GTK archive manager
-    thunar-archive-plugin     # Thunar right-click archive integration
+    # thunar-archive-plugin moved to programs.thunar.plugins in
+    # modules/desktop.nix — as a loose package it was installed but never loaded.
     unrar                     # rar/cbr extraction backend for the above
 
     # ── Disk / calculator / docs / accessibility ────────────────────────────

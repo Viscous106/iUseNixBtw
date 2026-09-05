@@ -107,8 +107,9 @@
     awww          # wallpaper daemon (formerly swww)
     rofi          # app launcher (Super+D)
     swaynotificationcenter  # notification daemon (swaync CLI)
-    thunar        # file manager
-    thunar-volman # volume manager for Thunar
+    # thunar / thunar-volman intentionally absent: they come from
+    # programs.thunar in modules/desktop.nix, which is the only way the plugins
+    # actually load. A second unwrapped copy here would shadow the wrapper.
     playerctl     # media controls
     pamixer       # volume control
     brightnessctl # brightness control
