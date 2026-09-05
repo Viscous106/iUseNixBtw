@@ -515,6 +515,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1788531059,
+        "narHash": "sha256-hLD4l3QOGBQhkVp3mQ2lJ/YbEi99qUgKapb40KovZ88=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "801bef6abd86b91e51083066b83fb354a11fc640",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -558,6 +574,26 @@
         "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
       }
     },
+    "quickshell_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787994703,
+        "narHash": "sha256-6SUZyyALo19heYPa/Xmu2H4zV+wvdfVX4fTcqbgHRnI=",
+        "owner": "quickshell-mirror",
+        "repo": "quickshell",
+        "rev": "2d3b3e9c70ef380dff751b61d334dc88df016c29",
+        "type": "github"
+      },
+      "original": {
+        "owner": "quickshell-mirror",
+        "repo": "quickshell",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "antigravity": "antigravity",
@@ -565,7 +601,49 @@
         "home-manager": "home-manager",
         "hyprland": "hyprland",
         "nixpkgs": "nixpkgs",
+        "skwd-wall": "skwd-wall",
         "zen-browser": "zen-browser"
+      }
+    },
+    "skwd-daemon": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1787519816,
+        "narHash": "sha256-MqJbWqIJg33UZYbKJ04mpFiYVSCkmWnV2XeQl0yzdhk=",
+        "owner": "liixini",
+        "repo": "skwd-daemon",
+        "rev": "d5f46c462c2a5270a915a85cd68fc00e34c05c8e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "liixini",
+        "repo": "skwd-daemon",
+        "type": "github"
+      }
+    },
+    "skwd-wall": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "quickshell": "quickshell_2",
+        "skwd-daemon": "skwd-daemon"
+      },
+      "locked": {
+        "lastModified": 1787134573,
+        "narHash": "sha256-TZ1oFqgfGgwEfvWnb7xc8gW6GwHXmN5gLVVS3k5AgXA=",
+        "ref": "main",
+        "rev": "49a2f5c0bdc711cde5b70f145ff659380954882a",
+        "revCount": 104,
+        "type": "git",
+        "url": "https://github.com/liixini/skwd-wall"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/liixini/skwd-wall"
       }
     },
     "systems": {

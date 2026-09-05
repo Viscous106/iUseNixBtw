@@ -139,6 +139,20 @@
   # every launch.
   programs.xfconf.enable = true;
 
+  # ── skwd-wall — wallpaper selector on SUPER+W ─────────────────────────────
+  # Installs skwd-wall (the Quickshell selector UI), the `skwd` CLI, and
+  # skwd-daemon, which is what actually renders the wallpaper. The daemon
+  # replaces awww/mpvpaper for this purpose, so nothing else may paint the
+  # background: caelestia already has background.wallpaperEnabled = false, and
+  # the awww restore was dropped from startup_apps.lua.
+  #
+  # The module also does systemd.packages = [ skwd ], which INSTALLS
+  # skwd-daemon.service but cannot start it here: the unit is
+  # WantedBy=graphical-session.target, and this session never reaches that
+  # target (Hyprland is started directly, no uwsm). startup_apps.lua launches
+  # the daemon instead — the same workaround caelestia needs.
+  programs.skwd-wall.enable = true;
+
   # ── Bluetooth ─────────────────────────────────────────────────────────────
   hardware.bluetooth.enable      = true;
   hardware.bluetooth.powerOnBoot = true;
