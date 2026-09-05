@@ -98,7 +98,8 @@ hl.bind(mod .. " + ALT + SPACE", hl.dsp.exec_cmd("hyprctl dispatch workspaceopt 
 -- this opens and the window is dismissed normally rather than by re-pressing.
 -- The dashboard is on SUPER+SHIFT+E; the quick scheme picker is SUPER+CTRL+R.
 hl.bind(mod .. " + ALT + B", hl.dsp.exec_cmd("caelestia shell nexus open"))
-hl.bind(mod .. " + ALT + E", hl.dsp.exec_cmd("caelestia emoji"))
+-- `caelestia emoji` with no flag only prints help; -p opens the picker.
+hl.bind(mod .. " + ALT + E", hl.dsp.exec_cmd("caelestia emoji -p"))
 hl.bind(mod .. " + ALT + A", hl.dsp.exec_cmd("caelestia shell audio cycleOutput"))
 hl.bind(mod .. " + ALT + I", hl.dsp.exec_cmd("caelestia shell idleInhibitor toggle"))
 hl.bind(mod .. " + ALT + H", hl.dsp.exec_cmd(sd .. "/drag_hold.sh"))
