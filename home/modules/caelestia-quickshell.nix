@@ -11,6 +11,66 @@
   # home-manager.extraSpecialArgs = { inherit inputs; }.
   imports = [ inputs.caelestia-shell.homeManagerModules.default ];
 
+  # ── Patch: stop panels closing when another surface takes focus ────────────
+  # modules/drawers/ContentWindow.qml wraps the drawers in a HyprlandFocusGrab.
+  # Whenever the grab is lost it runs onCleared, which sets screenState.launcher
+  # /session/sidebar back to false — i.e. the panel closes. That is how
+  # click-outside-to-dismiss is implemented.
+  #
+  # wl-kbptr (SUPER+H) is a keyboard pointer: it maps its own layer surface and
+  # takes focus. That breaks the grab, so opening a panel and then reaching for
+  # wl-kbptr to click something in it closes the very panel you were aiming at.
+  # There is no config option for this — nothing in upstream's settings schema
+  # touches the focus grab — so the condition is patched out.
+  #
+  # Split by panel, because the grab is simultaneously the click-outside
+  # dismissal AND the thing wl-kbptr trips:
+  #   * launcher + session KEEP the grab. Both already handle Escape
+  #     (modules/{launcher,session}/Content.qml) and have vimKeybinds enabled
+  #     below, so they are fully keyboard-drivable and never need wl-kbptr.
+  #     Keeping the grab means click-outside still dismisses them.
+  #   * sidebar + dashboard LOSE it. Neither has an Escape handler upstream, and
+  #     ContentWindow's keyboardFocus is None unless launcher/session is open, so
+  #     they cannot receive keys at all — clicking is the only way to use them,
+  #     which is exactly when wl-kbptr is needed. They close via their keybind.
+  #   * tray menus keep it: transient popups where click-away is the only
+  #     sensible dismissal.
+  # The two onCleared assignments are dropped too, so a launcher/session grab
+  # clearing does not drag an open sidebar or dashboard shut with it.
+  programs.caelestia.package =
+    (inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}.with-cli).overrideAttrs (old: {
+      postPatch = (old.postPatch or "") + ''
+        substituteInPlace modules/drawers/ContentWindow.qml \
+          --replace-fail \
+            'if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled) || (s.sidebar && conf.sidebar.enabled))' \
+            'if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled)) // patched: sidebar dropped' \
+          --replace-fail \
+            'if (!conf.dashboard.showOnHover && s.dashboard && conf.dashboard.enabled)' \
+            'if (false) // patched: dashboard grab disabled' \
+          --replace-fail \
+            'root.screenState.sidebar = false;' \
+            '// patched: sidebar is not auto-closed on focus loss' \
+          --replace-fail \
+            'root.screenState.dashboard = false;' \
+            '// patched: dashboard is not auto-closed on focus loss'
+
+        # vimKeybinds ships Ctrl+J/K (and Ctrl+N/P) for next/previous. Move that
+        # to Alt. Bare j/k cannot be used in the launcher — it has a live search
+        # field, so unmodified letters must stay typeable — and the session reuses
+        # the same handler, so both files get the same change. Alt is otherwise
+        # unused in both. Tab / Shift+Tab keep working either way.
+        substituteInPlace modules/launcher/Content.qml \
+          --replace-fail \
+            'if (event.modifiers & Qt.ControlModifier) {' \
+            'if (event.modifiers & Qt.AltModifier) {'
+
+        substituteInPlace modules/session/Content.qml \
+          --replace-fail \
+            'if (event.modifiers & Qt.ControlModifier) {' \
+            'if (event.modifiers & Qt.AltModifier) {'
+      '';
+    });
+
   programs.caelestia = {
     enable = true;
 
@@ -70,6 +130,13 @@
       # the bar once at login; see that file.
       bar.persistent = false;
       bar.showOnHover = false;
+
+      # The launcher and session panels have built-in hjkl navigation, off by
+      # default. With these on, neither needs wl-kbptr at all — type/arrows/Enter
+      # already drive them. (No such option exists for the sidebar, which is why
+      # the focus-grab patch below is still needed.)
+      launcher.vimKeybinds = true;
+      session.vimKeybinds = true;
     };
   };
 

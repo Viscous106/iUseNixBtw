@@ -71,7 +71,12 @@ hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(sd .. "/Dropterminal.sh " ..
 hl.bind(mod .. " + SHIFT + tab", hl.dsp.focus({ workspace = "m-1" }))
 -- (removed) SUPER SHIFT A animation switcher — animations are defined in lua/animations.lua
 hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("blueman-manager"))
-hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("caelestia shell drawers toggle dashboard"))
+-- Dashboard (media / performance / weather). Moved here from SUPER+SHIFT+E,
+-- which was the old Kool_Quick_Settings.sh rofi menu's key and is now free.
+-- Note the dashboard has no Escape handler and does not dismiss on click-away
+-- (see the focus-grab patch in home/modules/caelestia-quickshell.nix), so this
+-- same key is how you close it again.
+hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("caelestia shell drawers toggle dashboard"))
 hl.bind(mod .. " + SHIFT + G", hl.dsp.exec_cmd("caelestia shell gameMode toggle"))
 hl.bind(mod .. " + SHIFT + I", hl.dsp.layout("togglesplit"))
 -- (removed) SUPER SHIFT M monitor picker — monitor switching is now automatic (see lua/monitors.lua)
