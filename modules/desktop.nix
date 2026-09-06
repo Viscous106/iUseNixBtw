@@ -125,7 +125,9 @@
   # environment.systemPackages above.
   programs.thunar = {
     enable = true;
-    plugins = with pkgs.xfce; [
+    # These three moved out of pkgs.xfce to top-level in nixpkgs; referencing
+    # them through pkgs.xfce still works but emits a deprecation warning.
+    plugins = with pkgs; [
       thunar-archive-plugin      # right-click create/extract (xarchiver is the
                                  # backend, already installed in
                                  # home/modules/apps-desktop-shell.nix)
