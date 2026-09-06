@@ -30,3 +30,6 @@ flake.lock.backup
 home/OpenRGB/
 home/openrgb/
 home/scaler-content/
+
+# SDD scratch (ledger, briefs, review packages) — not part of the config
+.superpowers/

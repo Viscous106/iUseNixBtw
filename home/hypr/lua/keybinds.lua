@@ -47,12 +47,9 @@ hl.bind(mod .. " + U", hl.dsp.workspace.toggle_special())
 -- history browser; it reads cliphist (still fed by the wl-paste watchers in
 -- startup_apps.lua) and renders it with fuzzel.
 hl.bind(mod .. " + V", hl.dsp.exec_cmd("caelestia clipboard"))
--- Wallpaper picker: qs-wallpaper-picker, a standalone Quickshell selector that
--- opens straight onto a thumbnail grid — arrows to move, Enter to apply, Escape
--- to close, typing filters. It is launched on demand rather than being a daemon,
--- so it costs nothing while closed. Handles video as well as images, which
--- caelestia cannot (see pkgs/qs-wallpaper-picker.nix).
-hl.bind(mod .. " + W", hl.dsp.exec_cmd("qs-wallpaper-picker"))
+-- Wallpaper picker: our own Quickshell skewed-carousel selector.
+-- See docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
+hl.bind(mod .. " + W", hl.dsp.exec_cmd("wallpaper-picker"))
 -- move focus
 hl.bind(mod .. " + left",  hl.dsp.focus({ direction = "l" }))
 hl.bind(mod .. " + right", hl.dsp.focus({ direction = "r" }))

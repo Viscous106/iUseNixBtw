@@ -58,9 +58,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.quickshell.inputs.nixpkgs.follows = "nixpkgs";
     };
-  };
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix";
+    };
+};
 
-  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, ... }@inputs:
+outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:
   let
     system = "x86_64-linux";
 

@@ -37,7 +37,7 @@ GDK_BACKEND=$BACKEND yad \
 " Shift Q " "kills an active window" "(kill)" \
 " ALT mouse scroll up/down   " "Desktop Zoom" "Desktop Magnifier" \
 " Alt V" "Clipboard Manager" "(cliphist)" \
-" W" "Choose wallpaper" "(Wallpaper Menu)" \
+" W" "Choose wallpaper" "(Quickshell wallpaper picker)" \
 " Shift W" "Choose wallpaper effects" "(imagemagick + swww)" \
 "CTRL ALT W" "Random wallpaper" "(via swww)" \
 " CTRL ALT B" "Hide/UnHide bar" "(caelestia bar drawer)" \
