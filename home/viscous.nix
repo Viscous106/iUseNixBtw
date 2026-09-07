@@ -95,6 +95,7 @@
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-ide  # IDE (upstream renamed google-antigravity -> the 2.0 base app)
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli  # `agy` terminal CLI
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex  # OpenAI Codex CLI (native binary, not the node wrapper)
+    pkgs.codex-whoami  # which OpenAI org/project is Codex actually billing
     fd
     psmisc         # provides killall
     lsd           # better ls

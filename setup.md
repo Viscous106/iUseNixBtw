@@ -124,6 +124,15 @@ from):
 /persist/secrets/openai_api           # exports OPENAI_API_KEY (Codex CLI) — sourced by zsh
 ```
 
+The Codex CLI does **not** authenticate from `$OPENAI_API_KEY` at runtime — it
+reads `~/.codex/auth.json`, which is not persisted and not in git. After a fresh
+install, log in once (the env var is only consumed here):
+
+```
+printenv OPENAI_API_KEY | codex login --with-api-key
+codex-whoami          # confirm which org/project it will bill
+```
+
 Then:
 
 1. `passwd` — set a real login password (the one baked into

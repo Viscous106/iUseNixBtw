@@ -38,6 +38,10 @@
       # Our own Quickshell wallpaper selector; see pkgs/wallpaper-picker.nix and
       # docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
       wallpaper-picker = final.callPackage ./pkgs/wallpaper-picker.nix { };
+
+      # Reports which OpenAI org/project the Codex CLI is billing — Codex itself
+      # only ever shows the auth mode. See pkgs/codex-whoami.nix.
+      codex-whoami = final.callPackage ./pkgs/codex-whoami.nix { };
     })
   ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
