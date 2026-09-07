@@ -64,6 +64,7 @@
       # Arch sets git identity via a plain ~/.gitconfig instead) ─────────────
       [ -f /persist/secrets/git-identity ] && source /persist/secrets/git-identity
       [ -f /persist/secrets/claude_api ] && source /persist/secrets/claude_api
+      [ -f /persist/secrets/openai_api ] && source /persist/secrets/openai_api
 
       fastfetch
     '';

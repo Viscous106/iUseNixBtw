@@ -64,8 +64,10 @@
        $DRY_RUN_CMD mkdir -p /persist/secrets/ssh
        $DRY_RUN_CMD touch /persist/secrets/git-identity
        $DRY_RUN_CMD touch /persist/secrets/claude_api
+       $DRY_RUN_CMD touch /persist/secrets/openai_api
        $DRY_RUN_CMD echo "# Add your git config here" > /persist/secrets/git-identity
        $DRY_RUN_CMD echo "# export CLAUDE_API_KEY=your_key_here" > /persist/secrets/claude_api
+       $DRY_RUN_CMD echo "# export OPENAI_API_KEY=your_key_here" > /persist/secrets/openai_api
     fi
 
     # SSH keys and known_hosts
@@ -92,6 +94,7 @@
     pkgs.ghgrab
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-ide  # IDE (upstream renamed google-antigravity -> the 2.0 base app)
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli  # `agy` terminal CLI
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex  # OpenAI Codex CLI (native binary, not the node wrapper)
     fd
     psmisc         # provides killall
     lsd           # better ls
