@@ -1,0 +1,34 @@
+# ── Codex CLI configuration ─────────────────────────────────────────────────
+# Live-editable: symlinked (not copied) into ~/.codex/config.toml by
+# home/modules/extras.nix, so edits here take effect without a rebuild.
+#
+# NOTE: codex WRITES to this file itself — it appends [projects.*] trust_level
+# entries when you trust a directory. Because the symlink points back into the
+# repo, those writes land here and show up in `git diff`. That is intended
+# (same arrangement as claude/settings.json), but it means an unexpected diff
+# in this file is usually codex, not you.
+
+model = "gpt-6-astra"
+model_reasoning_effort = "xhigh"
+
+[projects."/home/viscous"]
+trust_level = "trusted"
+
+# ── Status line ─────────────────────────────────────────────────────────────
+# Codex's status line is a FIXED set of named segments — there is no
+# custom-command hook like Claude Code's `statusLine`, and the binary ships no
+# progress-bar glyphs, so the bars/reset-countdowns in the Claude statusline
+# cannot be reproduced here. `codex --help` has no segment list; the full set
+# lives in the TUI config docs. Unknown identifiers are rejected at startup.
+[tui]
+status_line = [
+  "model-with-reasoning",
+  "context-used",
+  "five-hour-limit",
+  "weekly-limit",
+  "current-dir",
+  "branch-changes",
+  "estimated-thread-cost",
+  "codex-version",
+]
+status_line_use_colors = true
