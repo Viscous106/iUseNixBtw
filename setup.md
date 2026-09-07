@@ -121,6 +121,7 @@ from):
 /persist/secrets/ssh/known_hosts
 /persist/secrets/git-identity         # exports GIT_AUTHOR_NAME etc — sourced by zsh
 /persist/secrets/claude_api           # exports CLAUDE_API_KEY — sourced by zsh
+/persist/secrets/openai_api           # exports OPENAI_API_KEY (Codex CLI) — sourced by zsh
 ```
 
 Then:
