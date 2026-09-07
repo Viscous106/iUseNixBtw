@@ -131,4 +131,16 @@
   # up helpers/statusline.sh instead, not this one.
   xdg.configFile."claude/statusline-command.sh".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/statusline-command.sh";
+
+  # ── Codex CLI ──────────────────────────────────────────────────────────────
+  # home.file, not xdg.configFile: codex reads $CODEX_HOME (default ~/.codex),
+  # which is not an XDG path. Same selective approach as claude above — only
+  # config.toml is vendored; auth.json, sessions/, history.jsonl and the
+  # *.sqlite stores are live runtime state and must stay real files.
+  #
+  # mkOutOfStoreSymlink (not a store copy) because codex rewrites config.toml
+  # itself to record [projects.*] trust_level — a read-only store path would
+  # break that.
+  home.file.".codex/config.toml".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/codex/config.toml";
 }
