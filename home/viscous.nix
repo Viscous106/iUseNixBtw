@@ -66,7 +66,7 @@
        $DRY_RUN_CMD touch /persist/secrets/claude_api
        $DRY_RUN_CMD touch /persist/secrets/openai_api
        $DRY_RUN_CMD echo "# Add your git config here" > /persist/secrets/git-identity
-       $DRY_RUN_CMD echo "# export CLAUDE_API_KEY=your_key_here" > /persist/secrets/claude_api
+       $DRY_RUN_CMD echo "# export CLAUDE_CODE_OAUTH_TOKEN=your_token_here" > /persist/secrets/claude_api
        $DRY_RUN_CMD echo "# export OPENAI_API_KEY=your_key_here" > /persist/secrets/openai_api
     fi
 
@@ -96,6 +96,7 @@
     inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli  # `agy` terminal CLI
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex  # OpenAI Codex CLI (native binary, not the node wrapper)
     pkgs.codex-whoami  # which OpenAI org/project is Codex actually billing
+    pkgs.claude-whoami # which Anthropic org/workspace is Claude Code using
     fd
     psmisc         # provides killall
     lsd           # better ls

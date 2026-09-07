@@ -42,6 +42,11 @@
       # Reports which OpenAI org/project the Codex CLI is billing — Codex itself
       # only ever shows the auth mode. See pkgs/codex-whoami.nix.
       codex-whoami = final.callPackage ./pkgs/codex-whoami.nix { };
+
+      # Same question for Claude Code — which Anthropic org/workspace is it
+      # talking to. Note the two CLIs resolve credentials in opposite
+      # directions; see the header of pkgs/claude-whoami.nix.
+      claude-whoami = final.callPackage ./pkgs/claude-whoami.nix { };
     })
   ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
