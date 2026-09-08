@@ -61,6 +61,17 @@
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
     };
+
+    # Slurm client for naam-machine4000pro, pinned five majors behind our main
+    # snapshot. Slurm's RPC layer refuses clients newer than slurmctld; the host
+    # runs Ubuntu 24.04's 23.11.4 while nixpkgs-unstable is on 26.05. nixos-24.05
+    # is the last branch carrying the 23.11 series (23.11.10.1).
+    #
+    # Deliberately NO nixpkgs.follows here: following our snapshot would rebuild
+    # 23.11 against a 26.11 stdenv, which is exactly what the pin exists to avoid.
+    # Only `slurm` is taken from it (see modules/slurm-client.nix), so the extra
+    # closure is one package's worth and substitutes from the binary cache.
+    nixpkgs-2405.url = "github:NixOS/nixpkgs/nixos-24.05";
 };
 
 outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:
@@ -82,6 +93,7 @@ outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skw
       ./modules/peripherals.nix
       ./modules/audio-glkrt5682max.nix
       ./modules/touchscreen.nix
+      ./modules/slurm-client.nix
 
       hyprland.nixosModules.default
       skwd-wall.nixosModules.default
