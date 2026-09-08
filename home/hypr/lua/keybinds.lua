@@ -34,8 +34,13 @@ hl.bind(mod .. " + M", hl.dsp.window.fullscreen({ mode = "maximized" }))
 -- Two locks, deliberately: SUPER+L is hyprlock (hyprlock.conf), SUPER+N is
 -- caelestia's own lock screen. The old SUPER+CTRL+N (hyprlock) and
 -- SUPER+SHIFT+L (swaylock) binds were removed to stop at two.
+-- SUPER+N goes through caelestia-lock.sh rather than calling
+-- `caelestia shell lock lock` directly: that IPC call only assigns
+-- WlSessionLock.locked = true, which is a silent no-op whenever the shell has
+-- been left with a stale locked=true and no lock actually held. The script
+-- clears that state first. See the header comment in caelestia-lock.sh.
 hl.bind(mod .. " + L", hl.dsp.exec_cmd(sd .. "/hyprlock.sh"))
-hl.bind(mod .. " + N", hl.dsp.exec_cmd("caelestia shell lock lock"))
+hl.bind(mod .. " + N", hl.dsp.exec_cmd(sd .. "/caelestia-lock.sh"))
 hl.bind(mod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + S", hl.dsp.exec_cmd(sd .. "/RofiSearch.sh"))
