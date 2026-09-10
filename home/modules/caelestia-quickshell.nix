@@ -68,6 +68,111 @@
           --replace-fail \
             'if (event.modifiers & Qt.ControlModifier) {' \
             'if (event.modifiers & Qt.AltModifier) {'
+
+        # ── Patch: battery as its own bar entry, above the clock ─────────────
+        # Upstream only draws the battery inside the statusIcons pill, which
+        # sits BELOW the clock and shares one rounded background with wifi and
+        # bluetooth. There is no config knob to lift it out: the C++ schema
+        # (plugin/src/Caelestia/Config/barconfig.hpp) hardcodes the default
+        # bar.entries list, and modules/bar/Bar.qml's DelegateChooser only has
+        # choices for spacer/logo/workspaces/activeWindow/tray/clock/
+        # statusIcons/power.
+        #
+        # ListEntry.id is a plain QString with no enum validation, though, so
+        # bar.entries in shell.json happily takes an id upstream never defined.
+        # All that is missing is a DelegateChoice to match it — added below,
+        # along with the component it draws. An entry whose id matches no
+        # choice renders nothing, so this patch and the bar.entries setting
+        # further down have to ship together.
+        #
+        # Every --replace-fail pattern here is a SINGLE line on purpose. A
+        # multi-line pattern would need lines at column 0 to match the file,
+        # and that drops the common indent Nix strips from this indented
+        # string to zero — which would leave the heredoc terminator below
+        # indented, and an indented terminator does not end a quoted heredoc.
+        cat > modules/bar/components/Battery.qml <<'CAELESTIA_BATTERY_QML'
+        import QtQuick
+        import QtQuick.Layouts
+        import Quickshell.Services.UPower
+        import Caelestia.Config
+        import qs.components
+        import qs.services
+        import qs.utils
+
+        // Charge icon over the percentage, sized and coloured to sit directly
+        // above the clock: same innerWidth, no background pill (the clock's
+        // own background defaults off, and two stacked pills read as heavy).
+        Item {
+            id: root
+
+            // False on a desktop, and false whenever upowerd is not on the
+            // bus. Bar.qml hides the whole entry on it.
+            readonly property bool present: UPower.displayDevice.isLaptopBattery
+
+            readonly property bool charging: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state)
+
+            // Matches status/BatteryStatus.qml: error colour under 20%, but
+            // only while actually running off the battery.
+            readonly property color colour: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? Colours.palette.m3secondary : Colours.palette.m3error
+
+            implicitWidth: Tokens.sizes.bar.innerWidth
+            implicitHeight: layout.implicitHeight
+
+            ColumnLayout {
+                id: layout
+
+                anchors.centerIn: parent
+                spacing: Tokens.spacing.extraSmall / 2
+
+                MaterialIcon {
+                    Layout.alignment: Qt.AlignHCenter
+
+                    animate: true
+                    text: Icons.getBatteryIcon(UPower.displayDevice.percentage, root.charging)
+                    color: root.colour
+                    fill: 1
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+
+                    animate: true
+                    text: Math.round(UPower.displayDevice.percentage * 100)
+                    color: root.colour
+                    font: Tokens.font.body.builders.small.scale(0.9).build()
+                }
+            }
+        }
+        CAELESTIA_BATTERY_QML
+
+        substituteInPlace modules/bar/Bar.qml \
+          --replace-fail \
+            'roleValue: "clock"' \
+            'roleValue: "battery"
+                delegate: EntryWrapper {
+                    // ColumnLayout skips invisible items along with their
+                    // spacing, so the battery-less case costs no gap and the
+                    // same bar.entries list works on the desktop too.
+                    visible: bat.present
+
+                    Battery {
+                        id: bat
+
+                        objectName: "taskbarBattery"
+                    }
+                }
+            }
+            DelegateChoice {
+                roleValue: "clock"' \
+          --replace-fail \
+            '} else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {' \
+            '} else if (id === "battery" && Config.bar.popouts.statusIcons) {
+            // Reuses the "battery" popout in popouts/Content.qml — the same
+            // one the statusIcons entry opened on hover before it moved here.
+            popouts.currentName = "battery";
+            popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
+            popouts.hasCurrent = true;
+        } else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {'
       '';
     });
 
@@ -130,6 +235,39 @@
       # the bar once at login; see that file.
       bar.persistent = false;
       bar.showOnHover = false;
+
+      # Battery above the clock. Upstream's default entry order is
+      #   logo, workspaces, spacer, activeWindow, spacer, tray, clock,
+      #   statusIcons, power
+      # and the whole list has to be restated because bar.entries replaces the
+      # default rather than merging into it — the only change against upstream
+      # is the "battery" line, which the Bar.qml patch above teaches the bar to
+      # draw.
+      bar.entries = [
+        { id = "logo";         enabled = true; }
+        { id = "workspaces";   enabled = true; }
+        { id = "spacer";       enabled = true; }
+        { id = "activeWindow"; enabled = true; }
+        { id = "spacer";       enabled = true; }
+        { id = "tray";         enabled = true; }
+        { id = "battery";      enabled = true; }
+        { id = "clock";        enabled = true; }
+        { id = "statusIcons";  enabled = true; }
+        { id = "power";        enabled = true; }
+      ];
+
+      # …and off in the statusIcons pill, so it is not drawn twice. Same deal:
+      # the full list is restated, and only the battery line differs from
+      # upstream's defaults.
+      bar.statusIcons = [
+        { id = "lockStatus"; enabled = true; }
+        { id = "audio";      enabled = false; }
+        { id = "microphone"; enabled = false; }
+        { id = "kbLayout";   enabled = false; }
+        { id = "network";    enabled = true; }
+        { id = "bluetooth";  enabled = true; }
+        { id = "battery";    enabled = false; }
+      ];
 
       # The launcher and session panels have built-in hjkl navigation, off by
       # default. With these on, neither needs wl-kbptr at all — type/arrows/Enter

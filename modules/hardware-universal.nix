@@ -144,6 +144,20 @@
   powerManagement.enable          = true;
   powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
 
+  # UPower — the DBus battery/AC service. NixOS leaves it off by default, and
+  # nothing else here pulled it in, so org.freedesktop.UPower was simply absent
+  # from the bus. Anything asking the bus for battery state got nothing: the
+  # kernel still exports /sys/class/power_supply/BAT1, but that is not where
+  # desktop clients look.
+  #
+  # Caelestia's bar reads Quickshell.Services.UPower. With no daemon,
+  # UPower.displayDevice.isLaptopBattery is false, and its BatteryStatus
+  # component treats that as "desktop machine" and falls back to drawing the
+  # power-profile icon (a balance scale) instead of a battery. Turning this on
+  # is what makes the battery entry show a real charge level.
+  # Independent of TLP — TLP sets policy, UPower only reports state.
+  services.upower.enable = true;
+
   # TLP — good defaults for laptops; harmless on desktops
   services.tlp = {
     enable = true;
