@@ -23,7 +23,9 @@ hl.on("hyprland.start", function()
   -- time, and exporting an unset variable just errors.)
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
-  hl.exec_cmd(scriptsDir .. "/KeybindsLayoutInit.sh")
+  -- (removed) KeybindsLayoutInit.sh rebound SUPER+J/K via `hyprctl keyword bind`,
+  -- which the Lua config's non-legacy parser rejects. It had been a no-op for as
+  -- long as this config has been Lua: `hyprctl binds` shows no J or K bind at all.
 
   -- bar + dropdown terminal
   -- Caelestia (Quickshell) replaces waybar. It is one process for the whole

@@ -12,15 +12,10 @@
 # like it worked while changing nothing at all. `eval` runs Lua against the
 # live config, where hl.config() takes the same table lua/decorations.lua uses.
 #
-# Every other script here that calls `hyprctl keyword` is broken the same way
-# and is NOT fixed by this change. Live (non-comment) calls remain in:
-#   ChangeLayout.sh (4)          <- bound: SUPER+ALT+L
-#   cursor_selector.sh (2)       <- bound: SUPER+SHIFT+C
-#   KeybindsLayoutInit.sh (4)
-#   TouchPad.sh (2)
-#   GameMode.sh (1)
-#   monitor_connect.sh (1)
-#   mirror_connectToPhone.sh (1)
+# ChangeLayout.sh and TouchPad.sh had the same bug and were converted alongside
+# this one. The rest of the affected scripts (cursor_selector, KeybindsLayoutInit,
+# GameMode, monitor_connect, mirror_connectToPhone) were deleted as unwanted
+# rather than fixed, along with the binds and menu entries that called them.
 
 notif="$HOME/.config/swaync/images"
 
