@@ -142,7 +142,12 @@
   services.thermald.enable = lib.mkDefault false;
 
   powerManagement.enable          = true;
-  powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
+  # amd-pstate-epp offers only `performance` and `powersave` --- schedutil is
+  # not in scaling_available_governors on this CPU, so the value that used to
+  # be here failed silently. powersave is the one power-profiles-daemon drives
+  # through EPP; it raises the governor to performance itself when the
+  # performance profile is selected.
+  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 
   # UPower — the DBus battery/AC service. NixOS leaves it off by default, and
   # nothing else here pulled it in, so org.freedesktop.UPower was simply absent
@@ -158,19 +163,28 @@
   # Independent of TLP — TLP sets policy, UPower only reports state.
   services.upower.enable = true;
 
-  # TLP — good defaults for laptops; harmless on desktops
-  services.tlp = {
-    enable = true;
-    settings = {
-      CPU_SCALING_GOVERNOR_ON_AC    = "performance";
-      CPU_SCALING_GOVERNOR_ON_BAT   = "schedutil";
-      CPU_ENERGY_PERF_POLICY_ON_AC  = "performance";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-      # Prevent USB autosuspend from killing the boot drive
-      USB_AUTOSUSPEND               = 0;
-      RUNTIME_PM_ON_AC              = "auto";
-    };
-  };
+  # ── Power profiles — power-profiles-daemon, NOT TLP ────────────────────
+  # The two cannot coexist: nixpkgs' power-profiles-daemon module asserts
+  # `!config.services.tlp.enable`. TLP was here first, and that is exactly why
+  # the quiet/balanced/performance switcher in caelestia's battery popout
+  # rendered fine but did nothing — it drives PowerProfiles over DBus, and with
+  # no ppd on the bus every click was a silent no-op.
+  #
+  # This hardware is the good case for ppd: amd-pstate-epp (Ryzen 7 7435HS)
+  # plus a working ACPI platform_profile advertising `quiet balanced
+  # performance` — precisely the three-way control ppd exposes.
+  #
+  # Where each setting from the old TLP block went:
+  #   CPU_SCALING_GOVERNOR_ON_{AC,BAT}    ppd, and switchable at runtime
+  #   CPU_ENERGY_PERF_POLICY_ON_{AC,BAT}  ppd, through EPP
+  #   USB_AUTOSUSPEND = 0                 already covered by the udev rule
+  #                                       further down, which is what actually
+  #                                       guards the USB boot drive
+  #   RUNTIME_PM_ON_AC = "auto"           dropped; only ever applied on AC
+  #
+  # The real cost is TLP's OTHER defaults, which were never set explicitly here
+  # (disk APM, wifi power save). On-battery draw may shift slightly.
+  services.power-profiles-daemon.enable = true;
 
   # ── zram swap (no swapfile on compressed BTRFS) ───────────────────────────
   zramSwap.enable        = true;
