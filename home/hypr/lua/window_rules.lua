@@ -129,10 +129,6 @@ hl.window_rule({
   tag = "+gamestore",
 })
 hl.window_rule({
-  match = { class = "^(com.heroicgameslauncher.hgl)$" },
-  tag = "+gamestore",
-})
-hl.window_rule({
   match = { class = "^([Tt]hunar|org.gnome.Nautilus|[Pp]cmanfm-qt)$" },
   tag = "+file-manager",
 })
@@ -310,10 +306,6 @@ hl.window_rule({
 })
 hl.window_rule({
   match = { class = "(codium|codium-url-handler|VSCodium)", title = "negative:(.*codium.*|.*VSCodium.*)" },
-  float = true,
-})
-hl.window_rule({
-  match = { class = "^(com.heroicgameslauncher.hgl)$", title = "negative:(Heroic Games Launcher)" },
   float = true,
 })
 hl.window_rule({
