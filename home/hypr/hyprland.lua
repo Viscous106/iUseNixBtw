@@ -21,5 +21,3 @@ require("lua.monitors")
 hl.on("hyprland.start", function()
   hl.exec_cmd(HOME .. "/.config/hypr/initial-boot.sh")
 end)
--- bind = SUPER SHIFT, C, exec, ~/.config/hypr/scripts/cursor_selector.sh
-hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd(HOME .. "/.config/hypr/scripts/cursor_selector.sh"))

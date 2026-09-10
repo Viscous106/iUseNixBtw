@@ -120,12 +120,14 @@ hl.bind(mod .. " + ALT + I", hl.dsp.exec_cmd("caelestia shell idleInhibitor togg
 hl.bind(mod .. " + ALT + H", hl.dsp.exec_cmd(sd .. "/drag_hold.sh"))
 hl.bind(mod .. " + ALT + L", hl.dsp.exec_cmd(sd .. "/ChangeLayout.sh"))
 hl.bind(mod .. " + ALT + M", hl.dsp.exec_cmd("nwg-displays"))
-hl.bind(mod .. " + ALT + N", hl.dsp.exec_cmd(sd .. "/screensaver.sh"))
+-- DND moved here from SUPER+ALT+T. This key used to run scripts/screensaver.sh,
+-- which is now deleted along with ToggleScreensaver.sh and the screensaver
+-- listener in configs/hypridle.conf.
+hl.bind(mod .. " + ALT + N", hl.dsp.exec_cmd("caelestia shell notifs toggleDnd"))
 hl.bind(mod .. " + ALT + O", hl.dsp.exec_cmd(sd .. "/ChangeBlur.sh"))
 hl.bind(mod .. " + ALT + R", hl.dsp.exec_cmd(sd .. "/Refresh.sh"))
 hl.bind(mod .. " + ALT + S", hl.dsp.exec_cmd("pavucontrol"))
--- ToggleAGS.sh never existed in this repo, so this bind has always been dead.
-hl.bind(mod .. " + ALT + T", hl.dsp.exec_cmd("caelestia shell notifs toggleDnd"))
+-- (free) SUPER+ALT+T — was DND, now on SUPER+ALT+N above.
 -- WallpaperRandom.sh drove awww, which is no longer started at login now that
 -- caelestia owns static wallpapers — so this bind had gone dead. The CLI does
 -- random natively and regenerates the colour scheme with it.

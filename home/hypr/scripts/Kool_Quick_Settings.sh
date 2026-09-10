@@ -41,7 +41,6 @@ GTK Settings (nwg-look)
 QT Apps Settings (qt6ct)
 QT Apps Settings (qt5ct)
 Choose Rofi Themes
-Toggle Game Mode
 Switch Dark-Light Theme
 EOF
 }
@@ -94,7 +93,6 @@ main() {
             fi
             qt5ct ;;
         "Choose Rofi Themes") $scriptsDir/RofiThemeSelector.sh ;;
-        "Toggle Game Mode") $scriptsDir/GameMode.sh ;;
         "Switch Dark-Light Theme") $scriptsDir/DarkLight.sh ;;
         *) return ;;  # Do nothing for invalid choices
     esac
