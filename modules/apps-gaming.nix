@@ -52,7 +52,8 @@
     wineWow64Packages.stagingFull
     winetricks
     lutris
-    heroic                      # matches heroic-games-launcher-bin
+    # heroic (heroic-games-launcher-bin): REMOVED — not wanted. Its Hyprland
+    # window rules in home/hypr/lua/window_rules.lua went with it.
     # an-anime-game-launcher-bin: AUR-only prebuilt binary (genshin-impact
     # launcher fork). No nixpkgs equivalent exists under any name I could
     # find (checked pkgs/by-name, pkgs/games, pkgs/top-level/all-packages.nix)
