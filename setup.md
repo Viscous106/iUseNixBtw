@@ -147,15 +147,24 @@ Then:
 
 Two pieces are not restored by the install.
 
-**Skills repo.** `home/modules/extras.nix` symlinks
-`~/.config/claude/{skills,agents,commands}` to `/persist/claude-skills`, a
-separate public repo. `/persist` is root-owned, so activation only warns
-about a missing clone — create it yourself:
+**Skills repo.** Skills, agents and slash commands live in
+[claude-skills](https://github.com/Viscous106/claude-skills), a separate repo
+that is *not* wired through home-manager — Claude Code reads
+`~/.config/claude/{skills,agents,commands}` natively, so a clone and three
+symlinks do the whole job. Needs the SSH key restored first:
 
 ```
-sudo mkdir -p /persist/claude-skills && sudo chown $USER:users /persist/claude-skills
-git clone git@github.com:Viscous106/claude-skills.git /persist/claude-skills
+git clone git@github.com:Viscous106/claude-skills.git ~/Viscous/claude-skills
+
+ln -sfn ~/Viscous/claude-skills/plugins/viscous-skills/skills   ~/.config/claude/skills
+ln -sfn ~/Viscous/claude-skills/plugins/viscous-skills/agents   ~/.config/claude/agents
+ln -sfn ~/Viscous/claude-skills/plugins/viscous-skills/commands ~/.config/claude/commands
 ```
+
+Edits to a skill take effect in the next session — no rebuild, and no
+`/plugin install`. Do **not** install `viscous-skills` from the marketplace on
+this machine; that is for other people, and installing it here would shadow
+these with a stale version-pinned copy.
 
 **Plugins.** `home/claude/settings.json` tracks `enabledPlugins`, but the
 installed plugin cache under `~/.config/claude/plugins/` is runtime state and
@@ -189,6 +198,15 @@ wipe and start over.
 - **Secrets** — see above. Automating secret restoration would mean the
   secrets exist somewhere automatable, which defeats the point of keeping
   them out of git.
+- **The Claude Code skills clone** — `claude-skills` is a separate repo with
+  its own release cycle, and Claude Code reads the skills directory natively.
+  Wiring it through home-manager would add an activation script and a
+  bootstrap step to reproduce what one `git clone` already does, so it is
+  step 4 of the post-install instructions above instead.
+- **Claude Code plugins** — `enabledPlugins` is tracked in
+  `home/claude/settings.json`, but installing them hits the network, and a
+  failed fetch inside `home.activation` would wedge a `nixos-rebuild switch`.
+  Reinstall them by hand with `/plugin install`.
 - **Picking a different disk layout** — this repo assumes the whole disk is
   dedicated to this install. If you want dual-boot or a different partition
   scheme, you're on your own for that part; everything after "mount the

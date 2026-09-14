@@ -114,14 +114,20 @@
   # on Arch itself ~/.config/claude (not ~/.claude, which turned out to hold
   # only a legacy/secondary settings.json + hooks there too) is where the
   # real settings.json — model, statusLine, plugins, voice — actually lives.
-  # Only symlink the static config pieces individually (CLAUDE.md,
-  # settings.json, hooks, statusline helpers) — the rest of ~/.config/claude
-  # is live session/runtime state (history, projects, caches) that must stay
-  # real files, not vendored into git.
+  # Only symlink the static config pieces individually (CLAUDE.md, hooks,
+  # statusline helpers, and settings.json via activation below) — the rest of
+  # ~/.config/claude is live session/runtime state (history, projects,
+  # caches) that must stay real files, not vendored into git.
   xdg.configFile."claude/CLAUDE.md".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/CLAUDE.md";
-  xdg.configFile."claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/claude/settings.json";
+  # settings.json is deliberately NOT an xdg.configFile — see
+  # home.activation.linkClaudeSettings in home/viscous.nix. Claude Code
+  # rewrites this file (/model, /config, plugin enable/disable) with an
+  # atomic tmp-file-then-rename, and it resolves the symlink only one hop
+  # before choosing where to put the tmp file. xdg.configFile always routes
+  # through /nix/store, so that one hop lands in the store and the write
+  # fails with EROFS. A direct symlink puts the first hop in
+  # /persist/nixos-config/home/claude, which is writable.
   xdg.configFile."claude/hooks".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/hooks";
   xdg.configFile."claude/helpers".source = config.lib.file.mkOutOfStoreSymlink
@@ -132,18 +138,12 @@
   xdg.configFile."claude/statusline-command.sh".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/statusline-command.sh";
 
-  # Skills / agents / slash commands live in a separate public repo
-  # (github.com/Viscous106/claude-skills) so they can be shared as a plugin
-  # marketplace, while the machine-specific pieces above stay here. Cloned to
-  # /persist/claude-skills; see home.activation.checkClaudeSkills in
-  # home/viscous.nix for the bootstrap. Symlinked out-of-store so editing a
-  # skill takes effect immediately, with no rebuild and no flake.lock bump.
-  xdg.configFile."claude/skills".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/claude-skills/plugins/viscous-skills/skills";
-  xdg.configFile."claude/agents".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/claude-skills/plugins/viscous-skills/agents";
-  xdg.configFile."claude/commands".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/claude-skills/plugins/viscous-skills/commands";
+  # skills/, agents/ and commands/ are deliberately NOT managed here. They
+  # live in github.com/Viscous106/claude-skills, a separate repo cloned to
+  # ~/Viscous/claude-skills and symlinked into ~/.config/claude by hand — see
+  # setup.md. Claude Code reads those directories natively, so routing them
+  # through home-manager bought nothing a plain `git clone` doesn't, while
+  # adding an activation warning and a root-owned-/persist bootstrap.
 
   # ── Codex CLI ──────────────────────────────────────────────────────────────
   # home.file, not xdg.configFile: codex reads $CODEX_HOME (default ~/.codex),
