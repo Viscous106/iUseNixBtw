@@ -45,7 +45,7 @@
     padding: 10px;
     margin: 10px 15px 0 0;
     border-radius: 15px;
-    background-color: #1c1b1f;
+    background-color: #1b1b1f;
     animation: fading 400ms ease forwards;
     opacity: 0;
     animation-delay: 250ms;
@@ -57,12 +57,12 @@
 }
 
 .thunar .frame.standard-view .view *:selected {
-    color: #c2c1ff;
+    color: #bfc1ff;
 }
 
 .thunar .rubberband {
-    background-color: alpha(#c2c1ff, 0.15);
-    border: 1px solid alpha(#c2c1ff, 0.15);
+    background-color: alpha(#bfc1ff, 0.15);
+    border: 1px solid alpha(#bfc1ff, 0.15);
 }
 
 
@@ -82,12 +82,12 @@
 }
 
 .thunar header.top tabs .reorderable-page:hover {
-    background-color: alpha(#c2c1ff, 0.08);
+    background-color: alpha(#bfc1ff, 0.08);
 
 }
 .thunar header.top tabs .reorderable-page:checked {
-    color: #c2c1ff;
-    background-color: alpha(#c2c1ff, 0.15);
+    color: #bfc1ff;
+    background-color: alpha(#bfc1ff, 0.15);
 
 }
 
@@ -115,8 +115,8 @@
 }
 
 .thunar .sidebar .view:selected {
-    background: alpha(#c2c1ff, 0.15);
-    color: #c2c1ff;
+    background: alpha(#bfc1ff, 0.15);
+    color: #bfc1ff;
 }
 
 /* =============================================================================
@@ -132,18 +132,18 @@
 .thunar .location-button.toggle:checked,
 .thunar .path-bar-button.toggle:checked {
     padding: 8px 25px;
-    background: alpha(#c2c1ff, 0.15);
-    color: #c2c1ff;
+    background: alpha(#bfc1ff, 0.15);
+    color: #bfc1ff;
     box-shadow: none;
 }
 
 .thunar .location-button.path-bar-button:not(:checked) {
-    background-color: #1c1b1f;
+    background-color: #1b1b1f;
 }
 
 .thunar .location-button.path-bar-button:not(:checked):hover {
-    background: alpha(#c2c1ff, 0.08);
-    color: alpha(#c2c1ff, 0.8);
+    background: alpha(#bfc1ff, 0.08);
+    color: alpha(#bfc1ff, 0.8);
 }
 
 .thunar .location-button.toggle+.location-button.toggle:checked {
@@ -160,7 +160,7 @@
    ============================================================================= */
 
 .thunar button.toggle:checked {
-    color: #c2c1ff;
+    color: #bfc1ff;
 }
 
 .thunar .image-button {
@@ -174,7 +174,7 @@
    ============================================================================= */
 
 .thunar statusbar {
-    background-color: #1c1b1f;
+    background-color: #1b1b1f;
     border-radius: 15px;
     padding: 10px 10px;
     margin: 15px 5px 15px -10px;
