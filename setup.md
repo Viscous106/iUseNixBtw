@@ -143,6 +143,37 @@ Then:
    `ssh-agent`, `AddKeysToAgent yes` — see the git history for why this isn't
    gnome-keyring).
 
+### Claude Code
+
+Two pieces are not restored by the install.
+
+**Skills repo.** `home/modules/extras.nix` symlinks
+`~/.config/claude/{skills,agents,commands}` to `/persist/claude-skills`, a
+separate public repo. `/persist` is root-owned, so activation only warns
+about a missing clone — create it yourself:
+
+```
+sudo mkdir -p /persist/claude-skills && sudo chown $USER:users /persist/claude-skills
+git clone git@github.com:Viscous106/claude-skills.git /persist/claude-skills
+```
+
+**Plugins.** `home/claude/settings.json` tracks `enabledPlugins`, but the
+installed plugin cache under `~/.config/claude/plugins/` is runtime state and
+is not in git. Until you reinstall them, Claude Code starts with plugins
+enabled but absent. Inside Claude Code:
+
+```
+/plugin marketplace add anthropics/claude-plugins-official
+/plugin install superpowers@claude-plugins-official
+/plugin install frontend-design@claude-plugins-official
+/plugin install rust-analyzer-lsp@claude-plugins-official
+/plugin install typescript-lsp@claude-plugins-official
+```
+
+This is deliberately manual rather than a `home.activation` hook — plugin
+installs hit the network, and a failed fetch should not be able to wedge a
+`nixos-rebuild switch`.
+
 ## If something goes wrong mid-install
 
 `setup.sh` doesn't try to be resumable — if `nixos-install` fails partway

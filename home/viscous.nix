@@ -86,6 +86,21 @@
     fi
   '';
 
+  # ── Claude Code skills repo ───────────────────────────────────────────────
+  # home/modules/extras.nix symlinks ~/.config/claude/{skills,agents,commands}
+  # to /persist/claude-skills. That clone cannot be created here: /persist is
+  # root-owned and activation runs as viscous, so this only warns with the
+  # exact bootstrap commands rather than failing the switch. The symlinks are
+  # harmlessly dangling until the clone exists.
+  home.activation.checkClaudeSkills = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -d /persist/claude-skills/plugins/viscous-skills/skills ]; then
+      echo "Warning: /persist/claude-skills is missing — Claude Code skills/agents/commands will be dangling symlinks."
+      echo "  Bootstrap with:"
+      echo "    sudo mkdir -p /persist/claude-skills && sudo chown $USER:users /persist/claude-skills"
+      echo "    git clone git@github.com:Viscous106/claude-skills.git /persist/claude-skills"
+    fi
+  '';
+
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
