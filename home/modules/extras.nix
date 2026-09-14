@@ -132,11 +132,6 @@
     "/persist/nixos-config/home/claude/hooks";
   xdg.configFile."claude/helpers".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/helpers";
-  # statusline-command.sh: the older starship/p10k-converted statusline —
-  # kept vendored for parity even though Arch's settings.json actually wires
-  # up helpers/statusline.sh instead, not this one.
-  xdg.configFile."claude/statusline-command.sh".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/claude/statusline-command.sh";
 
   # skills/, agents/ and commands/ are deliberately NOT managed here. They
   # live in github.com/Viscous106/claude-skills, a separate repo cloned to

@@ -33,3 +33,14 @@ home/scaler-content/
 
 # SDD scratch (ledger, briefs, review packages) — not part of the config
 .superpowers/
+
+# Runtime-generated wallpaper copies — written by home/hypr/scripts/
+# WallustSwww.sh and WallpaperEffects.sh into the vendored config dirs, so
+# every wallpaper change would otherwise dirty this repo. ~5.9MB each.
+home/rofi/.current_wallpaper
+home/hypr/configs/wallpaper_effects/.wallpaper_modified
+
+# tmux plugins are installed by tpm at runtime (home/tmux/tmux.conf runs
+# plugins/tpm/tpm). They were previously committed as submodule gitlinks with
+# no .gitmodules, so a fresh clone got six empty directories.
+home/tmux/plugins/

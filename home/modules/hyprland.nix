@@ -80,14 +80,9 @@
       "/persist/nixos-config/home/hypr/monitors.conf";
     "hypr/workspaces.conf".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/workspaces.conf";
-    "hypr/hypr-setup.sh".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/hypr-setup.sh";
-    "hypr/sync.sh".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/sync.sh";
-    "hypr/pkglist.txt".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/pkglist.txt";
-    "hypr/aurlist.txt".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/aurlist.txt";
+    # hypr-setup.sh, sync.sh, pkglist.txt and aurlist.txt were removed: all
+    # four were pacman/AUR-based Arch migration leftovers with no meaning on
+    # NixOS (pkglist.txt was a 3223-line `pacman -Qqen` dump).
 
     # configs/ — mostly dead weight left over from the pre-Lua config (kept
     # for parity with what's still on Arch), but user-defaults.sh and
