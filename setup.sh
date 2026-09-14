@@ -212,3 +212,7 @@ echo "  1. Log in as viscous (password is already set from configuration.nix's h
 echo "  2. Restore /persist/secrets/{ssh/,git-identity,claude_api} from your own"
 echo "     backup — these were never in git and won't exist yet. See setup.md."
 echo "  3. Run 'passwd' if you want to change the login password."
+echo "  4. Clone the Claude Code skills repo (needs the SSH key from step 2):"
+echo "       git clone git@github.com:Viscous106/claude-skills.git ~/Viscous/claude-skills"
+echo "     then symlink skills/, agents/ and commands/ into ~/.config/claude,"
+echo "     and reinstall the Claude Code plugins — both are spelled out in setup.md."

@@ -86,19 +86,18 @@
     fi
   '';
 
-  # ── Claude Code skills repo ───────────────────────────────────────────────
-  # home/modules/extras.nix symlinks ~/.config/claude/{skills,agents,commands}
-  # to /persist/claude-skills. That clone cannot be created here: /persist is
-  # root-owned and activation runs as viscous, so this only warns with the
-  # exact bootstrap commands rather than failing the switch. The symlinks are
-  # harmlessly dangling until the clone exists.
-  home.activation.checkClaudeSkills = config.lib.dag.entryAfter [ "writeBoundary" ] ''
-    if [ ! -d /persist/claude-skills/plugins/viscous-skills/skills ]; then
-      echo "Warning: /persist/claude-skills is missing — Claude Code skills/agents/commands will be dangling symlinks."
-      echo "  Bootstrap with:"
-      echo "    sudo mkdir -p /persist/claude-skills && sudo chown $USER:users /persist/claude-skills"
-      echo "    git clone git@github.com:Viscous106/claude-skills.git /persist/claude-skills"
-    fi
+  # ── Claude Code settings.json ─────────────────────────────────────────────
+  # Linked here rather than with xdg.configFile because Claude Code rewrites
+  # this file itself (/model, /config, enabling a plugin) using an atomic
+  # write: it creates settings.json.tmp.<pid> beside the file and renames it
+  # over the original. It resolves the symlink one hop to pick that
+  # directory, and xdg.configFile always interposes a /nix/store path, so the
+  # tmp write fails with EROFS on a read-only filesystem. A direct symlink
+  # makes the first hop /persist/nixos-config/home/claude, which is writable,
+  # so the rewrite lands in the git repo where it belongs.
+  home.activation.linkClaudeSettings = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD mkdir -p $HOME/.config/claude
+    $DRY_RUN_CMD ln -sfn /persist/nixos-config/home/claude/settings.json $HOME/.config/claude/settings.json
   '';
 
   # ── XDG dirs ──────────────────────────────────────────────────────────────
