@@ -132,6 +132,19 @@
   xdg.configFile."claude/statusline-command.sh".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/statusline-command.sh";
 
+  # Skills / agents / slash commands live in a separate public repo
+  # (github.com/Viscous106/claude-skills) so they can be shared as a plugin
+  # marketplace, while the machine-specific pieces above stay here. Cloned to
+  # /persist/claude-skills; see home.activation.checkClaudeSkills in
+  # home/viscous.nix for the bootstrap. Symlinked out-of-store so editing a
+  # skill takes effect immediately, with no rebuild and no flake.lock bump.
+  xdg.configFile."claude/skills".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/claude-skills/plugins/viscous-skills/skills";
+  xdg.configFile."claude/agents".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/claude-skills/plugins/viscous-skills/agents";
+  xdg.configFile."claude/commands".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/claude-skills/plugins/viscous-skills/commands";
+
   # ── Codex CLI ──────────────────────────────────────────────────────────────
   # home.file, not xdg.configFile: codex reads $CODEX_HOME (default ~/.codex),
   # which is not an XDG path. Same selective approach as claude above — only
