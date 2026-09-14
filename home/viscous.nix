@@ -97,6 +97,7 @@
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex  # OpenAI Codex CLI (native binary, not the node wrapper)
     pkgs.codex-whoami  # which OpenAI org/project is Codex actually billing
     pkgs.claude-whoami # which Anthropic org/workspace is Claude Code using
+    obsidian
     fd
     psmisc         # provides killall
     lsd           # better ls
