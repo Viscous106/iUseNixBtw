@@ -114,6 +114,7 @@
     obsidian
     fd
     psmisc         # provides killall
+    ripgrep
     lsd           # better ls
     pyenv         # python version manager
     pulseaudio    # provides paplay
