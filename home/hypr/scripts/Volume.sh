@@ -8,7 +8,7 @@ sDIR="$HOME/.config/hypr/scripts"
 # Get Volume
 get_volume() {
     volume=$(pamixer --get-volume)
-    if [[ "$volume" -eq "0" ]]; then
+    if [[ "$(pamixer --get-mute)" == "true" || "$volume" -eq "0" ]]; then
         echo "Muted"
     else
         echo "$volume %"
@@ -73,16 +73,22 @@ toggle_mute() {
 
 # Toggle Mic
 toggle_mic() {
-	if [ "$(pamixer --default-source --get-mute)" == "false" ]; then
+	if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
+		pamixer --default-source -u
+		# The default source changes when a headset connects or drops, so a mute
+		# applied to one device could never be lifted from another. Clear mute on
+		# every real (non-monitor) source so the key always actually turns the
+		# microphone back on.
+		for _src in $(pactl list short sources | awk '$2 !~ /\.monitor$/ { print $2 }'); do
+			pactl set-source-mute "$_src" 0 2>/dev/null
+		done
+	else
 		pamixer --default-source -m
-	elif [ "$(pamixer --default-source --get-mute)" == "true" ]; then
-		pamixer -u --default-source u
 	fi
 }
 # Get Mic Icon
 get_mic_icon() {
-    current=$(pamixer --default-source --get-volume)
-    if [[ "$current" -eq "0" ]]; then
+    if [[ "$(pamixer --default-source --get-mute)" == "true" ]]; then
         echo "$iDIR/microphone-mute.png"
     else
         echo "$iDIR/microphone.png"
@@ -92,7 +98,7 @@ get_mic_icon() {
 # Get Microphone Volume
 get_mic_volume() {
     volume=$(pamixer --default-source --get-volume)
-    if [[ "$volume" -eq "0" ]]; then
+    if [[ "$(pamixer --default-source --get-mute)" == "true" || "$volume" -eq "0" ]]; then
         echo "Muted"
     else
         echo "$volume %"
@@ -116,7 +122,7 @@ inc_mic_volume() {
 # Decrease MIC Volume
 dec_mic_volume() {
     if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
-        toggle-mic
+        toggle_mic
     else
         pamixer --default-source -d 5 && notify_mic_user
     fi
@@ -137,6 +143,10 @@ elif [[ "$1" == "--get-icon" ]]; then
 	get_icon
 elif [[ "$1" == "--get-mic-icon" ]]; then
 	get_mic_icon
+elif [[ "$1" == "--get-mic" || "$1" == "--get-mic-volume" ]]; then
+	# get_mic_volume was defined but had no dispatch case, so asking for the mic
+	# level fell through to the final `else` and returned the SPEAKER volume.
+	get_mic_volume
 elif [[ "$1" == "--mic-inc" ]]; then
 	inc_mic_volume
 elif [[ "$1" == "--mic-dec" ]]; then
