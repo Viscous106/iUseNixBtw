@@ -32,18 +32,15 @@ TABLET_FILE="$STATE_DIR/hypr-tablet-mode"          # exists == folded
 # keyd GRABS the physical keyboard and re-emits through keyd-virtual-keyboard —
 # Hyprland reports that virtual device as "main: yes". So disabling
 # at-translated-set-2-keyboard alone would do nothing at all; the virtual
-# devices have to go too. kanata sits in the same chain and brings its own
-# pointer (kanata-1).
+# devices have to go too.
 #
 # ydotoold-virtual-device is deliberately NOT muted: it is scripted/synthetic
 # input (wl-kbptr and friends), not something a palm can press.
 TABLET_MUTE=(
   at-translated-set-2-keyboard
   keyd-virtual-keyboard
-  kanata
   elan-touchpad
   keyd-virtual-pointer
-  kanata-1
 )
 
 # Same call convention as monitor-auto.sh: this build uses the non-legacy (Lua)

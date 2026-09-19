@@ -93,12 +93,6 @@
       "Bash(gh secret set *)"
     ],
     "ask": [
-      "Bash(sudo *)",
-      "Bash(nixos-rebuild *)",
-      "Bash(systemctl *)",
-      "Bash(docker *)",
-      "Bash(podman *)",
-      "Bash(nix-collect-garbage *)",
       "Bash(npm publish *)",
       "Bash(pnpm publish *)",
       "Bash(cargo publish *)",

@@ -99,11 +99,6 @@
   xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/nvim";
 
-  # ── kanata — config.kbd read directly by services.kanata (modules/
-  # peripherals.nix); symlinked here too so `~/.config/kanata` matches Arch.
-  xdg.configFile."kanata".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/kanata";
-
   # ── OBS Studio ──────────────────────────────────────────────────────────
   xdg.configFile."obs-studio".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/obs-studio";
