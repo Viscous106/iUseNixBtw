@@ -50,16 +50,35 @@
 
   # GPU + other modules loaded after root is mounted (keeps initrd lean)
   boot.kernelModules = [
-    # Intel GPUs
-    "i915"
-    # AMD GPUs (modern + legacy)
-    "amdgpu" "radeon"
-    # NVIDIA open-source fallback
-    "nouveau"
-    # VirtIO GPU
-    "virtio_gpu"
     # CPU frequency scaling
     "acpi_cpufreq" "cpufreq_ondemand" "cpufreq_performance"
+
+    # AMD GPU — kept on every host. Harmless where absent, and it is the one
+    # GPU driver matching this CPU vendor should a BIOS hybrid-graphics toggle
+    # ever expose an iGPU.
+    "amdgpu"
+  ]
+  # ── Speculative GPU drivers: portable USB image only ──────────────────────
+  # These exist so the portable install boots on unknown hardware. On the
+  # laptop they are dead weight: lspci reports exactly one display device
+  # (NVIDIA AD107M — there is no iGPU at all), /sys/class/drm has a single card
+  # bound to `nvidia`, and i915 / radeon / virtio_gpu all sit at used_by=0
+  # having bound to nothing.
+  #
+  # nouveau is the one that is not merely wasteful: it is the open driver for
+  # the very GPU the proprietary module drives. It stays out of the way today
+  # only because the nvidia module blacklists it — an ordering guarantee worth
+  # not relying on once the hardware is known.
+  #
+  # Deliberately not lib.mkForce: boot.kernelModules is a merged list and other
+  # modules legitimately contribute to it (i2c-dev from apps-gaming; tun, veth,
+  # bridge, br_netfilter, xt_nat from docker; uinput; nvidia_uvm). Forcing the
+  # list would silently drop all of those.
+  ++ lib.optionals (config.networking.hostName != "laptop") [
+    "i915"        # Intel GPUs
+    "radeon"      # AMD legacy
+    "nouveau"     # NVIDIA open-source fallback
+    "virtio_gpu"  # QEMU / VirtIO
   ];
 
   # Prevent nouveau from fighting NVIDIA proprietary drivers (harmless if no NVIDIA)
