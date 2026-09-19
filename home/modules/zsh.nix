@@ -114,6 +114,8 @@
     tx      = "tmuxifier";
     "tmux-edit" = "cd ~/.config/tmuxifier/layouts && nvim";
     scrible = "tjournal";
+    cp="rsync -ahP --info=progress2,stats2 --stats";
+    mv="rsync -ahP --info=progress2,stats2 --stats --remove-source-files"
   };
 
   # ── zshenv / zprofile — ported verbatim from Arch ────────────────────────
