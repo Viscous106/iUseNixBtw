@@ -74,6 +74,19 @@
   # ── Shell ─────────────────────────────────────────────────────────────────
   programs.zsh.enable = true;
 
+  # ── Journal size cap ──────────────────────────────────────────────────────
+  # journald was uncapped and had grown to 3 GB, most of it one kernel warning
+  # repeated 46,848 times in a single session (rtw89 RX stats — see the roaming
+  # note in modules/hardware-universal.nix). Uncapped journald defaults to 10%
+  # of the filesystem, which on a 476 GB root is ~47 GB before it ever rotates.
+  # A driver that decides to warn per received frame should not be able to eat
+  # the disk, whatever the driver.
+  services.journald.extraConfig = ''
+    SystemMaxUse=500M
+    SystemMaxFileSize=50M
+    MaxRetentionSec=1month
+  '';
+
   # ── Session variables ─────────────────────────────────────────────────────
   # Arch sets these in /etc/environment, which PAM injects into every session —
   # including the Hyprland session started from the TTY. NixOS had no equivalent,

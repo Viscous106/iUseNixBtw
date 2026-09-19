@@ -114,6 +114,30 @@
       P2P.Enable                         = false;  # disable Wi-Fi Direct — prevents the
                                                    # spurious NM "error setting IPv4 forwarding"
                                                    # warning on the iwd P2P virtual device at boot
+
+      # ── Roam churn ────────────────────────────────────────────────────────
+      # RoamThreshold5G defaults to -76 dBm. On the APs this machine actually
+      # sees ("Create Impact", two BSSes on 5 GHz) the signal sits at -68 to
+      # -76 — i.e. permanently at the trigger — so iwd roam-scanned every
+      # RoamRetryInterval (60 s) and ping-ponged between e8:10:98:6e:84:70 and
+      # e8:10:98:6f:06:30 all day. Each scan interrupts traffic, and each roam
+      # re-negotiates rates.
+      #
+      # This matters beyond the churn itself: the rtw89 RX-stats warning storm
+      # (46k kernel WARNs in one session, ~3 GB of journal) began 26 s after the
+      # first roam of the boot and only ever occurred inside roam-heavy windows
+      # — never during a steady link, including under a verified 52 MiB
+      # download. The WARN itself is an upstream driver bug (it cannot map HE
+      # rate index 111; valid ranges are 0-60 and 61-68) and is not fixable
+      # from configuration — but not thrashing the association avoids the
+      # condition that provokes it.
+      #
+      # -80 still leaves CriticalRoamThreshold5G (-82, unchanged) below it, so a
+      # genuinely dying link still roams. Raise this back toward -76 if you move
+      # between APs often and notice it clinging to a weak one.
+      General.RoamThreshold5G  = -80;
+      General.RoamThreshold    = -74;   # 2.4 GHz, default -70
+      General.RoamRetryInterval = 300;  # default 60 s
     };
   };
 
