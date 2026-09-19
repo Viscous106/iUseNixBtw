@@ -8,7 +8,20 @@
   # Transfers when asked, and adds udev rules for controllers — all the
   # "lib32-*" plumbing Arch's multilib repo does by hand as separate
   # packages (see note near the bottom of this file).
-  programs.steam.enable = true;
+  programs.steam = {
+    enable = true;
+    gamescopeSession.enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play / Steam Link
+    dedicatedServer.openFirewall = false;
+    extraCompatPackages = with pkgs; [
+      proton-ge-bin
+    ];
+  };
+
+  # Real-time scheduling priority permissions for VR compositor / SteamVR to prevent stuttering
+  security.pam.loginLimits = [
+    { domain = "@users"; item = "rtprio"; type = "-"; value = 1; }
+  ];
 
   # ── ASUS ROG hardware tools (asusctl / rog-control-center / supergfxctl) ──
   # These three Arch packages only do anything on ASUS ROG laptops. On any

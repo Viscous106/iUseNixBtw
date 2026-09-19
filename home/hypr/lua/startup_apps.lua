@@ -23,6 +23,27 @@ hl.on("hyprland.start", function()
   -- time, and exporting an unset variable just errors.)
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
+
+  -- Activate graphical-session.target.
+  -- xdg-desktop-portal.service declares `Requisite=graphical-session.target`, and
+  -- Requisite (unlike Requires) does not START the dependency — it fails outright
+  -- if it is not ALREADY active. graphical-session.target is RefuseManualStart=yes,
+  -- so it can only be pulled in by another unit; with systemd.enable = false there
+  -- is no hyprland-session.target to do that. Net effect: the target stayed dead,
+  -- every portal D-Bus activation died with "Dependency failed for Portal service",
+  -- and org.freedesktop.portal.ScreenCast never existed — which is the interface
+  -- browser screen sharing (getDisplayMedia) calls, so "share entire screen" in
+  -- Chrome/Firefox failed on every proctoring and video-call site.
+  -- NixOS ships nixos-fake-graphical-session.target for exactly this case: it is
+  -- BindsTo=graphical-session.target, so starting it activates the target without
+  -- adopting any of the hyprland-session.target machinery systemd.enable = false
+  -- deliberately avoids. This starts no extra daemons — nothing here is actually
+  -- enabled into the target (skwd-daemon.service ships an [Install] WantedBy= but
+  -- was never `systemctl --user enable`d, and there is no .wants directory), so
+  -- the only effect is that the portals can finally D-Bus activate on demand.
+  -- Must run AFTER the two env lines above: the portal backend reads
+  -- HYPRLAND_INSTANCE_SIGNATURE from the activation environment to find Hyprland.
+  hl.exec_cmd("systemctl --user start nixos-fake-graphical-session.target")
   -- (removed) KeybindsLayoutInit.sh rebound SUPER+J/K via `hyprctl keyword bind`,
   -- which the Lua config's non-legacy parser rejects. It had been a no-op for as
   -- long as this config has been Lua: `hyprctl binds` shows no J or K bind at all.
