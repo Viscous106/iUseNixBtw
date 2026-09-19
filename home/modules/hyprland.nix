@@ -22,7 +22,11 @@
     #   * hyprland-session.target never started, and since it BindsTo
     #     graphical-session.target, graphical-session.target never activated;
     #   * so every unit WantedBy/PartOf graphical-session.target (hypridle.service,
-    #     tray.target) was permanently dead;
+    #     tray.target, and critically xdg-desktop-portal.service, which declares
+    #     Requisite=graphical-session.target) was permanently dead — that is what
+    #     broke browser screen sharing. startup_apps.lua now starts
+    #     nixos-fake-graphical-session.target to activate the target directly,
+    #     which fixes that without turning this option back on;
     #   * and HYPRLAND_INSTANCE_SIGNATURE / XDG_SESSION_TYPE / DISPLAY never reached
     #     the systemd + dbus activation environment.
     # Arch has no such systemd wiring at all — everything is launched by the
@@ -107,8 +111,9 @@
 
   # ── Hypridle idle daemon ────────────────────────────────────────────────────
   # Deliberately NOT using services.hypridle. Its unit is WantedBy/PartOf
-  # graphical-session.target, which never activates here (see systemd.enable
-  # above), so the service could never start — and if it ever did, it would run a
+  # graphical-session.target. That target now DOES activate (startup_apps.lua
+  # starts nixos-fake-graphical-session.target so the portals can come up), so
+  # enabling this would no longer merely fail — it would run a
   # SECOND hypridle alongside the one lua/startup_apps.lua execs directly with
   # `hypridle -c ~/.config/hypr/configs/hypridle.conf`. Arch runs exactly one
   # hypridle, started from the Lua config; this matches that.

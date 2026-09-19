@@ -26,6 +26,23 @@
     };
   };
 
+  # ── Wayland-native Chromium / Electron ────────────────────────────────────
+  # google-chrome's nixpkgs wrapper appends its Wayland flags only when this is
+  # set — the wrapper literally contains:
+  #   ${NIXOS_OZONE_WL:+${WAYLAND_DISPLAY:+--ozone-platform-hint=auto ...}}
+  # Nothing in this config set it, so Chrome always started on XWayland. There,
+  # getDisplayMedia() uses Chromium's X11 screen capturer, which under Hyprland
+  # has no real root window to read — so "share your entire screen" produced a
+  # failed/black capture on proctored tests and video calls. On Wayland Chrome
+  # takes the xdg-desktop-portal ScreenCast + PipeWire path instead, which is the
+  # one xdg-desktop-portal-hyprland actually implements.
+  # Paired with the nixos-fake-graphical-session.target line in
+  # home/hypr/lua/startup_apps.lua: this picks the right capture path, that one
+  # makes the portal it depends on able to start at all. Both are required.
+  # Also applies to other Chromium/Electron apps (VS Code, Discord, …) — the
+  # standard NixOS switch for running them natively on Wayland.
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
   xdg.portal = {
     enable       = true;
     # xdg-desktop-portal-hyprland is added automatically by programs.hyprland.enable;
@@ -149,10 +166,16 @@
   # the awww restore was dropped from startup_apps.lua.
   #
   # The module also does systemd.packages = [ skwd ], which INSTALLS
-  # skwd-daemon.service but cannot start it here: the unit is
-  # WantedBy=graphical-session.target, and this session never reaches that
-  # target (Hyprland is started directly, no uwsm). startup_apps.lua launches
-  # the daemon instead — the same workaround caelestia needs.
+  # skwd-daemon.service but does not start it: systemd.packages only places the
+  # unit file, it never runs `systemctl --user enable`, so the unit's [Install]
+  # WantedBy=graphical-session.target is inert — no graphical-session.target.wants
+  # symlink is ever created. startup_apps.lua launches the daemon instead — the
+  # same workaround caelestia needs.
+  # (This used to read "this session never reaches that target". That is no longer
+  # why: startup_apps.lua now starts nixos-fake-graphical-session.target so the
+  # xdg-desktop-portal units can activate, so the target IS active. skwd-daemon
+  # still does not auto-start, purely because it was never enabled — which is what
+  # keeps that change from double-starting a second wallpaper daemon.)
   programs.skwd-wall.enable = true;
 
   # ── Bluetooth ─────────────────────────────────────────────────────────────
