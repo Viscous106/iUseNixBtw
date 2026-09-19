@@ -24,13 +24,17 @@
 
     keyboards.default = {
       # "*" minus the virtual devices that "*" would otherwise sweep in:
-      # ids come from `keyd monitor`. Both the real keyboard and kanata's
-      # virtual output report 0001:0001, so the trailing hash is required.
+      # ids come from `keyd monitor`. Several devices share 0001:0001 or
+      # 0000:0000, so the trailing hash is what makes an entry specific.
       ids = [
         "*"
         "-2333:6666:e7fb73a9"   # ydotoold virtual device — keyd would re-remap
                                 # hyprwhspr's injected keystrokes
-        "-0000:0000:39ecd0ee"   # sof-glkrt5682max Headset Jack — not a keyboard
+        # Dropped: "-0000:0000:39ecd0ee" excluded the sof-glkrt5682max Headset
+        # Jack, a Google Ampton Chromebook device carried over with the old
+        # audio module. This machine's jack enumerates as "HD-Audio Generic
+        # Headphone" with a different hash, and keyd does not match it anyway
+        # (no key capabilities) — so the entry excluded nothing that exists.
       ];
 
       settings = {
