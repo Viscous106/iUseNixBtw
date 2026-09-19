@@ -362,7 +362,7 @@
       # SUPER+SHIFT+E and SUPER+ALT+B; only the hover trigger goes away.
       dashboard.showOnHover = false;
 
-      # Caelestia must not paint a wallpaper: qs-wallpaper-picker applies through
+      # Caelestia must not paint a wallpaper: the wallpaper picker applies through
       # awww (images, with transitions) and mpvpaper (video), and both draw on
       # the background layer. With caelestia also painting there, the two fight
       # over the same surface. awww/mpvpaper wins ownership because it is the
@@ -434,17 +434,11 @@
   # while the shell's own picker happily lists all 274 images.
   home.sessionVariables.CAELESTIA_WALLPAPERS_DIR = "${config.home.homeDirectory}/Pictures/wallpapers";
 
-  # ── qs-wallpaper-picker ─────────────────────────────────────────────────────
-  # Fast keyboard-first Quickshell picker on SUPER+W, handling images and video.
-  # See pkgs/qs-wallpaper-picker.nix. It reads its library from QS_WALLPAPER_DIR
-  # (upstream default is ~/Wallpapers, which is not where this library lives).
   home.packages = [
-    pkgs.qs-wallpaper-picker
     # `caelestia clipboard` (SUPER+V) shells out to `fuzzel --dmenu` to render
     # the picker and to cliphist to read/decode history — see the CLI's
     # subcommands/clipboard.py. cliphist and wl-copy were already installed;
     # fuzzel was not, so the command would have died on a missing binary.
     pkgs.fuzzel
   ];
-  home.sessionVariables.QS_WALLPAPER_DIR = "${config.home.homeDirectory}/Pictures/wallpapers";
 }

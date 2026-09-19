@@ -16,11 +16,8 @@
     ./modules/mpv.nix
     ./modules/btop.nix
     ./modules/yazi.nix
-    ./modules/swaylock.nix
-    ./modules/wlogout.nix
     ./modules/cava.nix
     ./modules/wl-kbptr.nix
-    ./modules/thefuck.nix
     ./modules/qt5ct.nix
     ./modules/qt6ct.nix
     ./modules/gtk.nix
@@ -128,7 +125,6 @@
     grim          # screenshot tool
     awww          # wallpaper daemon (formerly swww)
     rofi          # app launcher (Super+D)
-    swaynotificationcenter  # notification daemon (swaync CLI)
     # thunar / thunar-volman intentionally absent: they come from
     # programs.thunar in modules/desktop.nix, which is the only way the plugins
     # actually load. A second unwrapped copy here would shadow the wrapper.

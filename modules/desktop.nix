@@ -85,9 +85,6 @@
     # above it in startup_apps.lua, provides the same NetworkManager tray icon.
     blueman
 
-    # Notifications (swaync = SwayNC, a nicer notification + control-centre)
-    swaynotificationcenter
-
     # Screen locker + idle daemon
     hyprlock
     hypridle

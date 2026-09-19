@@ -6,14 +6,21 @@
   xdg.configFile."rofi".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/rofi";
 
-  # ── Swaync notification center ────────────────────────────────────────────
+  # ── Swaync config tree — kept for its ICON ASSETS ONLY ────────────────────
+  # The swaynotificationcenter daemon itself is gone: Caelestia owns
+  # org.freedesktop.Notifications. This directory stays because fifteen of the
+  # Hypr scripts read their notification artwork out of it — Volume.sh,
+  # BrightnessKbd.sh, ScreenShot.sh, WallpaperSelect.sh, AirplaneMode.sh and
+  # friends all do iDIR="$HOME/.config/swaync/icons" (or .../images). Deleting
+  # this tree alongside the package would silently blank the volume, mic and
+  # brightness OSD icons.
   xdg.configFile."swaync".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/swaync";
 
-  # swaync and hypridle are both launched solely via exec-once
-  # (startup_apps.lua), matching the original Arch/JaKooLit design (no
-  # systemd unit involved for either, on Arch). Both packages ship their own
-  # bundled systemd --user unit (share/systemd/user/{swaync,hypridle}.service)
+  # hypridle is launched solely via exec-once (startup_apps.lua), matching the
+  # original Arch/JaKooLit design (no systemd unit involved, on Arch). The
+  # package ships its own bundled systemd --user unit
+  # (share/systemd/user/hypridle.service)
   # that gets auto-discovered purely because the package sits in home.packages
   # / environment.systemPackages -- independent of services.hypridle.enable
   # (set false in hyprland.nix) or any home-manager option for swaync (there
@@ -29,7 +36,8 @@
   # option.
   home.activation.maskDuplicateSessionUnits = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/systemd/user"
-    ln -sf /dev/null "$HOME/.config/systemd/user/swaync.service"
+    # The swaync line went with the swaynotificationcenter package: no package
+    # in the profile means no bundled unit to race, so nothing left to mask.
     ln -sf /dev/null "$HOME/.config/systemd/user/hypridle.service"
   '';
 
