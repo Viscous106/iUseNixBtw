@@ -17,3 +17,5 @@ alias gl='git log --graph --all --decorate --oneline --format=format:"%C(bold 14
 alias ca='config add'
 alias cl="config log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(148)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold 117)- %an%C(reset)%C(bold 203)%d%C(reset)'"
 alias guvcview="guvcview -d /dev/video1"
+alias cp="rsync -ahP --info=progress2,stats2 --stats"
+alias mv="rsync -ahP --info=progress2,stats2 --stats --remove-source-files"

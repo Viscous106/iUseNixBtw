@@ -60,13 +60,36 @@ in
       Requires    = [ "ydotoold.service" ];
       Wants       = [ "pipewire.service" ];
       After       = [ "pipewire.service" "ydotoold.service" ];
+
+      # hyprwhspr manages its own Python venv via `hyprwhspr setup` (see the
+      # header above) and refuses to start without it:
+      #     Error: hyprwhspr setup is incomplete.
+      #     Python environment not found at: ~/.local/share/hyprwhspr/venv/bin/python
+      # That setup has never been run on this machine, so ExecStart exited 1
+      # every single time — and with Restart=on-failure, RestartSec=2 and no
+      # effective start limit, systemd relaunched it forever: 9,991 failed
+      # starts in one 7.5 h session, ~22 per minute, each additionally paying
+      # for a `bash -lc` login shell in ExecStartPre. A steady CPU drip and a
+      # large share of the journal volume, for a service that cannot work.
+      #
+      # ConditionPathExists is the right primitive here: an unmet condition
+      # makes systemd SKIP the unit (it goes inactive, not failed) rather than
+      # start-and-fail it, so the loop cannot begin. Run `hyprwhspr setup`
+      # once and it starts normally at the next login with no config change.
+      ConditionPathExists = "%h/.local/share/hyprwhspr/venv/bin/python";
+
+      # Backstop for any other failure mode: give up after 5 attempts in five
+      # minutes instead of retrying until reboot. The default burst window
+      # (5 starts / 10 s) never tripped because RestartSec=2 sat exactly on it.
+      StartLimitBurst       = 5;
+      StartLimitIntervalSec = 300;
     };
     Service = {
       Type = "simple";
       ExecStartPre = "${pkgs.bash}/bin/bash -lc 'for i in $(seq 1 60); do [ -n \"$WAYLAND_DISPLAY\" ] && [ -S \"\${XDG_RUNTIME_DIR}/$WAYLAND_DISPLAY\" ] && exit 0; sleep 0.25; done; exit 1'";
       ExecStart    = "${hyprwhspr}/bin/hyprwhspr";
       Restart      = "on-failure";
-      RestartSec   = 2;
+      RestartSec   = 5;
     };
     Install.WantedBy = [ "default.target" ];
   };

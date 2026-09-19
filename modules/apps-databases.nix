@@ -61,6 +61,16 @@
   services.mysql = {
     enable = true;
     package = pkgs.mariadb;
+
+    # Every other database here binds to loopback on its own — mongod on
+    # 127.0.0.1:27017, postgres on 127.0.0.1:5432, valkey on 127.0.0.1:6379 —
+    # but MariaDB's default is 0.0.0.0, so `ss -tlnp` showed mysqld alone
+    # listening on every interface. The firewall does not admit 3306 from
+    # outside, so this was never an open door; it was reachable from the docker
+    # bridge (172.17.0.1) and one `openFirewall`/`allowedTCPPorts` edit away
+    # from being exposed on café wifi. Match the other three explicitly rather
+    # than leave that depending on a firewall rule elsewhere.
+    settings.mysqld.bind-address = "127.0.0.1";
   };
 
   # ── Valkey (via the services.redis module) ────────────────────────────────

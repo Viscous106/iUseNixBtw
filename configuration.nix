@@ -116,7 +116,28 @@
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
+
+    # services.openssh.enable opens port 22 in the firewall by default, so
+    # sshd was reachable on every network this laptop joined — verified in the
+    # live ruleset: `-A nixos-fw -p tcp --dport 22 -j nixos-fw-accept`. On a
+    # machine that roams onto shared office and cafe wifi that is standing
+    # attack surface for a service nothing has ever used: `last` shows only
+    # reboots, and sshd's journal has no Accepted/session-opened line at all.
+    #
+    # sshd still runs and still listens locally; what changes is that the
+    # firewall no longer admits it from an untrusted link. Remote access is
+    # meant to go over Tailscale anyway (services.tailscale.enable above), and
+    # tailscale0 is trusted below so SSH keeps working there once you have run
+    # `sudo tailscale up` — it currently reports "Logged out".
+    #
+    # To re-open it on a LAN you trust: openFirewall = true, or scope it with
+    # networking.firewall.interfaces.<iface>.allowedTCPPorts = [ 22 ].
+    openFirewall = false;
   };
+
+  # Tailscale is a private overlay; traffic arriving on it is already
+  # authenticated by Tailscale itself, so it does not need a second gate.
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
 
   programs.ssh = {
     startAgent  = true;
