@@ -30,11 +30,6 @@
       # now), so we repack Opera's own official .deb. See pkgs/opera.nix.
       opera = final.callPackage ./pkgs/opera.nix { };
 
-      # Quickshell wallpaper selector — a fast keyboard-first picker bound to
-      # SUPER+W. Not in nixpkgs; see pkgs/qs-wallpaper-picker.nix for why it
-      # needs wrapping rather than being run from a git clone.
-      qs-wallpaper-picker = final.callPackage ./pkgs/qs-wallpaper-picker.nix { };
-
       # Our own Quickshell wallpaper selector; see pkgs/wallpaper-picker.nix and
       # docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
       wallpaper-picker = final.callPackage ./pkgs/wallpaper-picker.nix { };

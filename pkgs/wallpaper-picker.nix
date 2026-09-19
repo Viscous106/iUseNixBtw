@@ -60,7 +60,7 @@ writeShellApplication {
     # not in qtbase, and are not on any default plugin search path. Without
     # this, QML Image fails to decode .webp wallpapers and the card renders
     # blank. writeShellApplication has no makeWrapper hook to set this via
-    # --prefix (see qs-wallpaper-picker.nix for that approach), so it is
+    # --prefix (a makeWrapper --prefix would be the alternative), so it is
     # exported here directly instead — the smaller change for a single plain
     # env var, versus restructuring this derivation just to gain makeWrapper.
     export QT_PLUGIN_PATH="${qt6.qtimageformats}/lib/qt-6/plugins''${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"

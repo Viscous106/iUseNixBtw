@@ -108,6 +108,10 @@
     gwa     = "git worktree add";
     gwr     = "git worktree remove";
     gwp     = "git worktree prune";
+    # Rescued from home/zsh/scripts/alias.sh before it was deleted: that file was
+    # never in the source loop above, so these two had never actually worked.
+    gfa     = "git fetch --all && for branch in $(git branch --format=\"%(refname:short)\"); do git checkout $branch && git pull --rebase; done";
+    guvcview = "guvcview -d /dev/video1";  # /dev/video0 is the metadata node
     cfg     = "nvim /persist/nixos-config/";
     rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config#nix";
     update  = "nix flake update /persist/nixos-config && rebuild";
