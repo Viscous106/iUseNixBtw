@@ -80,7 +80,7 @@ outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skw
       ./modules/apps-databases.nix
       ./modules/apps-system.nix
       ./modules/peripherals.nix
-      ./modules/audio-glkrt5682max.nix
+      ./modules/audio.nix
       ./modules/touchscreen.nix
 
       hyprland.nixosModules.default
