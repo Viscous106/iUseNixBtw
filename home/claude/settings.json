@@ -198,6 +198,11 @@
           "mode": "deny"
         }
       ]
+    },
+    "filesystem": {
+      "allowWrite": [
+        "/persist/nixos-config"
+      ]
     }
   },
   "hooks": {
