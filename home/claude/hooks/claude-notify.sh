@@ -19,13 +19,13 @@ case $event in
     urgency=critical
     title="Claude needs you"
     body=${msg:-Waiting for your input}
-    sound=/usr/share/sounds/freedesktop/stereo/message.oga
+    sound=/run/current-system/sw/share/sounds/freedesktop/stereo/message.oga
     ;;
   Stop)
     urgency=normal
     title="Claude finished"
     body="Turn complete — ready for the next instruction"
-    sound=/usr/share/sounds/freedesktop/stereo/complete.oga
+    sound=/run/current-system/sw/share/sounds/freedesktop/stereo/complete.oga
     ;;
   *)
     urgency=normal

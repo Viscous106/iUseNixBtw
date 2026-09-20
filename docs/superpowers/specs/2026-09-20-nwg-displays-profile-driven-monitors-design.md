@@ -58,8 +58,29 @@ else:
     hyprctl(f"dispatch dpms {cmd} {d['name']}")    # safe: CRTC retained
 ```
 
-**Rule: every profile keeps every output `Active`. Blanking is expressed by unticking
-`DPMS`, never by unticking `Active`.**
+**Rule: every profile keeps every output `Active`. Never untick `Active`.**
+
+**AMENDED 2026-09-20 - profile DPMS does not work on this build.** The `Active` +
+`DPMS`-off mechanism this spec was originally built around is inert here, verified
+against the live compositor:
+
+```
+$ hyprctl dispatch dpms on eDP-1
+error: [string "return hl.dispatch(dpms on eDP-1)"]:1: ')' expected near 'on'   exit=7
+```
+
+nwg-displays applies DPMS only through that plain-dispatch form
+(`settings_applier.py:77,111-113`) and never reads the IPC reply
+(`tools.py:92-104`), so on a Lua-parser build it fails silently and still reports
+success. Its Lua output carries no DPMS field at all, so nothing survives into
+`monitors.lua` either.
+
+Consequently the ownership split narrows: **profiles own geometry only** - position,
+mode, scale, mirror, transform. `monitor-auto.sh` retains ownership of DPMS through
+its existing `dpms_set`, which uses the `hyprctl eval` + `hl.dsp.dpms` table form and
+already encodes the toggle-not-set semantics. The `docked-external` profile is still
+authored with `DPMS` unticked for documentation value, but the blanking that actually
+happens is the script's.
 
 ### Reload reentrancy
 
@@ -103,10 +124,16 @@ no Nix changes.
 |---|---|---|---|
 | `laptop-only` | active, dpms on, `0x0` | — | no external |
 | `docked-extend` | active, dpms on, `-1920x0` | active, `0x0` | external + lid open |
-| `docked-external` | active, **dpms off**, `-1920x0` | active, `0x0` | external + lid closed |
+| `docked-external` | active, `-1920x0` (blanked by the script, not the profile) | active, `0x0` | external + lid closed |
 | `docked-mirror` | active, dpms on, mirrors external | active, `0x0` | manual only |
 
 `docked-mirror` is never selected automatically; it is reachable from the picker.
+
+**Precedence:** a manual pick is not sticky. The next hotplug or lid event re-runs the selector,
+which computes the profile from state and overrides the manual choice. This is deliberate — it
+keeps exactly one rule for what is on screen, and avoids a "why is it still mirrored?" state that
+survives undocking. Picking `docked-mirror` and then closing the lid therefore lands on
+`docked-external`, not on a mirrored blank panel.
 
 Geometry rationale is unchanged from the current script: the external is pinned at `0x0`
 and the panel sits at `-1920x0`, keeping the two regions disjoint in every intermediate
@@ -143,6 +170,14 @@ any behaviour depends on the answer.
 
 The baseline removal in `lua/monitors.lua` is required, not cosmetic: it runs at config-parse
 time on every reload and would overwrite the profile's position for `eDP-1`.
+
+Removing it does give up what the baseline was for — guaranteeing the panel has a picture during
+boot, before any profile is applied. Hyprland's built-in default for an unconfigured output
+(`preferred` mode, `auto` position) covers this, so the panel still lights up; what is lost is the
+specific `-1920x0` placement during the window between parse and the first `monitor-auto.sh` run.
+That window is the same one the current baseline already tolerates, and the selector runs on
+`hyprland.start`. If it proves visible in practice, the fix is to seed `hypr/monitors.lua` with a
+one-line panel entry rather than to restore the baseline in `lua/monitors.lua`.
 
 ## Verification
 

@@ -16,6 +16,11 @@ require("lua.animations")
 require("lua.system_settings")
 require("lua.monitors")
 
+-- nwg-displays' generated layout. MUST come after lua.monitors: that module
+-- registers the hotplug/lid hooks, this file carries the geometry those hooks
+-- select. Resolves to ~/.config/hypr/monitors.lua via package.path.
+require("monitors")
+
 -- extras that lived directly in hyprland.conf:
 -- exec-once = $HOME/.config/hypr/initial-boot.sh  (kept for parity; script is optional)
 hl.on("hyprland.start", function()

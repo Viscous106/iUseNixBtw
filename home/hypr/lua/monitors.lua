@@ -1,23 +1,22 @@
 -- ~/.config/hypr/lua/monitors.lua
--- Automatic, event-driven monitor management — no manual profile picker.
---
--- A baseline is set at config-parse time so the internal panel always has a
--- picture during boot. The real layout is decided by scripts/monitor-auto.sh,
--- which re-evaluates state and runs on:
+-- Event hooks and lid binds for monitor management. Owns no geometry itself:
+-- layout is decided by scripts/monitor-auto.sh (profile selection) and carried
+-- by nwg-displays' generated ~/.config/hypr/monitors.lua, which hyprland.lua
+-- requires after this module. This file only wires monitor-auto.sh to run on:
 --   * hyprland.start          (initial layout)
 --   * monitor.added / removed (HDMI plugged / unplugged)
 --   * Lid Switch on / off     (lid closed / opened)
+-- A manual override also exists via scripts/monitor-pick.sh (SUPER+ALT+SHIFT+M),
+-- but it is not sticky: the next event above recomputes and can override it.
 -- See scripts/monitor-auto.sh for the full behavior table.
 
 local HOME = os.getenv("HOME")
 local auto = HOME .. "/.config/hypr/scripts/monitor-auto.sh"
 
--- Baseline: internal panel usable immediately; monitor-auto.sh refines on start.
--- Position it at -1920x0, matching INT_POS_DOCKED in monitor-auto.sh. The external
--- is always pinned at 0x0, so parking the panel to its left keeps the two regions
--- disjoint. A baseline of 0x0 collides with the external on every reload and makes
--- Hyprland latch the "Monitor eDP-1 overlaps with other monitor(s)" warning.
-hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "-1920x0", scale = 1 })
+-- No baseline hl.monitor() here. Geometry is owned by ~/.config/hypr/monitors.lua,
+-- which nwg-displays regenerates on every Apply and hyprland.lua requires after
+-- this module. A baseline would run at config-parse time on every reload and
+-- overwrite the profile's position for eDP-1.
 
 -- Re-apply the automatic layout on startup and on any output hotplug.
 hl.on("hyprland.start",  function() hl.exec_cmd(auto) end)
