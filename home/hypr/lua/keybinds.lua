@@ -120,6 +120,9 @@ hl.bind(mod .. " + ALT + I", hl.dsp.exec_cmd("caelestia shell idleInhibitor togg
 hl.bind(mod .. " + ALT + H", hl.dsp.exec_cmd(sd .. "/drag_hold.sh"))
 hl.bind(mod .. " + ALT + L", hl.dsp.exec_cmd(sd .. "/ChangeLayout.sh"))
 hl.bind(mod .. " + ALT + M", hl.dsp.exec_cmd("nwg-displays"))
+-- SUPER+ALT+M edits layouts in the GUI; SUPER+ALT+SHIFT+M switches between saved
+-- profiles without opening it. Note SUPER+SHIFT+M is taken by ScreenMode.sh.
+hl.bind(mod .. " + ALT + SHIFT + M", hl.dsp.exec_cmd(sd .. "/monitor-pick.sh"))
 -- DND moved here from SUPER+ALT+T. This key used to run scripts/screensaver.sh,
 -- which is now deleted along with ToggleScreensaver.sh and the screensaver
 -- listener in configs/hypridle.conf.

@@ -56,6 +56,44 @@ esac
 # plain `hyprctl dispatch <name> <args>` forms are rejected — everything has to go
 # through `hyprctl eval` against the same hl.* API used in lua/monitors.lua.
 hy() { hyprctl eval "$1" >/dev/null; }
+
+# --- self-healing sanitiser for the disabled= landmine ----------------------
+# A GUI Apply with Active unticked writes `disabled = true` (Lua) / `,disable`
+# (conf) into ~/.config/hypr/monitors.lua / monitors.conf. Since Task 3 those
+# files are require()'d / read on every run, so the poisoned state survives a
+# hyprland.lua reload, a full reboot, AND the physical replug that is supposed
+# to recover the DP link — nwg-displays' own safety net does not help here:
+# its confirm-or-revert dialog cannot render when no output is left to click
+# on, and its revert path deliberately does not reload. This runs on every
+# invocation of this script, in particular hyprland.start — exactly when a
+# poisoned file would have just been loaded — and heals it: strip the
+# directive from disk, and re-enable the output live so this boot does not
+# stay bricked waiting for the next GUI Apply to fix the file for real.
+sanitize_disabled() {
+  local f found=0 out
+  for f in "$HOME/.config/hypr/monitors.lua" "$HOME/.config/hypr/monitors.conf"; do
+    [ -f "$f" ] || continue
+    if grep -qE '(disabled\s*=\s*true|,disable\b)' "$f"; then
+      found=1
+      sed -i --follow-symlinks -E 's/disabled\s*=\s*true/disabled = false/g; s/,disable\b//g' "$f"
+    fi
+  done
+  [ "$found" = 1 ] || return 0
+  # An output that `hyprctl -j monitors all` reports but the plain (non-all)
+  # list omits is disabled — the same all-vs-plain distinction
+  # check_int_not_disabled in monitor-verify.sh relies on. Reuse it here
+  # instead of guessing at a JSON field name.
+  for out in $(comm -23 \
+                 <(hyprctl -j monitors all | jq -r '.[].name' | sort) \
+                 <(hyprctl -j monitors     | jq -r '.[].name' | sort)); do
+    hy "hl.monitor({ output = \"$out\", disabled = false })"
+  done
+  notify-send -e -u critical "󰍹 Display" \
+    "Removed a disabled= directive from the generated monitor config and re-enabled the output live — re-author that profile in nwg-displays with Active ticked" \
+    2>/dev/null || true
+}
+sanitize_disabled
+
 # scripts/auto-rotate.sh owns the internal panel's rotation and records the
 # current transform in $XDG_RUNTIME_DIR/hypr-rotation. Re-applying the panel
 # without it would silently un-rotate a folded tablet on every lid event and
@@ -112,56 +150,161 @@ external_name() {
   hyprctl -j monitors all | jq -r --arg i "$INT" 'map(select(.name != $i)) | .[0].name // empty'
 }
 
-# NOTE: we deliberately do NOT disable the internal panel for external-only.
-# `hl.monitor({ disabled = true })` works, but on this NVIDIA + USB-C DP-alt-mode
-# setup disabling eDP-1 releases its CRTC, and the resulting CRTC reshuffle drops
-# the external's DP link entirely — the Dell goes to "disconnected" at the kernel
-# level and only comes back on a physical replug. (In the aquamarine log:
-# "eDP-1 is disabled, releasing crtc 392" -> hotplug -> "Connector DP-1 disconnected".)
-# Blanking with dpms keeps its CRTC assigned, so there is no modeset churn and the
-# external link stays up.
-evacuate_int() {   # move everything off the internal panel, then blank it
+# --- profile selection -----------------------------------------------------
+# Geometry now lives in nwg-displays profiles, authored through the GUI and
+# applied with `nwg-displays-apply -p`. This script only decides WHICH profile
+# the current state calls for. If the profile is missing (unrecognised external,
+# or profiles not yet authored) it falls back to the hardcoded geometry below,
+# so auto-extend still works on unknown hardware.
+PROFILE_DIR="$HOME/.config/nwg-displays/profiles"
+STATE="${XDG_RUNTIME_DIR:-/tmp}/hypr-active-profile"
+
+have_profile() { [ -f "$PROFILE_DIR/$1.json" ]; }
+
+# Guard against a profile JSON with `active: false` on some output — e.g. a
+# hand-edited or future-nwg-displays-version profile; disabling eDP-1 releases
+# its CRTC and the reshuffle drops the external's DP link at the kernel level
+# (see external_name()'s note and the design doc's "DP-link landmine"
+# section). NOTE: this does NOT cover the GUI's own Active checkbox in
+# nwg-displays 0.4.3 — that checkbox drives `outputs_activity`, while this
+# JSON field is `db.active`, which `on_active_check_button_toggled` never
+# touches, so unticking Active in the GUI does not change what this guard
+# reads. That route (Active unticked -> `disabled = true` written into
+# monitors.lua/monitors.conf) is instead covered by sanitize_disabled() above,
+# which heals it after the fact on every run.
+profile_has_disabled_output() {
+  local f="$PROFILE_DIR/$1.json" bad
+  [ -f "$f" ] || return 1
+  bad="$(jq -r '[.. | objects | select(has("active")) | select(.active == false)
+                 | (.description // .name // "unknown")][0] // empty' "$f" 2>/dev/null)"
+  if [ -n "$bad" ]; then
+    notify-send -e -u critical "󰍹 Display" \
+      "Refusing $1: output $bad has Active unticked" 2>/dev/null || true
+    return 0
+  fi
+  return 1
+}
+
+# monitor-verify.sh lives beside this script; resolve it relative to our own
+# directory rather than hardcoding a path.
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+
+# AMENDED 2026-09-20: profile DPMS is inert on this build. nwg-displays drives
+# DPMS with plain `hyprctl dispatch dpms ...`, which the non-legacy Lua parser
+# rejects outright (verified live: `hyprctl dispatch dpms on eDP-1` ->
+# "')' expected near 'on'"), and nwg-displays never reads the IPC reply, so it
+# reports success regardless. Profiles therefore own GEOMETRY ONLY; this script
+# keeps driving DPMS itself via dpms_set, exactly as it always has.
+#
+# Idempotence gate. `nwg-displays-apply` ends in `hyprctl reload`, which can
+# re-enter this script; re-applying the same profile would oscillate. Comparing
+# against the last applied name breaks the cycle regardless of whether
+# hyprland.start re-fires on reload (see Task 1 in the plan). The gate is only
+# armed on OBSERVED success — a failed apply, a rejected profile, or a failed
+# verify must NOT poison $STATE, or every later event would return early
+# without ever retrying.
+apply_profile() {   # apply_profile <profile-name> <dpms-want: on|off>
+  local name="$1" dpms_want="$2" t
+  if [ "$(cat "$STATE" 2>/dev/null)" = "$name" ]; then
+    return 0
+  fi
+  if profile_has_disabled_output "$name"; then
+    return 1
+  fi
+  if ! nwg-displays-apply -p "$name" >/dev/null 2>&1; then
+    notify-send -e -u critical "󰍹 Display" "nwg-displays-apply failed for $name" 2>/dev/null || true
+    return 1
+  fi
+  # The profile's transform is a static value captured when the profile was
+  # authored, while scripts/auto-rotate.sh writes the LIVE rotation to
+  # $XDG_RUNTIME_DIR/hypr-rotation at runtime — so a stale profile transform
+  # would clobber a folded-tablet rotation on every profile apply. Re-assert it
+  # here, and BEFORE dpms_set: per the dpms_set note above, an hl.monitor call
+  # on an output flips its dpms back on asynchronously, so doing this after
+  # dpms_set would re-light a panel that was just blanked and fail
+  # verification forever. Order matters here — do not swap these two lines.
+  t="$(int_transform)"
+  [ "$t" != 0 ] && hy "hl.monitor({ output = \"$INT\", transform = $t })"
+  dpms_set "$dpms_want" "$INT"
+  if "$SELF_DIR/monitor-verify.sh" "$name" >/dev/null 2>&1; then
+    printf '%s' "$name" > "$STATE"
+  else
+    notify-send -e -u critical "󰍹 Display" "$name applied but failed verification" 2>/dev/null || true
+    rm -f "$STATE"   # do not let a stale prior profile suppress the retry
+    return 1
+  fi
+}
+
+# Move every workspace off the internal panel. Split out of the old
+# evacuate_int(): apply_profile() drives the dpms flip exactly once, after the
+# profile geometry is applied — doing it here too would double-toggle
+# (hl.dsp.dpms ignores `mode` and simply toggles).
+move_ws_off_int() {
   local ext="$1" ws
-  for ws in $(hyprctl -j workspaces | jq -r --arg i "$INT" '.[] | select(.monitor == $i and .id > 0) | .id'); do
+  for ws in $(hyprctl -j workspaces | jq -r --arg i "$INT" \
+                '.[] | select(.monitor == $i and .id > 0) | .id'); do
     ws_to_mon "$ws" "$ext"
   done
   focus_mon "$ext"
-  dpms_set off "$INT"
-  # Hyprland always keeps one workspace on an enabled monitor, so eDP-1 will still
-  # hold an empty one. It is blanked and off to the side, which is harmless.
 }
 
-# Brief OSD naming the layout we just switched to.
+# Fallback: the pre-profile hardcoded path. Applied live via mon_set()
+# (hl.monitor), but it does NOT persist across a reload: nwg-displays'
+# generated ~/.config/hypr/monitors.lua is still require()'d after this
+# module runs, so a reload re-applies whatever that file last held over this
+# fallback's runtime geometry. That's fine — the fallback's whole purpose is
+# "some sane geometry now, on unrecognised hardware", not a persisted layout.
+fallback_layout() {
+  local ext="$1" closed="$2"
+  if [ -n "$ext" ]; then
+    mon_set "$INT" "$INT_MODE" "$INT_POS_DOCKED"
+    mon_set "$ext" "$EXT_MODE" "$EXT_POS"
+    if [ "$closed" = yes ]; then
+      move_ws_off_int "$ext"; dpms_set off "$INT"
+    else
+      dpms_set on "$INT"
+    fi
+  else
+    dpms_set on "$INT"
+    mon_set "$INT" "$INT_MODE" "$INT_POS_SOLO"
+  fi
+}
+
 notify_mode() {   # mode-label
   notify-send -e -u low -t 1500 -h string:x-canonical-private-synchronous:monitor-auto \
     "󰍹 Display" "$1" 2>/dev/null || true
 }
 
 EXT="$(external_name)"
-mode=""
+if lid_closed "$1"; then CLOSED=yes; else CLOSED=no; fi
 
 if [ -n "$EXT" ]; then
-  # Both docked layouts share the same geometry, so these two mon_set calls are
-  # no-ops on a lid toggle and the switch costs nothing but the dpms flip.
-  mon_set "$INT" "$INT_MODE" "$INT_POS_DOCKED"
-  mon_set "$EXT" "$EXT_MODE" "$EXT_POS"
-  if lid_closed "$1"; then
-    evacuate_int "$EXT"
-    mode="External only"
-  else
-    dpms_set on "$INT"
-    mode="Extended"
-  fi
+  if [ "$CLOSED" = yes ]; then want=docked-external; label="External only"
+  else                          want=docked-extend;  label="Extended"; fi
 else
-  if ! lid_closed "$1"; then
-    dpms_set on "$INT"
-    mon_set "$INT" "$INT_MODE" "$INT_POS_SOLO"
-    mode="Laptop only"
-  fi
-  # no external + lid closed: leave displays as-is, there is nowhere to move to.
+  # no external + lid closed: nowhere to move the session to, leave it alone.
+  [ "$CLOSED" = yes ] && exit 0
+  want=laptop-only; label="Laptop only"
 fi
 
-if [ -n "$mode" ]; then
-  notify_mode "$mode"
-  sleep "$SETTLE"   # keep the lock held so our own hotplug echo is dropped
+dpms_want=on
+[ "$want" = docked-external ] && dpms_want=off
+
+if have_profile "$want"; then
+  # Workspaces must leave the panel before the profile blanks it.
+  [ "$want" = docked-external ] && move_ws_off_int "$EXT"
+  if apply_profile "$want" "$dpms_want"; then
+    notify_mode "$label"
+  else
+    # Verify-gating makes failure a routine path now, not an exotic one: hold
+    # the settle window on this path too, or the flock releases straight into
+    # hyprctl reload's hotplug echo, which re-enters, re-applies, re-fails.
+    notify_mode "$label (failed)"
+  fi
+  sleep "$SETTLE"
+else
+  fallback_layout "$EXT" "$CLOSED"
+  rm -f "$STATE"          # fallback geometry is not a profile
+  notify_mode "$label (fallback)"
+  sleep "$SETTLE"
 fi

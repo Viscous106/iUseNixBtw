@@ -84,6 +84,10 @@
       "/persist/nixos-config/home/hypr/monitors.conf";
     "hypr/workspaces.conf".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/workspaces.conf";
+    # monitors.lua — nwg-displays' Lua output, loaded by require("monitors").
+    # Separate from lua/monitors.lua, which owns the event hooks and lid binds.
+    "hypr/monitors.lua".source = config.lib.file.mkOutOfStoreSymlink
+      "/persist/nixos-config/home/hypr/monitors.lua";
     # hypr-setup.sh, sync.sh, pkglist.txt and aurlist.txt were removed: all
     # four were pacman/AUR-based Arch migration leftovers with no meaning on
     # NixOS (pkglist.txt was a 3223-line `pacman -Qqen` dump).
