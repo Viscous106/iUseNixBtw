@@ -4,6 +4,23 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # A second nixpkgs, deliberately NOT following the one above, used for
+    # exactly one package: wivrn (see modules/vr.nix).
+    #
+    # This breaks the one-snapshot rule the other inputs follow, so it needs a
+    # reason. WiVRn refuses to connect unless the PC server and the headset
+    # client are the *same* version, and the client is a Meta Store app that
+    # auto-updates outside our control — so the server version is not really
+    # ours to pin, it is dictated by whatever the Store ships. As of writing,
+    # the Store is on 26.9 while nixos-unstable still carries 26.6.2 (it waits
+    # on a full Hydra run); nixos-unstable-small has 26.9 and is Hydra-tested,
+    # unlike master.
+    #
+    # Scoped to one leaf package, so the cost is an extra eval, not a second
+    # system closure. If nixos-unstable later catches up to whatever the Store
+    # is on, delete this input and drop back to plain pkgs.wivrn.
+    nixpkgs-wivrn.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
