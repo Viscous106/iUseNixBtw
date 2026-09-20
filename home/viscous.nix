@@ -35,6 +35,7 @@
     ./modules/python-env.nix
     ./modules/hyprwhspr.nix
     ./modules/ydotoold.nix
+    ./modules/wayvr.nix
     ./modules/battery-notify.nix
   ];
 

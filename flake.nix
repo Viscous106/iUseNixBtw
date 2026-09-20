@@ -82,6 +82,7 @@ outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skw
       ./modules/peripherals.nix
       ./modules/audio.nix
       ./modules/touchscreen.nix
+      ./modules/vr.nix
 
       hyprland.nixosModules.default
       skwd-wall.nixosModules.default

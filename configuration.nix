@@ -51,7 +51,7 @@
   users.users.viscous = {
     isNormalUser   = true;
     shell          = pkgs.zsh;
-    extraGroups    = [ "wheel" "networkmanager" "video" "audio" "input" "libvirtd" ];
+    extraGroups    = [ "wheel" "networkmanager" "video" "audio" "input" "libvirtd" "adbusers" ];
     # Password hash generated with mkpasswd -m sha-512
     initialHashedPassword = "$6$KAEKKvbZIFl93S.a$bH1h1M.sCzqmvX3SZkK6QcHfjP31vBadi4V/dpWPlL2zIeQ5ZQ85NwrE9sylDZ3Wb/YOeS8lSHtHeJhGbveic0";
   };
