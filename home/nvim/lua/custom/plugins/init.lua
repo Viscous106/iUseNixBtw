@@ -866,7 +866,9 @@ return {
     lazy = false,
     enabled = true,
     dependencies = { 'benlubas/image.nvim' },
-    build = ':MoltenInstall',
+    -- :MoltenInstall is not a thing — molten registers its commands through
+    -- the pynvim remote-plugin manifest, which :UpdateRemotePlugins writes.
+    build = ':UpdateRemotePlugins',
     config = function()
       vim.g.molten_output_win_max_height = 20
       vim.g.molten_image_provider = 'image.nvim'
@@ -928,12 +930,18 @@ return {
         vim.keymap.set(map.mode, map[1], map[2], { noremap = true, silent = true, desc = map.desc })
       end
 
-      -- Initialize molten when opening .ipynb or .py files
+      -- Initialize molten when opening .ipynb or .py files.
+      -- Guarded: the :Molten* commands only exist once the remote-plugin
+      -- manifest has been generated (:UpdateRemotePlugins) against a python3
+      -- host that has pynvim. Without the guard every Python buffer throws
+      -- "E492: Not an editor command: MoltenInit" on read.
       vim.api.nvim_create_autocmd('BufRead', {
         group = vim.api.nvim_create_augroup('MoltenInit', { clear = true }),
         pattern = { '*.ipynb', '*.py' },
         callback = function()
-          vim.cmd 'MoltenInit'
+          if vim.fn.exists ':MoltenInit' == 2 then
+            vim.cmd 'MoltenInit'
+          end
         end,
       })
     end,
