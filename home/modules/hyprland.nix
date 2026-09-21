@@ -79,9 +79,10 @@
     "hypr/animations".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/animations";
 
-    # top-level state/meta files referenced by lua/monitors.lua + setup scripts
-    "hypr/monitors.conf".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/monitors.conf";
+    # top-level state/meta files referenced by lua/monitors.lua + setup scripts.
+    # monitors.conf used to live here too: nwg-displays still writes that file,
+    # but nothing has sourced it since the move to the Lua parser, so it was a
+    # decoy that only ever disagreed with the live layout. Removed 2026-09-21.
     "hypr/workspaces.conf".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/workspaces.conf";
     # monitors.lua — nwg-displays' Lua output, loaded by require("monitors").

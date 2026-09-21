@@ -96,10 +96,12 @@ outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skw
       ./modules/apps-gaming.nix
       ./modules/apps-databases.nix
       ./modules/apps-system.nix
+      ./modules/proton.nix
       ./modules/peripherals.nix
       ./modules/audio.nix
       ./modules/touchscreen.nix
       ./modules/vr.nix
+      ./modules/proton.nix
 
       hyprland.nixosModules.default
       skwd-wall.nixosModules.default

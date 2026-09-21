@@ -27,7 +27,7 @@ STATE="${XDG_RUNTIME_DIR:-/tmp}/hypr-active-profile"
 # in nwg-displays 0.4.3 — that checkbox drives `outputs_activity`, while this
 # JSON field is `db.active`, which `on_active_check_button_toggled` never
 # touches. That route (Active unticked -> `disabled = true` written into
-# monitors.lua/monitors.conf) is instead covered by monitor-auto.sh's
+# monitors.lua) is instead covered by monitor-auto.sh's
 # sanitize_disabled(), which heals it after the fact on every run.
 profile_has_disabled_output() {
   local f="$PROFILE_DIR/$1.json" bad

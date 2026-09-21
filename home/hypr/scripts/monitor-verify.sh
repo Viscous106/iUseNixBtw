@@ -149,9 +149,8 @@ check_int_not_disabled() {
 }
 
 check_no_disable() {
-  if grep -qE '(disabled\s*=\s*true|,disable\b)' "$HOME/.config/hypr/monitors.lua" \
-                                                  "$HOME/.config/hypr/monitors.conf" 2>/dev/null; then
-    fail "a disable directive is present in a generated monitor config (monitors.lua/monitors.conf)"
+  if grep -qE 'disabled\s*=\s*true' "$HOME/.config/hypr/monitors.lua" 2>/dev/null; then
+    fail "a disable directive is present in the generated monitor config (monitors.lua)"
   else
     pass "no disable directive in generated monitor config"
   fi
