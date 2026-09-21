@@ -1,5 +1,30 @@
 { config, pkgs, lib, ... }:
 
+let
+  # Python environment for Neovim's python3 provider. molten-nvim is a pynvim
+  # *remote plugin* — its :Molten* commands only exist once nvim can start a
+  # python host that has pynvim importable, and only after :UpdateRemotePlugins
+  # has written ~/.local/share/nvim/rplugin.vim.
+  nvimPythonEnv = pkgs.python3.withPackages (ps: with ps; [
+    pynvim          # required — the Neovim remote-plugin API
+    jupyter-client  # required — talks to Jupyter kernels
+    ipykernel       # the Python kernel :MoltenInit actually starts
+    nbformat        # :MoltenImportOutput / :MoltenExportOutput
+    pillow          # :MoltenImagePopup
+    cairosvg        # SVG outputs with transparency
+    pyperclip       # g:molten_copy_output
+  ]);
+
+  # Exposed under a unique binary name rather than as a bare `python3`:
+  # home-manager appends extraPackages to nvim's PATH with --suffix, so a
+  # plain `python3` here would lose to the system one (which has no pynvim).
+  # init.lua resolves this name with vim.fn.exepath() to set
+  # vim.g.python3_host_prog — see home/nvim/init.lua.
+  nvimPythonHost = pkgs.writeShellScriptBin "nvim-python3-host" ''
+    exec ${nvimPythonEnv}/bin/python3 "$@"
+  '';
+in
+
 {
   programs.neovim = {
     enable        = true;
@@ -14,7 +39,9 @@
     # overlapping paths. kickstart.nvim doesn't use the legacy Vim
     # node/python3 providers, so this is a clean drop, not a functional
     # loss. nodejs/python3 stay available via extraPackages for anything
-    # that shells out to them directly (mason tools, build steps, etc.).
+    # that shells out to them directly (mason tools, build steps, etc.), and
+    # molten-nvim's python3 provider is wired up by hand via nvimPythonHost
+    # below instead of by this option.
     withNodeJs    = false;
     withPython3   = false;
     withRuby      = false;
@@ -23,6 +50,7 @@
       # Runtimes needed by LSPs / plugin build steps
       nodejs        # unsuffixed: tracks current default, avoids future EOL pins (nodejs_20 was removed)
       python3
+      nvimPythonHost # python3 provider for molten-nvim (see let-block above)
       # Fuzzy search (Telescope dependency)
       ripgrep
       fd

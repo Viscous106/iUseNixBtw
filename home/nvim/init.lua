@@ -103,6 +103,19 @@ vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+-- The python3 provider we *do* use: molten-nvim is a pynvim remote plugin, so
+-- it needs an interpreter with pynvim importable. home-manager's `withPython3`
+-- is off (it would generate a competing init.lua — see home/modules/neovim.nix),
+-- so the environment is built there and put on nvim's PATH under a unique name.
+-- Resolve it here rather than hardcoding a /nix/store path, and stay silent if
+-- it's absent so this config still loads on a non-Nix machine.
+local python3_host = vim.fn.exepath 'nvim-python3-host'
+if python3_host ~= '' then
+  vim.g.python3_host_prog = python3_host
+else
+  vim.g.loaded_python3_provider = 0
+end
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
