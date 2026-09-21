@@ -104,6 +104,24 @@
     wants       = [ "network-online.target" ];
     wantedBy    = [ "multi-user.target" ];
 
+    # The remote is created interactively by `rclone config`, so on a fresh
+    # machine this unit has nothing to mount yet. Without a condition it exits
+    # 1 ("didn't find section in config file"), restart-loops on RestartSec,
+    # and makes `nixos-rebuild switch` itself return non-zero. A failed
+    # ConditionPathExists is not a failure: systemd skips the unit and records
+    # "condition failed", the rebuild stays green, and it starts normally once
+    # the config file is there.
+    unitConfig = {
+      ConditionPathExists = "/persist/secrets/rclone.conf";
+      # Bounded retries. A real fault (expired session, Proton outage) should
+      # surface as a failed unit you can see, not an indefinite 10s loop
+      # filling the journal. These two live in [Unit], not [Service] — they
+      # were moved out of [Service] in systemd 229 and only linger there as
+      # deprecated compat.
+      StartLimitBurst       = 5;
+      StartLimitIntervalSec = 300;
+    };
+
     serviceConfig = {
       Type = "notify";
       ExecStart = ''
