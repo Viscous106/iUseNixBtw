@@ -58,10 +58,10 @@ esac
 hy() { hyprctl eval "$1" >/dev/null; }
 
 # --- self-healing sanitiser for the disabled= landmine ----------------------
-# A GUI Apply with Active unticked writes `disabled = true` (Lua) / `,disable`
-# (conf) into ~/.config/hypr/monitors.lua / monitors.conf. Since Task 3 those
-# files are require()'d / read on every run, so the poisoned state survives a
-# hyprland.lua reload, a full reboot, AND the physical replug that is supposed
+# A GUI Apply with Active unticked writes `disabled = true` into
+# ~/.config/hypr/monitors.lua. Since Task 3 that file is require()'d on every
+# run, so the poisoned state survives a hyprland.lua reload, a full reboot,
+# AND the physical replug that is supposed
 # to recover the DP link — nwg-displays' own safety net does not help here:
 # its confirm-or-revert dialog cannot render when no output is left to click
 # on, and its revert path deliberately does not reload. This runs on every
@@ -70,15 +70,10 @@ hy() { hyprctl eval "$1" >/dev/null; }
 # directive from disk, and re-enable the output live so this boot does not
 # stay bricked waiting for the next GUI Apply to fix the file for real.
 sanitize_disabled() {
-  local f found=0 out
-  for f in "$HOME/.config/hypr/monitors.lua" "$HOME/.config/hypr/monitors.conf"; do
-    [ -f "$f" ] || continue
-    if grep -qE '(disabled\s*=\s*true|,disable\b)' "$f"; then
-      found=1
-      sed -i --follow-symlinks -E 's/disabled\s*=\s*true/disabled = false/g; s/,disable\b//g' "$f"
-    fi
-  done
-  [ "$found" = 1 ] || return 0
+  local f="$HOME/.config/hypr/monitors.lua" out
+  [ -f "$f" ] || return 0
+  grep -qE 'disabled\s*=\s*true' "$f" || return 0
+  sed -i --follow-symlinks -E 's/disabled\s*=\s*true/disabled = false/g' "$f"
   # An output that `hyprctl -j monitors all` reports but the plain (non-all)
   # list omits is disabled — the same all-vs-plain distinction
   # check_int_not_disabled in monitor-verify.sh relies on. Reuse it here
@@ -170,7 +165,7 @@ have_profile() { [ -f "$PROFILE_DIR/$1.json" ]; }
 # JSON field is `db.active`, which `on_active_check_button_toggled` never
 # touches, so unticking Active in the GUI does not change what this guard
 # reads. That route (Active unticked -> `disabled = true` written into
-# monitors.lua/monitors.conf) is instead covered by sanitize_disabled() above,
+# monitors.lua) is instead covered by sanitize_disabled() above,
 # which heals it after the fact on every run.
 profile_has_disabled_output() {
   local f="$PROFILE_DIR/$1.json" bad

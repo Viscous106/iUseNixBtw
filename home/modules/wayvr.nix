@@ -46,8 +46,8 @@
   #   hyprctl output remove HEADLESS-2
   #
   # Kept as a note rather than baked into hyprland.nix on purpose: monitors here
-  # are owned by nwg-displays, which writes home/hypr/monitors.conf and
-  # monitors.lua. Declaring headless outputs behind its back would mean two
+  # are owned by nwg-displays, which writes home/hypr/monitors.lua.
+  # Declaring headless outputs behind its back would mean two
   # writers for one piece of state, and nwg-displays would clobber them on its
   # next save. Create them when you go into VR; they vanish on removal.
 }
