@@ -78,9 +78,55 @@
     fi
 
     # Keyrings (GNOME Keyring data)
-    $DRY_RUN_CMD mkdir -p $HOME/.local/share
-    if [ -d /persist/home/viscous/.local/share/keyrings ]; then
-      $DRY_RUN_CMD ln -sfn /persist/home/viscous/.local/share/keyrings $HOME/.local/share/keyrings || true
+    # gnome-keyring rewrites its *.keyring files in place, so this has to
+    # resolve to a real writable path — home.file/xdg.dataFile would interpose
+    # a read-only /nix/store path, the same reason the Claude settings.json
+    # below is linked by hand.
+    #
+    # Rewritten after the previous version left a dangling
+    # $HOME/.local/share/keyrings/keyrings symlink behind. It had two bugs:
+    #   - `ln -sfn TARGET $HOME/.local/share/keyrings` links *inside* that path
+    #     whenever it already exists as a real directory rather than replacing
+    #     it. That is precisely what the nested keyrings/keyrings link was.
+    #   - the `if [ -d /persist/... ]` guard only fired once the target already
+    #     existed, and nothing ever created it — so it could never establish the
+    #     link from a clean state, and silently no-op'd forever once the target
+    #     went missing.
+    keyringPersist=/persist/home/viscous/.local/share/keyrings
+    keyringHome=$HOME/.local/share/keyrings
+
+    $DRY_RUN_CMD mkdir -p "$keyringPersist"
+    $DRY_RUN_CMD chmod 700 "$keyringPersist"
+    $DRY_RUN_CMD mkdir -p "$HOME/.local/share"
+
+    if [ -L "$keyringHome" ]; then
+      # Already a symlink (possibly dangling, possibly aimed somewhere stale):
+      # re-point it. -n keeps ln from following it into its own target.
+      $DRY_RUN_CMD ln -sfn "$keyringPersist" "$keyringHome"
+    elif [ -d "$keyringHome" ]; then
+      # A real directory: migrate its contents to /persist, then replace it.
+      # The persist side is authoritative — a name already present there is
+      # never overwritten, the incoming copy is set aside as .superseded so
+      # nothing is destroyed silently.
+      $DRY_RUN_CMD rm -f "$keyringHome/keyrings"   # stale nested link, see above
+      for f in "$keyringHome"/*; do
+        [ -e "$f" ] || continue                     # empty dir: the glob stays literal
+        base=$(basename "$f")
+        if [ -e "$keyringPersist/$base" ]; then
+          $DRY_RUN_CMD mv "$f" "$f.superseded"
+        else
+          $DRY_RUN_CMD mv "$f" "$keyringPersist/$base"
+        fi
+      done
+      if [ -z "$(ls -A "$keyringHome")" ]; then
+        $DRY_RUN_CMD rmdir "$keyringHome"
+        $DRY_RUN_CMD ln -sfn "$keyringPersist" "$keyringHome"
+      else
+        echo "Warning: $keyringHome still holds files after migration (see *.superseded);" \
+             "leaving it as a directory rather than replacing it with the link."
+      fi
+    else
+      $DRY_RUN_CMD ln -sfn "$keyringPersist" "$keyringHome"
     fi
   '';
 
