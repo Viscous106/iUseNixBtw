@@ -552,6 +552,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-claude": {
+      "locked": {
+        "lastModified": 1790096505,
+        "narHash": "sha256-UbSc81aqsHU4mOficKbMitf3S7gFnJkYDAKfprVS1R8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "a251c42236bbff9f870fcdc513dac5873009c304",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "a251c42236bbff9f870fcdc513dac5873009c304",
+        "type": "github"
+      }
+    },
     "nixpkgs-wivrn": {
       "locked": {
         "lastModified": 1789894232,
@@ -671,6 +687,7 @@
         "home-manager": "home-manager",
         "hyprland": "hyprland",
         "nixpkgs": "nixpkgs_2",
+        "nixpkgs-claude": "nixpkgs-claude",
         "nixpkgs-wivrn": "nixpkgs-wivrn",
         "skwd-wall": "skwd-wall",
         "zen-browser": "zen-browser"
