@@ -26,6 +26,16 @@
         config.allowUnfree = true;
       };
 
+      # claude-code from its own pinned input rather than the main snapshot,
+      # so the CLI can be bumped on its own cadence. See the long note on the
+      # nixpkgs-claude input in flake.nix. Overriding the attr (rather than
+      # exposing a second pkgs set) means every consumer — home.packages here,
+      # anything reaching for pkgs.claude-code later — gets the pinned build.
+      claude-code = (import inputs.nixpkgs-claude {
+        system = prev.stdenv.hostPlatform.system;
+        config.allowUnfree = true;
+      }).claude-code;
+
       # nixpkgs dropped `opera` on 2025-05-19 (it is a `throw` in aliases.nix
       # now), so we repack Opera's own official .deb. See pkgs/opera.nix.
       opera = final.callPackage ./pkgs/opera.nix { };

@@ -21,6 +21,35 @@
     # is on, delete this input and drop back to plain pkgs.wivrn.
     nixpkgs-wivrn.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
+    # A third nixpkgs, again on the Hydra-tested small channel, for exactly one
+    # package: claude-code (wired up in the overlay in configuration.nix).
+    #
+    # Same one-snapshot exception as nixpkgs-wivrn above, different reason.
+    # claude-code ships several releases a week; our main snapshot only moves
+    # when the whole system does, so the CLI here was stuck on 2.1.245 while
+    # upstream was on 2.1.280. Claude Code's own `claude update` "fixes" that by
+    # installing a native build into ~/.local/bin, which then shadows the Nix
+    # binary on PATH — two CLIs, only one of them declarative. Pinning the CLI
+    # separately keeps it current without dragging the rest of the closure.
+    #
+    # Deliberately NOT reusing the nixpkgs-wivrn input even though both track
+    # nixos-unstable-small: wivrn's revision is dictated by whatever the Meta
+    # Store ships and must not move when claude-code is bumped. Two inputs mean
+    # bumping the CLI cannot break the headset.
+    #
+    # Pinned by full revision rather than by `nixos-unstable-small` branch name
+    # for the same reason caelestia-shell uses git+https: resolving a branch
+    # sends the github: fetcher to api.github.com, which 403s on the
+    # unauthenticated rate limit. A 40-char rev goes straight to codeload and
+    # never touches the API. The rev below is the nixos-unstable-small channel
+    # revision, i.e. one that has passed a full Hydra run. To bump:
+    #
+    #   curl -sL https://channels.nixos.org/nixos-unstable-small/git-revision
+    #
+    # and paste the result here (plain `nix flake update` cannot move a
+    # rev-pinned input).
+    nixpkgs-claude.url = "github:NixOS/nixpkgs/a251c42236bbff9f870fcdc513dac5873009c304";  # claude-code 2.1.278
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -78,9 +107,9 @@
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
     };
-};
+  };
 
-outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:
   let
     system = "x86_64-linux";
 
@@ -101,7 +130,6 @@ outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skw
       ./modules/audio.nix
       ./modules/touchscreen.nix
       ./modules/vr.nix
-      ./modules/proton.nix
 
       hyprland.nixosModules.default
       skwd-wall.nixosModules.default
