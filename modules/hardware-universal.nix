@@ -126,10 +126,84 @@
 
   # iwd gives better WiFi support on tricky chipsets (Intel AX series etc.)
   networking.networkmanager.wifi.backend = "iwd";
+
+  # ── WiFi power save — off ─────────────────────────────────────────────────
+  # NetworkManager leaves `wifi.powersave` unset by default, which means "don't
+  # touch it", which means the mac80211/rtw89 default (on) wins. On this card
+  # (RTL8852BE, rtw89_8852be) that is expensive: measured against the LAN
+  # gateway at -43 dBm, 60 ICMP echoes at 0.2 s, nothing else on the link —
+  #
+  #   power_save on    avg 3.76 ms   max 71.9 ms   mdev 10.62 ms
+  #   power_save off   avg 1.62 ms   max 10.8 ms   mdev  1.54 ms
+  #
+  # 2.3x the average, 6.6x the worst case and 6.9x the jitter, on the hop to a
+  # router three metres away. Throughput is unaffected either way (~190-250
+  # Mbit/s to Cloudflare in both states) — this is purely a latency and jitter
+  # tax, which is exactly the part a human notices: it is paid per round trip,
+  # so it lands on interactive traffic (SSH keystrokes, page loads that fan out
+  # into many small requests, calls) and not on bulk downloads.
+  #
+  # The mechanism is PS-Poll: with power save on, the radio sleeps between
+  # beacons and only wakes on the DTIM interval, so an inbound packet arriving
+  # mid-sleep waits for the next wake-up. `dtim period: 1` and `beacon int: 100`
+  # on this AP means a worst case around one beacon interval, which matches the
+  # ~70-100 ms outliers above.
+  #
+  # false -> NM writes `wifi.powersave=2` (disable) as the connection default.
+  # If the jitter ever comes back with this set, the next layer down is rtw89's
+  # own low-power mode, which NM does not reach:
+  #   boot.extraModprobeConfig = "options rtw89_core disable_ps_mode=1";
+  # and below that the PCIe L1 substates (`rtw89_pci.disable_aspm_l1ss=1`).
+  # Neither was needed here — both were left alone and the numbers above are
+  # with the stock values (disable_ps_mode=N, ASPM L1.2 enabled by firmware).
+  #
+  # Cost: a few hundred mW of extra idle draw on battery. That is the trade.
+  networking.networkmanager.wifi.powersave = false;
+
+  # ── Regulatory domain ─────────────────────────────────────────────────────
+  # The kernel boots with `cfg80211.ieee80211_regdom=00` — the "world" domain —
+  # and nothing here ever moved it off that, even though wireless-regdb is
+  # installed and the certificates load fine ("Loading compiled-in X.509
+  # certificates for regulatory database"). World is the deliberately pessimal
+  # fallback, and `iw reg get` shows what it costs:
+  #
+  #   country 00   every 5 GHz band flagged PASSIVE-SCAN, all limits (6, 20)
+  #   country IN   no PASSIVE-SCAN, 30 dBm on UNII-1/UNII-3, 6 GHz unlocked
+  #
+  # PASSIVE-SCAN is the expensive flag. It forbids sending probe requests on
+  # those channels, so the card cannot ask "who is there" — it has to park on
+  # each channel and wait for a beacon. A full scan measured 5.06 s under 00
+  # versus 4.14 s under IN, and the card is off its operating channel for that
+  # whole time, so every scan is a traffic stall. That matters here because iwd
+  # roam-scans on a timer (6 scans in the last 20 minutes, at -41 dBm) — see
+  # the roam-churn note below, which tuned the thresholds but could not make
+  # the scans themselves cheaper.
+  #
+  # It also explains iwd's "Failed to find band with country string 'IN 32' and
+  # oper class 4" — the AP advertises IN in its country IE, iwd tries to honour
+  # it, and the world domain has no matching band to map it onto.
+  #
+  # Set in two places on purpose: the modprobe option is the boot-time default
+  # for cfg80211 itself, and iwd's Country re-asserts it as a user hint once
+  # the wireless stack is up.
+  #
+  # NOTE: this is a fixed hint, and this is a laptop. IN is correct where it
+  # lives (time.timeZone = "Asia/Kolkata"). If you take it abroad for more than
+  # a few days, change both values or you will be transmitting under the wrong
+  # limits — legally, and on channels the local APs may not use.
+  boot.extraModprobeConfig = ''
+    options cfg80211 ieee80211_regdom=IN
+  '';
   networking.wireless.iwd = {
     enable   = true;
     settings = {
       General.EnableNetworkConfiguration = false;  # let NetworkManager handle it
+
+      # Regulatory domain, the wireless-stack half of the boot.extraModprobeConfig
+      # setting above. Without it iwd logs "Failed to find band with country
+      # string 'IN 32' and oper class 4" on every association, because it is
+      # trying to honour the AP's country IE against a world-domain band list.
+      General.Country                    = "IN";
       P2P.Enable                         = false;  # disable Wi-Fi Direct — prevents the
                                                    # spurious NM "error setting IPv4 forwarding"
                                                    # warning on the iwd P2P virtual device at boot

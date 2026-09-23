@@ -116,6 +116,69 @@
   # to authenticate this machine.
   services.tailscale.enable = true;
 
+  # ── DNS — local cache, fast upstream, Tailscale kept for ts.net only ──────
+  # Symptom: the link is fast (190-250 Mbit/s measured) but pages stall before
+  # they start. The stall is name resolution, not bandwidth. On a cold `curl`
+  # over eight real sites, time_namelookup ran 39-92 ms typical with one at
+  # 865 ms (archlinux.org) — on a 50 MB Cloudflare download, DNS was 90 ms of a
+  # 174 ms time-to-first-byte. More than half the wait to first byte was spent
+  # finding out where to send the request.
+  #
+  # Two separate causes, both of them configuration:
+  #
+  # 1. There was no DNS cache on this machine at all. systemd-resolved was
+  #    inactive and nothing else cached, so every lookup — including the same
+  #    handful of domains, over and over — went out to the network. A page that
+  #    pulls from a dozen hosts paid that a dozen times.
+  #
+  # 2. /etc/resolv.conf listed exactly one resolver: 100.100.100.100. That is
+  #    tailscaled's in-process DNS proxy, and `tailscale dns status` reports
+  #    "no resolvers configured" with a single split route for ts.net. So every
+  #    query for every domain was being handed to a userspace proxy whose only
+  #    real job here is ts.net, which then forwarded it back out to the router
+  #    anyway. Measured on cached names, that detour cost 19.2 ms median
+  #    against the router's 1.7 ms.
+  #
+  # On uncached names (random labels, forcing full recursion) the upstream
+  # itself is also the wrong choice — median over eight queries:
+  #
+  #   tailscale 100.100.100.100   185.7 ms
+  #   router    192.168.0.1       267.2 ms   (the ISP resolver behind it)
+  #   cloudflare 1.1.1.1           42.3 ms
+  #
+  # resolved fixes both axes at once: it caches, so the repeat lookups that
+  # dominate real browsing become local, and it queries 1.1.1.1 directly
+  # instead of the ISP, so the misses are ~6x faster.
+  #
+  # Tailscale is NOT disabled here and MagicDNS keeps working. tailscaled
+  # detects systemd-resolved and registers split DNS over its D-Bus API, so
+  # ts.net goes to Tailscale and everything else goes to the resolvers below —
+  # which is the arrangement the single split route above was always asking
+  # for. This is upstream's preferred integration, not a workaround.
+  #
+  # DNSSEC and DNSOverTLS are left off deliberately. This laptop roams onto
+  # café and office wifi; both break captive portals, and DoT adds a handshake
+  # to the first query on every new network. Turn DNSOverTLS on if the machine
+  # stops moving.
+  #
+  # Verify after a rebuild:
+  #   resolvectl status          -> "DNS Servers: 1.1.1.1 ..." + ts.net domain
+  #   resolvectl statistics      -> cache hits climbing
+  #   ping laptop.tail4ba78e.ts.net
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      DNS  = [ "1.1.1.1" "1.0.0.1" "9.9.9.9" ];
+      DNSOverTLS = false;
+      DNSSEC     = false;
+      Cache      = true;
+    };
+  };
+
+  # Hand NM's DNS to resolved instead of resolvconf. Without this NM keeps
+  # rc-manager=resolvconf and races resolved for /etc/resolv.conf — which
+  # resolved wants to own as a symlink to its stub (127.0.0.53).
+  networking.networkmanager.dns = "systemd-resolved";
 
   # ── SSH ───────────────────────────────────────────────────────────────────
   services.openssh = {
