@@ -53,6 +53,35 @@
       done
       unset _f
 
+      # ── rsync-based cp/mv (progress bars, resumable) ─────────────────────────
+      # Defined as functions, not shellAliases: an alias named cp/mv would
+      # alias-expand before a same-named function is ever looked up, silently
+      # shadowing it. Two rsync gotchas needed fixing too:
+      #   1. Without a trailing slash on a lone source dir, rsync always
+      #      nests it under dst (dst/src/...) even when dst doesn't exist
+      #      yet — unlike cp/mv, where dst becomes a renamed copy of src in
+      #      that case. Fixed by adding the trailing slash ourselves when
+      #      there's exactly one source dir and dst isn't an existing dir.
+      #   2. `mv --remove-source-files` deletes files but never the
+      #      now-empty source directory tree it leaves behind, so a plain
+      #      rsync alias doesn't really "move" a directory.
+      _rsync_transfer() {
+        local remove=$1; shift
+        local dst=''${@[-1]}
+        local srcs=(''${@[1,-2]})
+        if (( ''${#srcs} == 1 )) && [[ -d ''${srcs[1]} && ! -d $dst ]]; then
+          srcs[1]="''${srcs[1]%/}/"
+        fi
+        if [[ $remove == 1 ]]; then
+          rsync -ahP --info=progress2,stats2 --stats --remove-source-files "''${srcs[@]}" "$dst" \
+            && find "''${srcs[@]}" -depth -type d -empty -delete 2>/dev/null
+        else
+          rsync -ahP --info=progress2,stats2 --stats "''${srcs[@]}" "$dst"
+        fi
+      }
+      cp() { _rsync_transfer 0 "$@" }
+      mv() { _rsync_transfer 1 "$@" }
+
       # ── Pay-respects ─────────────────────────────────────────────────────────
       # `thefuck` was removed from nixpkgs (Python 3.12+ incompatible) — Arch
       # still has it, but nixpkgs forces pay-respects as the replacement here.
@@ -118,8 +147,6 @@
     tx      = "tmuxifier";
     "tmux-edit" = "cd ~/.config/tmuxifier/layouts && nvim";
     scrible = "tjournal";
-    cp="rsync -ahP --info=progress2,stats2 --stats";
-    mv="rsync -ahP --info=progress2,stats2 --stats --remove-source-files";
   };
 
   # ── zshenv / zprofile — ported verbatim from Arch ────────────────────────
