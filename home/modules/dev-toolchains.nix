@@ -56,6 +56,14 @@
     # ── Sass ────────────────────────────────────────────────────────────
     dart-sass
 
+    # ── Solidity / EVM ──────────────────────────────────────────────────
+    # forge/cast/anvil/chisel. Built from source via rustPlatform (not a
+    # `curl | bash` foundryup install), so it's reproducible and pinned by
+    # the flake lock like everything else here. `forge build` still shells
+    # out to download `solc` itself into ~/.svm/ on first use — that's
+    # upstream Foundry's own version manager, not something Nix wraps.
+    foundry
+
     # ── Embedded / keyboard firmware ────────────────────────────────────
     arduino-cli
     qmk
