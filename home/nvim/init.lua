@@ -753,6 +753,10 @@ require('lazy').setup({
         gopls = {},
         jdtls = {},
         ['typescript-language-server'] = {},
+        -- Nomic Foundation's Solidity LSP: understands Foundry projects out
+        -- of the box (root_markers includes foundry.toml), unlike the older
+        -- solidity_ls (vscode-solidity based).
+        solidity_ls_nomicfoundation = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -849,6 +853,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        solidity = { 'forge_fmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -1046,6 +1051,7 @@ require('lazy').setup({
         'markdown',
         'markdown_inline',
         'query',
+        'solidity',
         'tsx',
         'typescript',
         'vim',
