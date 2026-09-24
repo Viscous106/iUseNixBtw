@@ -65,10 +65,23 @@
       #   2. `mv --remove-source-files` deletes files but never the
       #      now-empty source directory tree it leaves behind, so a plain
       #      rsync alias doesn't really "move" a directory.
+      #   3. A missing source used to fall straight through to rsync,
+      #      which dumps a whole stats block and a cryptic "link_stat ...
+      #      No such file or directory" for what should just be a plain
+      #      "cannot stat" error like real cp/mv give — checked up front now.
       _rsync_transfer() {
-        local remove=$1; shift
+        local remove=$1 name=cp; shift
+        [[ $remove == 1 ]] && name=mv
         local dst=''${@[-1]}
         local srcs=(''${@[1,-2]})
+        local s missing=0
+        for s in "''${srcs[@]}"; do
+          if [[ ! -e $s ]]; then
+            print -u2 "$name: cannot stat '$s': No such file or directory"
+            missing=1
+          fi
+        done
+        (( missing )) && return 1
         if (( ''${#srcs} == 1 )) && [[ -d ''${srcs[1]} && ! -d $dst ]]; then
           srcs[1]="''${srcs[1]%/}/"
         fi
