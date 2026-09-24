@@ -20,6 +20,8 @@
                     # the overlay in configuration.nix.
 
     # Communications
+    discord
+    slack
     telegram-desktop
     zoom-us         # AUR `zoom` maps to nixpkgs `zoom-us`; nixpkgs's own `zoom`
                     # attribute is an unrelated Z-Code/interactive-fiction player.
