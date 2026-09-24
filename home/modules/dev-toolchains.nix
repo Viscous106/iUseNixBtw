@@ -63,6 +63,11 @@
     # out to download `solc` itself into ~/.svm/ on first use — that's
     # upstream Foundry's own version manager, not something Nix wraps.
     foundry
+    # Standalone `solc` binary, pinned by the flake lock, for tooling that
+    # shells out to `solc` directly rather than going through Foundry's
+    # ~/.svm-managed version (e.g. slither, hardhat compile fallback, or
+    # invoking solc by hand outside a Foundry project).
+    solc
 
     # ── Embedded / keyboard firmware ────────────────────────────────────
     arduino-cli
