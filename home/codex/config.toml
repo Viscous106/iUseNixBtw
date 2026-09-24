@@ -8,10 +8,16 @@
 # (same arrangement as claude/settings.json), but it means an unexpected diff
 # in this file is usually codex, not you.
 
-model = "gpt-6-astra"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "high"
 
 [projects."/home/viscous"]
+trust_level = "trusted"
+
+[projects."/home/viscous/Viscous/OpenSource/LFDecentralizedTrustLabs"]
+trust_level = "trusted"
+
+[projects."/home/viscous/Viscous/OpenSource/trueforge.git/feat/kubernetes-sandbox-provider"]
 trust_level = "trusted"
 
 # ── Status line ─────────────────────────────────────────────────────────────
