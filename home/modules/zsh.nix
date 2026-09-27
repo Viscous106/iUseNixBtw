@@ -95,6 +95,27 @@
       cp() { _rsync_transfer 0 "$@" }
       mv() { _rsync_transfer 1 "$@" }
 
+      # ── cd with a zoxide fallback ────────────────────────────────────────────
+      # A real path still goes to builtin cd, so flags, `cd -`, `cd old new`
+      # and CDPATH all behave exactly as before. Only a lone argument that
+      # isn't a usable path falls through to a zoxide jump, so `cd nixos-config`
+      # lands in /persist/nixos-config instead of erroring; if zoxide has no
+      # match either, builtin cd runs again just to print its normal error.
+      # A function, not an alias, for the same reason as cp/mv above, and
+      # deliberately not `zoxide init --cmd cd`: that variant replaces `z`/`zi`
+      # and hands cd's whole argument handling over to zoxide. It has to come
+      # after optimisation.sh has sourced `zoxide init zsh` (the scripts loop
+      # above), which is where `z` is defined.
+      cd() {
+        if (( $# == 1 )) && [[ -n $1 && $1 != -* ]]; then
+          builtin cd -- "$1" 2>/dev/null && return
+          z "$1" 2>/dev/null && return
+          builtin cd -- "$1"
+        else
+          builtin cd "$@"
+        fi
+      }
+
       # ── Pay-respects ─────────────────────────────────────────────────────────
       # `thefuck` was removed from nixpkgs (Python 3.12+ incompatible) — Arch
       # still has it, but nixpkgs forces pay-respects as the replacement here.
