@@ -132,7 +132,7 @@
       "Bash(gh auth *)"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -247,6 +247,5 @@
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
-  "voiceEnabled": true,
-  "advisorModel": "fable"
+  "voiceEnabled": true
 }

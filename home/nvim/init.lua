@@ -922,11 +922,12 @@ require('lazy').setup({
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
         --
-        -- 'super-tab': <Tab> accepts the selected completion while the menu is
-        -- open, jumps forward in a snippet if one is active, and otherwise falls
-        -- back to a literal tab. <CR> is left unmapped, so Enter is always just a
-        -- newline.
-        preset = 'super-tab',
+        -- 'enter': <CR> accepts the selected completion when the menu is open,
+        -- and falls back to a normal newline otherwise. <S-CR> is mapped below
+        -- to always insert a literal newline, even while the menu is open.
+        preset = 'enter',
+
+        ['<S-CR>'] = { 'fallback' },
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
