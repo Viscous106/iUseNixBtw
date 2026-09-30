@@ -37,11 +37,36 @@
     ./modules/ydotoold.nix
     ./modules/wayvr.nix
     ./modules/battery-notify.nix
+    ./modules/web3.nix
   ];
 
   home.username      = "viscous";
   home.homeDirectory = "/home/viscous";
   home.stateVersion  = "25.05";
+
+  # ── Solidity / EVM ────────────────────────────────────────────────────────
+  # The knobs for the whole EVM toolchain. Retune here rather than inside any
+  # project. Option docs live in home/modules/web3.nix; the reasoning behind
+  # the design is in docs/superpowers/specs/2026-09-27-web3-dev-environment-design.md
+  viscous.web3 = {
+    enable = true;
+
+    solc = {
+      # Bare `forge`/`solc` outside a project shell use this one.
+      default = "nixpkgs";
+
+      # Extra compilers, each installed as solc-<version> so they coexist.
+      # 0.6.12 is here for the freeCodeCamp course, which targets 0.6.x.
+      extra = {
+        "0.6.12" = "f6cb519b01dabc61cab4c184a3db11aa591d18151e362fcae850e42cffdfb09a";
+      };
+    };
+
+    direnv.enable = true;
+    anvil.port    = 8545;
+
+    # extraTools = with pkgs; [ slither-analyzer ];
+  };
 
   # ── PATH for systemd user session (Hyprland + shell subprocesses) ─────────
   # When Hyprland runs via systemd (systemd.enable = true), exec subprocesses
