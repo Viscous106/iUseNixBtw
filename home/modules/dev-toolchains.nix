@@ -57,17 +57,14 @@
     dart-sass
 
     # ── Solidity / EVM ──────────────────────────────────────────────────
-    # forge/cast/anvil/chisel. Built from source via rustPlatform (not a
-    # `curl | bash` foundryup install), so it's reproducible and pinned by
-    # the flake lock like everything else here. `forge build` still shells
-    # out to download `solc` itself into ~/.svm/ on first use — that's
-    # upstream Foundry's own version manager, not something Nix wraps.
-    foundry
-    # Standalone `solc` binary, pinned by the flake lock, for tooling that
-    # shells out to `solc` directly rather than going through Foundry's
-    # ~/.svm-managed version (e.g. slither, hardhat compile fallback, or
-    # invoking solc by hand outside a Foundry project).
-    solc
+    # Moved to home/modules/web3.nix, which installs foundry + solc and adds
+    # what a bare package list could not: additional pinned compilers (nixpkgs
+    # carries only one solc, and older material needs 0.6.x), direnv-loaded
+    # per-project shells, and a project template. It also closes the ~/.svm
+    # gap this comment used to describe, by setting FOUNDRY_SOLC so `forge`
+    # never reaches for its own downloader.
+    #   Options:  home/modules/web3.nix
+    #   Settings: home/viscous.nix  (viscous.web3)
 
     # ── Embedded / keyboard firmware ────────────────────────────────────
     arduino-cli

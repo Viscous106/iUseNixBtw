@@ -52,6 +52,13 @@
       # talking to. Note the two CLIs resolve credentials in opposite
       # directions; see the header of pkgs/claude-whoami.nix.
       claude-whoami = final.callPackage ./pkgs/claude-whoami.nix { };
+
+      # Builder for a pinned Solidity compiler from upstream's static release
+      # binaries — nixpkgs carries only one solc, and following older material
+      # needs older ones. Called as `pkgs.solc-bin { version; sha256; }` from
+      # home/modules/web3.nix; see pkgs/solc-bin.nix for why it is a plain
+      # fetchurl with no autoPatchelf.
+      solc-bin = final.callPackage ./pkgs/solc-bin.nix { };
     })
   ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
