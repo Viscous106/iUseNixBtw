@@ -69,9 +69,21 @@
       #      which dumps a whole stats block and a cryptic "link_stat ...
       #      No such file or directory" for what should just be a plain
       #      "cannot stat" error like real cp/mv give — checked up front now.
+      #   4. Fewer than 2 args (bare `mv`, or a flag-only probe like
+      #      `mv --version`) has no real source/dest to work with. Zsh's
+      #      own _mv/_cp completion calls exactly that (`mv --version`) to
+      #      sniff GNU vs BSD, so this isn't hypothetical: with no guard,
+      #      dst became "--version", srcs was empty, rsync no-ops on
+      #      --version and exits 0, and the `find ... -delete` below — fed
+      #      zero paths, so it defaulted to the current directory — silently
+      #      ran `find -delete` over whatever dir the shell was in, hanging
+      #      (and deleting empty dirs) on every mv tab-complete.
+      #      Delegating these to the real binary keeps completion, --help,
+      #      and "missing operand" errors behaving like real cp/mv.
       _rsync_transfer() {
         local remove=$1 name=cp; shift
         [[ $remove == 1 ]] && name=mv
+        (( $# < 2 )) && { command "$name" "$@"; return }
         local dst=''${@[-1]}
         local srcs=(''${@[1,-2]})
         local s missing=0
