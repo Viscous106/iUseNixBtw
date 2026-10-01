@@ -3,6 +3,7 @@
 {
   imports = [
     inputs.hyprland.homeManagerModules.default
+    inputs.nix-index-database.homeModules.nix-index
     ./modules/zsh.nix
     ./modules/neovim.nix
     ./modules/hyprland.nix
@@ -213,6 +214,7 @@
     # From Nix profile
     antigen       # zsh plugin manager
     bat           # better cat
+    chafa
     cheese        # webcam app
     fastfetch     # system info
     gh            # github cli
@@ -222,6 +224,9 @@
     nix-tree      # visualize nix dependencies
     wl-kbptr      # wayland keyboard pointer
     xev           # x11 event viewer
+    kind          # kubernetes IN docker - local clusters
+    kubectl       # kubernetes control cli
+    vite          # frontend build tool
   ];
 
   xdg.enable = true;

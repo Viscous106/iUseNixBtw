@@ -119,6 +119,8 @@
       # ── Pay-respects ─────────────────────────────────────────────────────────
       # `thefuck` was removed from nixpkgs (Python 3.12+ incompatible) — Arch
       # still has it, but nixpkgs forces pay-respects as the replacement here.
+      # This eval is what installs command_not_found_handler; the nix-locate it
+      # consults for "which package has this binary" is wired up below.
       if command -v pay-respects >/dev/null 2>&1; then
         eval "$(pay-respects zsh --alias)"
       fi
@@ -208,6 +210,19 @@
   # ── Helper Tools (Native Integrations) ──────────────────────────────────────
   programs.fzf.enable = true;
   programs.zoxide.enable = true;
+
+  # nix-locate, the package-lookup backend pay-respects shells out to when a
+  # command is not found. The flake input (see flake.nix) carries a prebuilt
+  # database, so this needs no `nix-index` crawl and no cron job to refresh it.
+  #
+  # The module defaults `enable` and `symlinkToCacheHome` to true, which is what
+  # drops the database at ~/.cache/nix-index/files where nix-locate looks for
+  # it. Only the zsh integration has to be turned off by hand: it sources
+  # nix-index's own command-not-found.sh, which defines command_not_found_handler
+  # — the exact hook pay-respects claims in initExtra above. Both modules append
+  # to the same zsh init, so leaving this on means whichever lands last silently
+  # wins. We want the database, not a second handler racing for the hook.
+  programs.nix-index.enableZshIntegration = false;
   # tmuxifier is a real nixpkgs package now (was vendored as a raw git clone
   # from Arch before that was true) — see home/tmuxifier for just the
   # personal layouts that vendoring left behind.
