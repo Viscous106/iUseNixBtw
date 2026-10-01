@@ -107,6 +107,25 @@
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
     };
+
+    # Prebuilt nix-locate database, regenerated upstream on every channel bump.
+    #
+    # pay-respects (home/modules/zsh.nix) owns command_not_found_handler, and
+    # the way it answers "command not found" is to ask nix-locate which package
+    # ships the missing binary. With no nix-locate on PATH it cannot even try —
+    # it just prints "nix-locate or nix-search is required to find packages"
+    # and gives up, for every missing command, not just the interesting ones.
+    #
+    # Plain pkgs.nix-index ships the tool but no database: you would have to
+    # run `nix-index` by hand, which crawls the whole channel, and re-run it
+    # every time nixpkgs moves — exactly the kind of imperative drift the rest
+    # of this config exists to avoid. This input ships the database as a flake
+    # output instead, so lookups work from first boot and the index moves with
+    # `nix flake update` like every other pin here.
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:
