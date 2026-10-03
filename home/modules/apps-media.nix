@@ -8,8 +8,6 @@
     # Streaming / recording
     obs-studio          # screen recording & streaming
     streamlink          # pull live streams into a local player
-    mov-cli             # terminal media-streaming scraper/browser
-    ani-cli             # terminal anime streaming scraper
 
     # Downloaders
     yt-dlp              # video/audio downloader
@@ -83,8 +81,5 @@
 
     # Android screen mirroring
     scrcpy
-
-    # Terminal toy
-    pokemon-colorscripts
   ];
 }

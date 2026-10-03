@@ -71,6 +71,15 @@ let
       # Store files land read-only; make the new project writable.
       chmod -R u+w "$dest"
 
+      # .envrc is written here rather than shipped in templateDir on purpose.
+      # home/modules/git.nix gitignores ".envrc" globally, so a template copy
+      # never gets git-added — and a flake only copies *tracked* files into the
+      # store, so the template in the store would silently lack it and direnv
+      # would never load. Generating it sidesteps that entirely.
+      printf '%s\n' \
+        '# Loads the dev shell from flake.nix on cd. Run: direnv allow (once).' \
+        'use flake' > "$dest/.envrc"
+
       echo "Created $dest"
       echo ""
       echo "Next:"
