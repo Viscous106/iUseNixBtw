@@ -98,8 +98,17 @@
           srcs[1]="''${srcs[1]%/}/"
         fi
         if [[ $remove == 1 ]]; then
-          rsync -ahP --info=progress2,stats2 --stats --remove-source-files "''${srcs[@]}" "$dst" \
-            && find "''${srcs[@]}" -depth -type d -empty -delete 2>/dev/null
+          # Belt-and-braces for gotcha 4: `find` with zero paths falls back to
+          # the current directory, so the prune list is built from the source
+          # *directories* only and skipped entirely when empty. An earlier
+          # version of this swept every empty dir under cwd, which is what
+          # deleted refs/ out of the bare repos in ~/.cache/nix and left nix
+          # fetching flakes with "could not find repository".
+          local prune=()
+          for s in "''${srcs[@]}"; do [[ -d $s ]] && prune+=("$s"); done
+          rsync -ahP --info=progress2,stats2 --stats --remove-source-files "''${srcs[@]}" "$dst" || return
+          (( ''${#prune} )) && find "''${prune[@]}" -depth -type d -empty -delete 2>/dev/null
+          return 0
         else
           rsync -ahP --info=progress2,stats2 --stats "''${srcs[@]}" "$dst"
         fi
