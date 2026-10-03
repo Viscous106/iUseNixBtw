@@ -49,7 +49,7 @@ let
 
   web3-cli = pkgs.writeShellApplication {
     name = "web3-cli";
-    runtimeInputs = [ pkgs.coreutils pkgs.git ];
+    runtimeInputs = [ pkgs.coreutils pkgs.git pkgs.direnv ];
     text = ''
       if [ $# -lt 1 ]; then
         echo "usage: web3-cli <directory>" >&2
@@ -81,23 +81,37 @@ let
         'use flake' > "$dest/.envrc"
 
       echo "Created $dest"
-      echo ""
-      echo "Next:"
 
-      # A flake can only see git-tracked files. Creating a project inside an
-      # existing repo therefore leaves flake.nix invisible to nix, and direnv
-      # fails with "Path ... is not tracked by Git" the moment you cd in. That
-      # is confusing enough in the wild that the exact fix is printed here.
-      # Projects created outside any repo are unaffected, hence the guard.
+      # A flake can only see git-tracked files. Created inside an existing repo,
+      # flake.nix is invisible to nix and direnv fails with "Path ... is not
+      # tracked by Git" on the first cd. Staging it here removes a step that
+      # has no judgement in it. Projects outside any repo skip this.
       if repo=$(git -C "$dest" rev-parse --show-toplevel 2>/dev/null); then
         rel=$(realpath --relative-to="$repo" "$dest")
-        echo "  # inside the git repo at $repo --"
-        echo "  # flakes only see tracked files, so add it first:"
-        echo "  git -C $repo add $rel"
+        if git -C "$repo" add "$rel" 2>/dev/null; then
+          echo "  staged in $repo"
+        else
+          echo "  WARNING: could not stage $rel -- run 'git -C $repo add $rel'" >&2
+          echo "           or the dev shell will not load." >&2
+        fi
       fi
 
+      # Trusting an .envrc this command just wrote itself adds no risk the user
+      # has not already taken by running this command.
+      if command -v direnv >/dev/null 2>&1; then
+        if direnv allow "$dest" 2>/dev/null; then
+          echo "  direnv allowed"
+        else
+          echo "  WARNING: 'direnv allow' failed -- run it inside the project." >&2
+        fi
+      fi
+
+      echo ""
+      echo "Next:"
+      # Changing the parent shell's directory is impossible from a child
+      # process, so this one step stays manual. The zsh wrapper defined in this
+      # same module does it for interactive use.
       echo "  cd $dest"
-      echo "  direnv allow      # first time only"
       echo "  just test"
     '';
   };
@@ -202,5 +216,17 @@ in
       # every time.
       nix-direnv.enable = true;
     };
+
+    # web3-cli stages the project and allows direnv itself, but no child process
+    # can change its parent shell's working directory — so the final `cd` can
+    # only come from a shell function. Shadowing the command name (the same
+    # trick cp/mv/cd already use in zsh.nix) keeps it to one thing to remember.
+    programs.zsh.initContent = ''
+      web3-cli() {
+        command web3-cli "$@" || return
+        local dest=''${@[-1]}
+        [[ -d $dest ]] && cd $dest
+      }
+    '';
   };
 }
