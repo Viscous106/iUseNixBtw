@@ -21,7 +21,7 @@
 #      already has a [direnv] prompt module.
 #
 #   3. Every new project meant hand-writing foundry.toml and re-remembering
-#      non-obvious flags. `web3-new` stamps out a correct project instead.
+#      non-obvious flags. `web3-cli` stamps out a correct project instead.
 
 let
   cfg = config.viscous.web3;
@@ -43,16 +43,16 @@ let
         sha256  = cfg.solc.extra.${cfg.solc.default};
       }}/bin/solc-${cfg.solc.default}";
 
-  # The project skeleton `web3-new` copies. Kept out-of-store as a plain
+  # The project skeleton `web3-cli` copies. Kept out-of-store as a plain
   # directory in this repo so it can be edited without a rebuild round-trip.
   templateDir = ../web3/template;
 
-  web3-new = pkgs.writeShellApplication {
-    name = "web3-new";
+  web3-cli = pkgs.writeShellApplication {
+    name = "web3-cli";
     runtimeInputs = [ pkgs.coreutils ];
     text = ''
       if [ $# -lt 1 ]; then
-        echo "usage: web3-new <directory>" >&2
+        echo "usage: web3-cli <directory>" >&2
         echo "" >&2
         echo "Creates a Foundry project with flake.nix, .envrc, justfile and a" >&2
         echo "correct foundry.toml. Pick the compiler by editing solcVersion in" >&2
@@ -62,7 +62,7 @@ let
 
       dest="$1"
       if [ -e "$dest" ] && [ -n "$(ls -A "$dest" 2>/dev/null)" ]; then
-        echo "web3-new: $dest exists and is not empty, refusing to overwrite" >&2
+        echo "web3-cli: $dest exists and is not empty, refusing to overwrite" >&2
         exit 1
       fi
 
@@ -169,7 +169,7 @@ in
       pkgs.solc
       # Task runner for the generated justfile.
       pkgs.just
-      web3-new
+      web3-cli
     ] ++ extraSolcPkgs ++ cfg.extraTools;
 
     home.sessionVariables = {
