@@ -65,7 +65,7 @@
         FOUNDRY_SOLC = "${solc.pkg}/bin/${solc.exe}";
 
         shellHook = ''
-          echo "foundry $(forge --version | head -1 | cut -d' ' -f2) | solc $("$FOUNDRY_SOLC" --version | tail -1 | cut -d' ' -f2)"
+          echo "foundry $(forge --version | head -1 | cut -d' ' -f3) | solc $("$FOUNDRY_SOLC" --version | tail -1 | cut -d' ' -f2 | cut -d'+' -f1)"
         '';
       };
     };
