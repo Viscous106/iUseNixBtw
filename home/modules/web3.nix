@@ -49,7 +49,7 @@ let
 
   web3-cli = pkgs.writeShellApplication {
     name = "web3-cli";
-    runtimeInputs = [ pkgs.coreutils ];
+    runtimeInputs = [ pkgs.coreutils pkgs.git ];
     text = ''
       if [ $# -lt 1 ]; then
         echo "usage: web3-cli <directory>" >&2
@@ -83,6 +83,19 @@ let
       echo "Created $dest"
       echo ""
       echo "Next:"
+
+      # A flake can only see git-tracked files. Creating a project inside an
+      # existing repo therefore leaves flake.nix invisible to nix, and direnv
+      # fails with "Path ... is not tracked by Git" the moment you cd in. That
+      # is confusing enough in the wild that the exact fix is printed here.
+      # Projects created outside any repo are unaffected, hence the guard.
+      if repo=$(git -C "$dest" rev-parse --show-toplevel 2>/dev/null); then
+        rel=$(realpath --relative-to="$repo" "$dest")
+        echo "  # inside the git repo at $repo --"
+        echo "  # flakes only see tracked files, so add it first:"
+        echo "  git -C $repo add $rel"
+      fi
+
       echo "  cd $dest"
       echo "  direnv allow      # first time only"
       echo "  just test"
