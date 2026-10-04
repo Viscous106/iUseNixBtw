@@ -99,6 +99,37 @@
     MaxRetentionSec=1month
   '';
 
+  # ── Core dumps ────────────────────────────────────────────────────────────
+  # Turned off. xdg-desktop-portal-hyprland segfaults on every output teardown
+  # — monitor unplug, DPMS cycle, session exit — destroying an SOutput, which
+  # destroys its zxdg_output_v1 proxy and marshals a destroy request against an
+  # already-torn-down Wayland object map. That is upstream's bug (the dtor at
+  # protocols/xdg-output-unstable-v1.cpp:186), not ours, and until it is fixed
+  # it fires once or twice a day. Every crash wrote a 27 MB core.PID into the
+  # cwd of the crashing process — which for a session daemon is $HOME — so ten
+  # of them had piled up in ~ by 2026-10-03.
+  #
+  # Disabling systemd-coredump alone does not fix it: the module then sets
+  # kernel.core_pattern to the bare string "core", which is exactly what put
+  # the files in $HOME to begin with. The limit is what actually suppresses the
+  # dump — the kernel skips dumping when RLIMIT_CORE is 0, but only for file
+  # patterns, because a piped core_pattern ignores the limit entirely. So both
+  # halves are needed: no pipe, and a zero limit on each of the three paths
+  # that sets one (PID 1 for system services, the per-user manager, and PAM for
+  # login sessions).
+  #
+  # Zeroed as a soft limit with the hard limit left alone, so `ulimit -c
+  # unlimited` in one shell still gets you a dump when you actually want to
+  # debug something, without root. For the full picture instead, comment this
+  # block out and rebuild: that restores systemd-coredump, and dumps land in
+  # /var/lib/systemd/coredump with rotation, readable via coredumpctl.
+  systemd.coredump.enable = false;
+  systemd.settings.Manager.DefaultLimitCORE = "0:infinity";
+  systemd.user.settings.Manager.DefaultLimitCORE = "0:infinity";
+  security.pam.loginLimits = [
+    { domain = "*"; item = "core"; type = "soft"; value = "0"; }
+  ];
+
   # ── Session variables ─────────────────────────────────────────────────────
   # Arch sets these in /etc/environment, which PAM injects into every session —
   # including the Hyprland session started from the TTY. NixOS had no equivalent,
