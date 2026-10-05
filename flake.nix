@@ -144,7 +144,6 @@
       ./modules/apps-gaming.nix
       ./modules/apps-databases.nix
       ./modules/apps-system.nix
-      ./modules/encryption.nix
       ./modules/proton.nix
       ./modules/peripherals.nix
       ./modules/audio.nix
