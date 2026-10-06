@@ -64,7 +64,7 @@
     # gap this comment used to describe, by setting FOUNDRY_SOLC so `forge`
     # never reaches for its own downloader.
     #   Options:  home/modules/web3.nix
-    #   Settings: home/viscous.nix  (viscous.web3)
+    #   Settings: home/user.nix  (my.web3)
 
     # ── Embedded / keyboard firmware ────────────────────────────────────
     arduino-cli

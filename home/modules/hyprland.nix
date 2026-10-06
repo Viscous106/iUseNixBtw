@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, user, ... }:
 
 {
   # ── Hyprland window manager ─────────────────────────────────────────────────
@@ -64,7 +64,17 @@
   # ── Symlink config tree into ~/.config/hypr/ ────────────────────────────────
   xdg.configFile = {
     # Top-level conf files — force = true overwrites leftovers from old HM generation
-    "hypr/hyprlock.conf" = { source = ../hypr/hyprlock.conf; force = true; };
+    # hyprlock.conf carries absolute wallpaper paths, and hyprlock's parser is
+    # not guaranteed to expand $HOME in them — so the home directory is
+    # substituted in here at eval time instead of being hardcoded in the file.
+    # This one is a store copy (not mkOutOfStoreSymlink), which is what makes
+    # the substitution possible; editing it needs a rebuild either way.
+    "hypr/hyprlock.conf" = {
+      text = builtins.replaceStrings
+        [ "@HOME@" ] [ "/home/${user.username}" ]
+        (builtins.readFile ../hypr/hyprlock.conf);
+      force = true;
+    };
     "hypr/hypridle.conf" = { source = ../hypr/hypridle.conf; force = true; };
 
     # hyprland.lua — entry point; requires("lua.<module>") resolves relative to it

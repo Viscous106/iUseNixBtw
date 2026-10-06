@@ -13,7 +13,7 @@
 {
   # hardware.uinput.enable comes from services.keyd (verified: it is the sole
   # definition of that option in this config), which grants the "uinput" group
-  # access to /dev/uinput. Arch instead granted the "input" group, and viscous
+  # access to /dev/uinput. Arch instead granted the "input" group, and the user
   # is already a member of "input" (configuration.nix) — kept as an additional
   # rule so ydotoold (which is not in the "uinput" group) also gets /dev/uinput
   # access, exactly matching Arch's actual rule.

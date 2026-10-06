@@ -2,7 +2,7 @@
 
 {
   # ── Hypridle + Hyprlock are now configured in modules/hyprland.nix ──────────
-  # This module is intentionally empty so that the import in viscous.nix
+  # This module is intentionally empty so that the import in user.nix
   # continues to work without change.
   #
   # • services.hypridle  — enabled in hyprland.nix, config via
