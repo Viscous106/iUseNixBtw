@@ -44,3 +44,31 @@ home/hypr/configs/wallpaper_effects/.wallpaper_modified
 # plugins/tpm/tpm). They were previously committed as submodule gitlinks with
 # no .gitmodules, so a fresh clone got six empty directories.
 home/tmux/plugins/
+
+# Agent-sandbox bind-mount stubs. Claude Code runs each Bash command inside a
+# bubblewrap sandbox, and for every deny-listed path that does not already
+# exist it creates the mount target first — a 0-byte, read-only placeholder.
+# /persist/nixos-config is a writable bind rather than an overlay, so those
+# land on real disk and show up as untracked files. They are build-time
+# artefacts of the tooling, not configuration, and carry no content at all.
+#
+# They must never be committed: several of these paths are DIRECTORIES in
+# normal use (.claude/skills, .claude/hooks, .claude/agents, .idea, .vscode),
+# and an empty FILE committed at one of them stops a fresh clone from ever
+# creating the directory.
+#
+# Note .claude/ is ignored wholesale. Nothing under it has ever been tracked
+# here (checked: 0 commits for every path). If a real project-level
+# .claude/settings.json is ever worth sharing, it needs `git add -f`.
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.idea
+.mcp.json
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc
+.claude/
