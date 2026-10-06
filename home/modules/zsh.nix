@@ -18,18 +18,10 @@
                                         # are the standalone modules above instead
     };
 
-    # Bonus plugin, not part of Arch's setup but harmless/additive — kept.
-    plugins = [
-      {
-        name = "zsh-fzf-history-search";
-        src  = pkgs.fetchFromGitHub {
-          owner = "joshskidmore";
-          repo  = "zsh-fzf-history-search";
-          rev   = "d1aae98ccd6ce153bbd6c9be4c6db1b99d5a7cff";
-          hash  = "sha256-4Dp2ehZLO83NhdBOKV0BhYFIvieaZPqiZZZtxsXWRaQ=";
-        };
-      }
-    ];
+    # zsh-fzf-history-search used to live here (a bonus plugin, not from the
+    # Arch setup). Removed when atuin took over Ctrl+R — see
+    # home/modules/atuin.nix. It bound the same key, so keeping both meant
+    # whichever loaded last silently won.
 
     initContent = ''
       # ── Custom keybindings ──────────────────────────────────────────────────
@@ -47,7 +39,7 @@
       for _f in \
         variable android-spawn clearandff git_worspace_tmux \
         gpg-git keybinds optimisation startup \
-        tmux_copy_wayland_fix tmux_start
+        tmux_copy_wayland_fix tmux_start cmd-notify
       do
         [ -f "$HOME/.config/zsh/scripts/$_f.sh" ] && source "$HOME/.config/zsh/scripts/$_f.sh"
       done
