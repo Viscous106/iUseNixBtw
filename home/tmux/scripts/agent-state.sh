@@ -26,6 +26,13 @@ set -uo pipefail
 
 readonly STATE_OPT='@agent-state'
 readonly STAMP_OPT='@agent-state-at'
+# Second channel, same footer: a shell command that finished in a window I was
+# not looking at. Kept separate from @agent-state so an agent chip and a command
+# chip can coexist on the same pane.
+readonly RUN_OPT='@run-state'       # ok | fail
+readonly RUN_INFO_OPT='@run-info'   # preformatted "w2 nix 42s"
+readonly RUN_AT_OPT='@run-at'       # epoch, so the renderer can rank by recency
+readonly RUN_MAX=2                  # chips rendered; footer is only 160 wide
 
 # Severity order. `status` folds a session's panes down to its worst state, and
 # `pick` sorts by this so whatever is blocking me lands at the top.
@@ -152,6 +159,18 @@ cmd_clear_done() {
     tmux set -p -u -t "$pane" "$STAMP_OPT" 2>/dev/null
   done < <(tmux list-panes "${tflag[@]}" -F "#{pane_id} #{$STATE_OPT}" 2>/dev/null \
              | awk '$2 == "done" { print $1 }')
+
+  # Command chips acknowledge the same way: looking at the window is the ack.
+  # Unlike agent state there is no "live" variant to preserve -- a finished
+  # command is always just a notification.
+  while read -r pane; do
+    [ -n "$pane" ] || continue
+    tmux set -p -u -t "$pane" "$RUN_OPT" 2>/dev/null
+    tmux set -p -u -t "$pane" "$RUN_INFO_OPT" 2>/dev/null
+    tmux set -p -u -t "$pane" "$RUN_AT_OPT" 2>/dev/null
+  done < <(tmux list-panes "${tflag[@]}" -F "#{pane_id} #{$RUN_OPT}" 2>/dev/null \
+             | awk '$2 != "" { print $1 }')
+
   tmux refresh-client -S 2>/dev/null
 }
 
@@ -186,7 +205,82 @@ cmd_status() {
       | sort -t$'\t' -k3,3nr -k1,1
   )
 
+  # Command chips, newest first, capped at RUN_MAX.
+  local rstate rinfo
+  while IFS=$'\t' read -r rstate rinfo; do
+    [ -n "$rinfo" ] || continue
+    if [ "$rstate" = fail ]; then
+      out+="#[fg=$(colour blocked),bold]✗ $(esc "$rinfo")#[default]  "
+    else
+      out+="#[fg=$(colour 'done'),bold]✓ $(esc "$rinfo")#[default]  "
+    fi
+  done < <(
+    tmux list-panes -a -F "#{$RUN_OPT}"$'\t'"#{$RUN_INFO_OPT}"$'\t'"#{$RUN_AT_OPT}" 2>/dev/null \
+      | awk -F'\t' '$1 != "" && $2 != "" { printf "%d\t%s\t%s\t%s\n", ($1=="fail"?1:0), $3, $1, $2 }' \
+      | sort -t$'\t' -k1,1nr -k2,2nr \
+      | cut -f3- \
+      | head -n "$RUN_MAX"
+  )
+
   printf '%s' "$out"
+}
+
+# A shell command finished. Called from the zsh precmd hook in
+# home/zsh/scripts/cmd-notify.sh, which has ALREADY applied the duration
+# threshold -- by the time we are exec'd the command is known to be worth
+# reporting, so nothing here second-guesses that.
+#
+#   run-done <exit-code> <seconds> <command...>
+cmd_run_done() {
+  local code=${1:-0} secs=${2:-0}; shift 2 || true
+  local cmdline="$*"
+  die_unless_pane
+
+  # "Am I in a different tab?" -- the whole point of the feature. Compare the
+  # CLIENT's window, via list-clients. Not `display -p`: that resolves the
+  # target from $TMUX_PANE, which this hook sets to the finishing pane, so it
+  # would always say we are already there. (Same trap as autofocus above.)
+  local here there
+  here=$(tmux list-clients -F '#{window_id}' 2>/dev/null | head -1)
+  there=$(tmux display -p -t "$TMUX_PANE" '#{window_id}' 2>/dev/null)
+  [ -n "$here" ] && [ "$here" = "$there" ] && return 0
+
+  # Label the window the way I would have to navigate to it. A bare window
+  # index is ambiguous the moment more than one session is open -- Claude:0 and
+  # main:0 are both "0" -- so qualify with the session name whenever the pane
+  # is not in the session I am currently viewing.
+  local win label state mysess itssess
+  win=$(tmux display -p -t "$TMUX_PANE" '#{window_index}' 2>/dev/null)
+  mysess=$(tmux list-clients -F '#{client_session}' 2>/dev/null | head -1)
+  itssess=$(tmux display -p -t "$TMUX_PANE" '#{session_name}' 2>/dev/null)
+  if [ -n "$itssess" ] && [ "$itssess" != "$mysess" ]; then
+    win="${itssess}:${win}"          # another session: name it
+  else
+    win="w${win}"                    # this session: just the tab number
+  fi
+  # First word only, basename'd, clipped -- "nix build .#foo --bar" -> "nix".
+  label=${cmdline%% *}
+  label=${label##*/}
+  [ ${#label} -gt 12 ] && label=${label:0:12}
+
+  if [ "$code" -eq 0 ]; then state=ok; else state=fail; fi
+
+  tmux set -p -t "$TMUX_PANE" "$RUN_OPT" "$state" 2>/dev/null || return 0
+  tmux set -p -t "$TMUX_PANE" "$RUN_INFO_OPT" "${win} ${label} ${secs}s" 2>/dev/null
+  tmux set -p -t "$TMUX_PANE" "$RUN_AT_OPT" "$(date +%s)" 2>/dev/null
+  tmux refresh-client -S 2>/dev/null
+
+  # Toast on failure only -- success stays in the footer so this does not
+  # compete with the Claude Code notifications. Same synchronous-hint pattern
+  # as home/claude/hooks/claude-notify.sh so repeats replace rather than stack.
+  if [ "$state" = fail ] && command -v notify-send >/dev/null 2>&1; then
+    notify-send -a "tmux" -u normal -i utilities-terminal \
+      -h "string:x-canonical-private-synchronous:run-${TMUX_PANE}" \
+      "Command failed  (exit $code)" \
+      "$cmdline
+window $win  •  after ${secs}s"
+  fi
+  return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -308,8 +402,9 @@ case "${1:-}" in
   codex)      shift; cmd_hook "$@" ;;
   agy)        shift; cmd_agy "$@" ;;
   pick)       shift; cmd_pick "$@" ;;
+  run-done)   shift; cmd_run_done "$@" ;;
   *)
-    echo "usage: agent-state.sh {set <state>|clear|clear-done <win>|status [sess]|pick|claude|codex|agy}" >&2
+    echo "usage: agent-state.sh {set <state>|clear|clear-done <win>|status [sess]|pick|claude|codex|agy|run-done <code> <secs> <cmd>}" >&2
     echo "       states: blocked working done idle" >&2
     exit 2
     ;;
