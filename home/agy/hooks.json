@@ -1,0 +1,10 @@
+{
+  "tmux-agent-state": {
+    "PreInvocation": [
+      { "type": "command", "command": "/home/viscous/.config/tmux/scripts/agent-state.sh agy PreInvocation", "timeout": 5 }
+    ],
+    "Stop": [
+      { "type": "command", "command": "/home/viscous/.config/tmux/scripts/agent-state.sh agy Stop", "timeout": 5 }
+    ]
+  }
+}
