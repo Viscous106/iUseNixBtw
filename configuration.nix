@@ -44,6 +44,10 @@
       # docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
       wallpaper-picker = final.callPackage ./pkgs/wallpaper-picker.nix { };
 
+      # Animated region selector standing in for slurp in the screenshot and
+      # screen-recording scripts; see pkgs/rope-select.nix.
+      rope-select = final.callPackage ./pkgs/rope-select.nix { };
+
       # Reports which OpenAI org/project the Codex CLI is billing — Codex itself
       # only ever shows the auth mode. See pkgs/codex-whoami.nix.
       codex-whoami = final.callPackage ./pkgs/codex-whoami.nix { };
