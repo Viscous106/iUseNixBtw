@@ -12,11 +12,37 @@
       auto-optimise-store   = true;
       warn-dirty            = false;
     };
+    # Keep the newest 3 system generations, nothing older.
+    #
+    # The count lives in systemd.services.prune-system-generations below, NOT
+    # here: nix-collect-garbage can only express "--delete-old" (which keeps
+    # exactly one) or "--delete-older-than <period>" (age, not count). Neither
+    # says "keep 3". So that service prunes by count first and this just sweeps
+    # whatever it unrooted.
     gc = {
       automatic = true;
       dates     = "weekly";
-      options   = "--delete-older-than 30d";
+      options   = "";
     };
+  };
+
+  # Prune system generations to the newest 3, then rewrite the boot menu.
+  #
+  # The switch-to-configuration call is not optional: systemd-boot's ESP
+  # entries are only regenerated on a rebuild, so deleting generations without
+  # it leaves menu entries pointing at store paths the following GC removes —
+  # i.e. entries that fail at boot. Ordered before nix-gc.service and pulled in
+  # by it, so it rides the existing weekly nix-gc.timer rather than adding one.
+  systemd.services.prune-system-generations = {
+    description   = "Delete all but the newest 3 NixOS system generations";
+    before        = [ "nix-gc.service" ];
+    wantedBy      = [ "nix-gc.service" ];
+    serviceConfig.Type = "oneshot";
+    path          = [ pkgs.nix ];
+    script = ''
+      nix-env -p /nix/var/nix/profiles/system --delete-generations +3
+      /run/current-system/bin/switch-to-configuration boot
+    '';
   };
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
