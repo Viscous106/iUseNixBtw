@@ -32,7 +32,7 @@
   # ── Boot ────────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot = {
     enable             = true;
-    configurationLimit = 10;   # ESP is 1 GiB and kernels live on btrfs, not here
+    configurationLimit = 3;    # matches the 3 generations nix.gc keeps; see configuration.nix
     editor             = false; # no cmdline editing at the menu ⇒ no init=/bin/sh
   };
 
