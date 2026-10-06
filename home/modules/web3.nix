@@ -215,6 +215,16 @@ in
       # Caches the dev shell so `cd` into a project is not a full nix evaluation
       # every time.
       nix-direnv.enable = true;
+
+      # Drops direnv's "export +AR +AS +CC +CONFIG_SHELL ..." diff line. With a
+      # plain .envrc that line is a useful one-liner, but a nix devShell exports
+      # ~60 stdenv internals (buildPhase, depsHostHostPropagated, strictDeps...)
+      # that nothing here ever reads, so it wraps over several lines on every cd
+      # and buries the shellHook banner that actually says which toolchain
+      # loaded. Not `silent`: that sets DIRENV_LOG_FORMAT="" and would also kill
+      # the "loading"/"using flake"/"cache invalidated" lines, which are the ones
+      # worth seeing when a shell fails to build.
+      config.global.hide_env_diff = true;
     };
 
     # web3-cli stages the project and allows direnv itself, but no child process

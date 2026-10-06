@@ -199,7 +199,15 @@
     gfa     = "git fetch --all && for branch in $(git branch --format=\"%(refname:short)\"); do git checkout $branch && git pull --rebase; done";
     guvcview = "guvcview -d /dev/video1";  # /dev/video0 is the metadata node
     cfg     = "nvim /persist/nixos-config/";
-    rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config#nix";
+    # No `#nix` on the end: that attribute is the portable-USB host, so running
+    # this while booted from the internal NVMe switched the laptop onto the USB
+    # profile — GRUB-as-removable instead of systemd-boot, and an fstab pointing
+    # /boot at by-label/EFI, which does not exist here. systemd promptly
+    # unmounted /boot and the next rebuild could not install a bootloader.
+    # Bare `--flake <dir>` resolves by hostname, which is correct on both:
+    # configuration.nix sets hostName "nix", hardware-configuration-laptop.nix
+    # mkForce's "laptop".
+    rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config";
     update  = "nix flake update /persist/nixos-config && rebuild";
     tx      = "tmuxifier";
     "tmux-edit" = "cd ~/.config/tmuxifier/layouts && nvim";
