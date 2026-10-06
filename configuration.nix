@@ -89,6 +89,54 @@
       # home/modules/web3.nix; see pkgs/solc-bin.nix for why it is a plain
       # fetchurl with no autoPatchelf.
       solc-bin = final.callPackage ./pkgs/solc-bin.nix { };
+
+      # Patched atuin: give every row of the search TUI a stable index.
+      #
+      # Upstream numbers rows by their distance from the selection, read out of
+      # a static " > 1 2 3 4 5 6 7 8 9   " string. That does two things we do
+      # not want: it stops at nine (one number per alt-N shortcut), and the
+      # numbers slide as the cursor moves, because a distance is not an index.
+      # The patch renders the row's own position instead. There is no config
+      # switch for any of it — see pkgs/atuin-number-all-rows.patch.
+      #
+      # The matching half of the change is NOT here: alt-1..alt-9 are unbound
+      # through atuin's own `[keymap.emacs]` config in home/modules/atuin.nix,
+      # which needs no patch. Only the rendering is hardcoded.
+      #
+      # Cost, deliberately accepted: a patched derivation is not in the binary
+      # cache, so atuin and its whole crate tree build locally here on every
+      # version bump — the same trade written up for mongodb in
+      # modules/apps-databases.nix, decided the other way because this build is
+      # minutes rather than tens of minutes. The patch targets exact lines in
+      # `DrawState::index`, so expect to re-fix it when that function changes
+      # upstream; if it ever stops applying, dropping this attr restores stock
+      # atuin with no other edits.
+      # Second patch, independent of the first: collapse repeated commands in
+      # the search list so five `clear`s offer one row, the newest, instead of
+      # five identical ones. Dedup goes in the SearchEngine::query default
+      # body, which is the single funnel every mode and the empty-query listing
+      # pass through. See pkgs/atuin-dedup-search-results.patch.
+      #
+      # doCheck = false because the upstream test suite is a second full
+      # compile of 692 crates plus a run, and it exercises upstream's code, not
+      # ours — neither patched file has tests, and the Cargo manifests are
+      # untouched so the dependency set is stock. Drop this line if a build
+      # ever looks suspect and you want the suite's opinion.
+      atuin = prev.atuin.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          ./pkgs/atuin-number-all-rows.patch
+          ./pkgs/atuin-dedup-search-results.patch
+        ];
+        doCheck = false;
+
+        # opt-level 3 -> 1 across all 692 crates. Codegen is the bulk of the
+        # build and this cuts a large slice off it; what it costs is runtime
+        # speed in a TUI that fuzzy-matches a few thousand rows against a local
+        # SQLite file, which is not where this program spends its time.
+        # Correctness is unaffected — it is the same code, optimised less.
+        # Raise it back to "3" if search ever feels sluggish.
+        CARGO_PROFILE_RELEASE_OPT_LEVEL = "1";
+      });
     })
   ];
   # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───

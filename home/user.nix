@@ -5,6 +5,7 @@
     inputs.hyprland.homeManagerModules.default
     inputs.nix-index-database.homeModules.nix-index
     ./modules/zsh.nix
+    ./modules/atuin.nix
     ./modules/neovim.nix
     ./modules/hyprland.nix
     ./modules/hypridle.nix

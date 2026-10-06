@@ -151,6 +151,7 @@
       ./modules/keyboard.nix
       ./modules/apps-gaming.nix
       ./modules/apps-databases.nix
+      ./modules/atuin.nix
       ./modules/apps-system.nix
       ./modules/proton.nix
       ./modules/peripherals.nix
