@@ -1,0 +1,56 @@
+--- a/crates/atuin/src/command/client/search/history_list.rs
++++ b/crates/atuin/src/command/client/search/history_list.rs
+@@ -198,10 +198,6 @@
+     columns: &'a [UiColumn],
+ }
+ 
+-// these encode the slices of `" > "`, `" {n} "`, or `"   "` in a compact form.
+-// Yes, this is a hack, but it makes me feel happy
+-static SLICES: &str = " > 1 2 3 4 5 6 7 8 9   ";
+-
+ impl DrawState<'_> {
+     /// Render a complete row for a history item based on configured columns.
+     fn render_row(&mut self, h: &History) {
+@@ -255,18 +251,31 @@
+             return;
+         }
+ 
+-        // these encode the slices of `" > "`, `" {n} "`, or `"   "` in a compact form.
+-        // Yes, this is a hack, but it makes me feel happy
+-
++        // Upstream encodes " > ", " 1 ".." 9 " and "   " as slices of a single
++        // static string, which caps the numbering at 9 because that is how many
++        // alt-N shortcuts exist. We want every visible row labelled, so the
++        // counter is formatted instead of looked up.
++        //
++        // The width stays exactly 3 columns: render_row hardcodes
++        // `indicator_width: u16 = 3` when working out how much space the
++        // expanding column gets, so widening here would silently misalign every
++        // row. Two digits keep a trailing space, three digits fill the field.
++        let indicator = self.indicator;
+         let i = self.y as usize + self.state.offset;
+-        let i = i.checked_sub(self.state.selected);
+-        let i = i.unwrap_or(10).min(10) * 2;
+-        let prompt: &str = if i == 0 {
+-            self.indicator
+-        } else {
+-            &SLICES[i..i + 3]
+-        };
+-        self.draw(prompt, Style::default());
++        match i.checked_sub(self.state.selected) {
++            // the selected row keeps the configured indicator
++            Some(0) => self.draw(indicator, Style::default()),
++            Some(n) => {
++                let text = if n < 100 {
++                    format!("{n:>2} ")
++                } else {
++                    format!("{n:>3}")
++                };
++                self.draw(&text, Style::default());
++            }
++            // rows before the selection are blank, as before
++            None => self.draw("   ", Style::default()),
++        }
+     }
+ 
+     fn duration(&mut self, h: &History, width: u16) {

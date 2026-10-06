@@ -1,0 +1,98 @@
+--- a2/crates/atuin/src/command/client/search/engines.rs
++++ b2/crates/atuin/src/command/client/search/engines.rs
+@@ -63,6 +63,47 @@
+     }
+ }
+ 
++/// Collapse repeated commands, keeping only the most recent run of each.
++///
++/// Upstream shows every occurrence, so running `clear` five times fills five
++/// rows of the search with the same text. Each row does carry its own time,
++/// duration and exit code, which is why upstream keeps them — but for recall
++/// the repeats are noise, and the newest one is the only one worth offering.
++///
++/// Relative order is preserved: for an empty query that is the database's
++/// recency order, and for a real query it is the engine's relevance ranking.
++/// A command's surviving row sits where its newest occurrence appeared.
++///
++/// Note this runs after the engine's `limit: Some(200)`, so the list can come
++/// back shorter than 200 — the cap counts rows fetched, not rows shown.
++fn dedup_keep_latest(results: Vec<History>) -> Vec<History> {
++    use std::collections::HashMap;
++
++    // command -> index of the newest entry carrying it
++    let mut winner: HashMap<&str, usize> = HashMap::with_capacity(results.len());
++    for (i, h) in results.iter().enumerate() {
++        match winner.get(h.command.as_str()) {
++            Some(&best) if results[best].timestamp >= h.timestamp => {}
++            _ => {
++                winner.insert(h.command.as_str(), i);
++            }
++        }
++    }
++
++    let mut keep = vec![false; results.len()];
++    for &i in winner.values() {
++        keep[i] = true;
++    }
++    // release the borrows of `results` before consuming it
++    drop(winner);
++
++    results
++        .into_iter()
++        .zip(keep)
++        .filter_map(|(h, k)| k.then_some(h))
++        .collect()
++}
++
+ #[enum_dispatch]
+ pub trait SearchEngine: Send + Sync + 'static {
+     async fn full_query(
+@@ -72,27 +113,28 @@
+     ) -> Result<Vec<History>>;
+ 
+     async fn query(&mut self, state: &SearchState, db: &mut dyn Database) -> Result<Vec<History>> {
+-        if state.input.as_str().is_empty() {
++        let results = if state.input.as_str().is_empty() {
+             let shells = state.shells.to_filter();
+-            Ok(db
+-                .search(
+-                    DbSearchMode::FullText,
+-                    state.filter_mode,
+-                    &state.context,
+-                    "",
+-                    OptFilters {
+-                        limit: Some(200),
+-                        authors: all_user_author_filter(),
+-                        shells: shells.as_filter(),
+-                        ..Default::default()
+-                    },
+-                )
+-                .await?
+-                .into_iter()
+-                .collect::<Vec<_>>())
++            db.search(
++                DbSearchMode::FullText,
++                state.filter_mode,
++                &state.context,
++                "",
++                OptFilters {
++                    limit: Some(200),
++                    authors: all_user_author_filter(),
++                    shells: shells.as_filter(),
++                    ..Default::default()
++                },
++            )
++            .await?
++            .into_iter()
++            .collect::<Vec<_>>()
+         } else {
+-            self.full_query(state, db).await
+-        }
++            self.full_query(state, db).await?
++        };
++
++        Ok(dedup_keep_latest(results))
+     }
+ 
+     fn get_highlight_indices(&self, command: &str, search_input: &str) -> Vec<usize>;

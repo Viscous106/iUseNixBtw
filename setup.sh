@@ -21,12 +21,14 @@
 #   2. Creates the @, @home, @nix, @persist, @snapshots btrfs subvolumes
 #   3. Mounts everything under /mnt exactly as hardware-configuration.nix expects
 #   4. Copies this repo (the directory this script lives in) to /mnt/persist/nixos-config
-#   5. Runs `nixos-install --flake .../nixos-config#nix`
+#   5. Prompts for the login username + password and writes them into the
+#      COPIED user.nix, hashed with `mkpasswd -m sha-512` — the checkout you
+#      ran this from keeps its own values
+#   6. Runs `nixos-install --flake .../nixos-config#nix`
 #
 # What it deliberately does NOT do (see setup.md):
 #   - Restore secrets (SSH keys, GPG keys, git identity, API keys) — those
 #     never lived in git and must be copied back onto /persist/secrets by hand.
-#   - Set the user's login password — set it after first boot with `passwd`.
 # ==============================================================================
 set -euo pipefail
 
@@ -49,6 +51,7 @@ declare -A _SETUP_CMD_TO_PKG=(
   [partprobe]=parted    [mkfs.fat]=dosfstools   [mkfs.btrfs]=btrfs-progs
   [btrfs]=btrfs-progs   [mount]=util-linux      [umount]=util-linux
   [ping]=iputils        [lsblk]=util-linux      [sed]=gnused
+  [mkpasswd]=mkpasswd
 )
 _SETUP_MISSING_PKGS=()
 for _cmd in "${!_SETUP_CMD_TO_PKG[@]}"; do
@@ -179,6 +182,57 @@ else
   echo "falls back to hardware-universal.nix's generic modesetting driver."
 fi
 
+# ── Login account ────────────────────────────────────────────────────────────
+# flake.nix imports ./user.nix and hands it to every module as `user`;
+# configuration.nix then creates users.users.${user.username} with
+# initialHashedPassword = user.hashedPassword. Ask for both here and write them
+# into the COPIED user.nix after cp below — the checkout this script runs from
+# keeps its original values, so `nixos-rebuild switch` on an existing machine
+# is unaffected.
+USER_NIX="$REPO_DIR/user.nix"
+if [ ! -f "$USER_NIX" ]; then
+  echo "$USER_NIX not found — flake.nix imports it for the username and password" >&2
+  echo "hash, so the install would fail to evaluate. Can't continue." >&2
+  exit 1
+fi
+DEFAULT_USERNAME="$(sed -n 's|^[[:space:]]*username[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' "$USER_NIX" | head -n1)"
+DEFAULT_USERNAME="${DEFAULT_USERNAME:-nixos}"
+
+echo
+echo "── Login account ───────────────────────────────────────────────────────"
+echo "These go into the installed copy's user.nix. This checkout is left alone,"
+echo "so the hash committed to git is never what ends up on the new system."
+echo
+
+while :; do
+  read -rp "Username [$DEFAULT_USERNAME]: " ACCOUNT_USER
+  ACCOUNT_USER="${ACCOUNT_USER:-$DEFAULT_USERNAME}"
+  [[ "$ACCOUNT_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] && break
+  echo "Invalid username. Lowercase letters, digits, '_' and '-' only, starting" >&2
+  echo "with a letter or '_'." >&2
+done
+
+while :; do
+  read -rsp "Password for $ACCOUNT_USER: " ACCOUNT_PASS; echo
+  if [ -z "$ACCOUNT_PASS" ]; then
+    echo "Password can't be empty — the account would have no way to log in." >&2
+    continue
+  fi
+  read -rsp "Confirm password: " ACCOUNT_PASS_CONFIRM; echo
+  [ "$ACCOUNT_PASS" = "$ACCOUNT_PASS_CONFIRM" ] && break
+  echo "Passwords didn't match — try again." >&2
+done
+
+# -s reads from stdin rather than argv, so the plaintext never shows up in `ps`.
+ACCOUNT_HASH="$(printf '%s\n' "$ACCOUNT_PASS" | mkpasswd -m sha-512 -s)"
+unset ACCOUNT_PASS ACCOUNT_PASS_CONFIRM
+if [ -z "$ACCOUNT_HASH" ]; then
+  echo "mkpasswd returned an empty hash — refusing to install an account whose" >&2
+  echo "password can't be verified." >&2
+  exit 1
+fi
+echo "Password hashed (sha-512)."
+
 # ── Copy the repo into place ─────────────────────────────────────────────────
 echo "── Copying repo to /mnt/persist/nixos-config ─────────────────────────"
 mkdir -p /mnt/persist/nixos-config
@@ -190,6 +244,24 @@ if [[ ! "$NVIDIA_ANSWER" =~ ^[Yy]$ ]]; then
   sed -i \
     's|^\([[:space:]]*\)\./modules/hardware-nvidia\.nix|\1# ./modules/hardware-nvidia.nix (disabled by setup.sh — no matching NVIDIA GPU)|' \
     /mnt/persist/nixos-config/flake.nix
+fi
+
+echo "Writing the login account into the copied user.nix ..."
+sed -i \
+  -e "s|^\([[:space:]]*\)username[[:space:]]*=.*|\1username = \"$ACCOUNT_USER\";|" \
+  -e "s|^\([[:space:]]*\)hashedPassword[[:space:]]*=.*|\1hashedPassword = \"$ACCOUNT_HASH\";|" \
+  /mnt/persist/nixos-config/user.nix
+
+# A silent no-match here would quietly install this repo's committed username
+# and password hash instead of the ones just entered, so verify rather than
+# trust the sed. grep -F because a sha-512 hash is full of regex metacharacters.
+if ! grep -qF "username = \"$ACCOUNT_USER\";" /mnt/persist/nixos-config/user.nix \
+  || ! grep -qF "hashedPassword = \"$ACCOUNT_HASH\";" /mnt/persist/nixos-config/user.nix; then
+  echo "Couldn't write the account into /mnt/persist/nixos-config/user.nix — the" >&2
+  echo "install would fall back to this repo's committed hash. Aborting before" >&2
+  echo "nixos-install; check that user.nix still has 'username =' and" >&2
+  echo "'hashedPassword =' lines." >&2
+  exit 1
 fi
 
 # Empty secrets scaffold — home-manager's activation script also does this on
@@ -208,10 +280,10 @@ nixos-install --root /mnt --flake /mnt/persist/nixos-config#nix --no-root-passwd
 echo
 echo "── Done ────────────────────────────────────────────────────────────────"
 echo "Reboot, then:"
-echo "  1. Log in as viscous (password is already set from configuration.nix's hash)"
+echo "  1. Log in as $ACCOUNT_USER with the password you chose during install."
 echo "  2. Restore /persist/secrets/{ssh/,git-identity,claude_api} from your own"
 echo "     backup — these were never in git and won't exist yet. See setup.md."
-echo "  3. Run 'passwd' if you want to change the login password."
+echo "  3. Run 'passwd' any time you want to change the login password."
 echo "  4. Clone the Claude Code skills repo (needs the SSH key from step 2):"
 echo "       git clone git@github.com:Viscous106/claude-skills.git ~/Viscous/claude-skills"
 echo "     then symlink skills/, agents/ and commands/ into ~/.config/claude,"
