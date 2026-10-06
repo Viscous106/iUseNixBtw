@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, user, ... }:
 
 {
   imports = [
@@ -41,15 +41,17 @@
     ./modules/web3.nix
   ];
 
-  home.username      = "viscous";
-  home.homeDirectory = "/home/viscous";
+  # Both from ../user.nix (handed down as `user` through extraSpecialArgs), so
+  # this file never has to know whose home it is configuring — see flake.nix.
+  home.username      = user.username;
+  home.homeDirectory = "/home/${user.username}";
   home.stateVersion  = "25.05";
 
   # ── Solidity / EVM ────────────────────────────────────────────────────────
   # The knobs for the whole EVM toolchain. Retune here rather than inside any
   # project. Option docs live in home/modules/web3.nix; the reasoning behind
   # the design is in docs/superpowers/specs/2026-09-27-web3-dev-environment-design.md
-  viscous.web3 = {
+  my.web3 = {
     enable = true;
 
     solc = {
@@ -118,7 +120,7 @@
     #     existed, and nothing ever created it — so it could never establish the
     #     link from a clean state, and silently no-op'd forever once the target
     #     went missing.
-    keyringPersist=/persist/home/viscous/.local/share/keyrings
+    keyringPersist=/persist/home/${user.username}/.local/share/keyrings
     keyringHome=$HOME/.local/share/keyrings
 
     $DRY_RUN_CMD mkdir -p "$keyringPersist"

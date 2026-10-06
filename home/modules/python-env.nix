@@ -1,7 +1,7 @@
 # Python library ecosystem migrated from Arch's explicitly-installed python-* packages.
 #
 # NOTE on coexistence: this file adds a THIRD python resolution path alongside
-# whatever is already in home/viscous.nix (a bare `pkgs.python3` and `pyenv`).
+# whatever is already in home/user.nix (a bare `pkgs.python3` and `pyenv`).
 # `pythonWithLibs` below is its own self-contained interpreter + site-packages
 # closure, entirely separate from the bare `python3` package and from any
 # pyenv-managed interpreter/venvs. Concretely:

@@ -24,7 +24,7 @@
 #      non-obvious flags. `web3-cli` stamps out a correct project instead.
 
 let
-  cfg = config.viscous.web3;
+  cfg = config.my.web3;
 
   # Compilers named solc-<version>, from upstream's static release binaries.
   extraSolcPkgs =
@@ -117,7 +117,7 @@ let
   };
 in
 {
-  options.viscous.web3 = {
+  options.my.web3 = {
     enable = lib.mkEnableOption "the Solidity/EVM development environment";
 
     solc = {
@@ -181,8 +181,8 @@ in
         assertion =
           cfg.solc.default == "nixpkgs" || cfg.solc.extra ? ${cfg.solc.default};
         message = ''
-          viscous.web3.solc.default is "${cfg.solc.default}", which is neither
-          "nixpkgs" nor a key of viscous.web3.solc.extra. Add that version to
+          my.web3.solc.default is "${cfg.solc.default}", which is neither
+          "nixpkgs" nor a key of my.web3.solc.extra. Add that version to
           `extra` (with its sha256), or set `default = "nixpkgs"`.
         '';
       }

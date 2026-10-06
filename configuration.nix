@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, user, ... }:
 
 {
   networking.hostName = "nix";
@@ -65,12 +65,17 @@
   boot.loader.grub.configurationLimit = 3;
 
   # ── User ──────────────────────────────────────────────────────────────────
-  users.users.viscous = {
+  # Name and password both come from ./user.nix, which setup.sh rewrites on a
+  # fresh install from what the installer typed at the prompt. Nothing here
+  # hardcodes an account.
+  users.users.${user.username} = {
     isNormalUser   = true;
     shell          = pkgs.zsh;
     extraGroups    = [ "wheel" "networkmanager" "video" "audio" "input" "libvirtd" ];
-    # Password hash generated with mkpasswd -m sha-512
-    initialHashedPassword = "$6$KAEKKvbZIFl93S.a$bH1h1M.sCzqmvX3SZkK6QcHfjP31vBadi4V/dpWPlL2zIeQ5ZQ85NwrE9sylDZ3Wb/YOeS8lSHtHeJhGbveic0";
+    # Password hash generated with mkpasswd -m sha-512 (see ./user.nix).
+    # initialHashedPassword, not hashedPassword, so `passwd` keeps working
+    # afterwards: NixOS applies this only when the account is first created.
+    initialHashedPassword = user.hashedPassword;
   };
 
   security.sudo.wheelNeedsPassword = false;

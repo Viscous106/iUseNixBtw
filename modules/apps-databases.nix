@@ -57,7 +57,7 @@
   # detects `isMariaDB = lib.getName cfg.package == lib.getName pkgs.mariadb`).
   # pkgs.mariadb exists (aliased to mariadb_114 in pkgs/top-level/all-packages.nix).
   # This is intentionally separate from the mysql84 home.package already
-  # declared in home/viscous.nix — different engine, both kept.
+  # declared in home/user.nix — different engine, both kept.
   services.mysql = {
     enable = true;
     package = pkgs.mariadb;
@@ -124,7 +124,7 @@
   # Arch had libvirtd + virtlogd enabled (VM passthrough scripts under
   # ~/.config/hypr/scripts/vm-passthrough.sh reference it) but this was never
   # ported. virtualisation.libvirtd.enable brings up both libvirtd and
-  # virtlogd; qemu is the default backend. viscous needs to be in the
+  # virtlogd; qemu is the default backend. the user needs to be in the
   # `libvirtd` group to manage VMs without sudo (added in configuration.nix).
   virtualisation.libvirtd.enable = true;
   programs.virt-manager.enable = true;

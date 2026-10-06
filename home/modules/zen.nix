@@ -1,4 +1,4 @@
-{ inputs, pkgs, config, ... }:
+{ inputs, pkgs, config, user, ... }:
 
 {
   imports = [
@@ -17,7 +17,7 @@
 
   # ── Persistent Profile ─────────────────────────────────────────────────────
   # Ensures the Zen profile is stored on the persistent partition
-  xdg.configFile."zen".source = config.lib.file.mkOutOfStoreSymlink "/persist/home/viscous/.config/zen";
+  xdg.configFile."zen".source = config.lib.file.mkOutOfStoreSymlink "/persist/home/${user.username}/.config/zen";
 
   # ── Profile migration note ─────────────────────────────────────────────────
   # Zen >= 18.18.6b expects config in ~/.config/zen (not ~/.zen).

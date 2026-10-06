@@ -132,6 +132,14 @@
   let
     system = "x86_64-linux";
 
+    # Who this install belongs to — username + password hash, the one place
+    # either is written down. setup.sh rewrites ./user.nix in the copy it
+    # installs, so a fresh machine gets whatever name and password were typed
+    # at the prompt instead of this repo's owner. Threaded into every NixOS
+    # module via specialArgs and every home-manager module via
+    # extraSpecialArgs, both as `user`.
+    user = import ./user.nix;
+
     # Everything both machines share. The ONLY difference between the portable
     # USB install and the internal encrypted NVMe install is which
     # hardware-configuration is appended to this list.
@@ -157,15 +165,15 @@
       {
         home-manager.useGlobalPkgs    = true;
         home-manager.useUserPackages  = true;
-        home-manager.extraSpecialArgs = { inherit inputs; };
+        home-manager.extraSpecialArgs = { inherit inputs user; };
         home-manager.backupFileExtension = "backup";
-        home-manager.users.viscous    = import ./home/viscous.nix;
+        home-manager.users.${user.username} = import ./home/user.nix;
       }
     ];
 
     mkHost = hardware: nixpkgs.lib.nixosSystem {
       inherit system;
-      specialArgs = { inherit inputs; };
+      specialArgs = { inherit inputs user; };
       modules = commonModules ++ [ hardware ];
     };
   in

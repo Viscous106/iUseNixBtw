@@ -124,7 +124,7 @@
   xdg.configFile."claude/CLAUDE.md".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/claude/CLAUDE.md";
   # settings.json is deliberately NOT an xdg.configFile — see
-  # home.activation.linkClaudeSettings in home/viscous.nix. Claude Code
+  # home.activation.linkClaudeSettings in home/user.nix. Claude Code
   # rewrites this file (/model, /config, plugin enable/disable) with an
   # atomic tmp-file-then-rename, and it resolves the symlink only one hop
   # before choosing where to put the tmp file. xdg.configFile always routes

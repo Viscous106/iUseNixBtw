@@ -74,7 +74,7 @@ in
   # That option is gone from nixpkgs: systemd 258 applies uaccess to Android
   # devices automatically, so the logged-in user gets the device node with no
   # rules and no group membership. All that is left is having the binary, and
-  # home/modules/dev-toolchains.nix already installs android-tools for viscous
+  # home/modules/dev-toolchains.nix already installs android-tools for the user
   # — so there is deliberately nothing to declare here.
   #
   # Manual fallback if the dashboard button misbehaves:
