@@ -106,15 +106,28 @@ shotwin() {
 }
 
 shotarea() {
+	# rope-select is the animated region picker (home/quickshell/rope-select).
+	# It is slurp-compatible and falls back to slurp itself if the overlay
+	# cannot run, so there is nothing to guard here beyond the exit code.
+	#
+	# That exit code now has to be honoured. Escape and right-click are
+	# first-class cancels, and the old inline command-substitution form could
+	# not see a cancel at all: grim got an empty -g, wrote nothing, and the
+	# script went on to announce "Screenshot Saved" and leave the temp file
+	# behind.
+	region=$(rope-select) || return 0
+
 	tmpfile=$(mktemp)
-	grim -g "$(slurp)" - >"$tmpfile"
+	grim -g "$region" - >"$tmpfile"
 
   # Copy with saving
 	if [[ -s "$tmpfile" ]]; then
 		wl-copy <"$tmpfile"
 		mv "$tmpfile" "$dir/$file"
+		notify_view
+	else
+		rm -f "$tmpfile"
 	fi
-	notify_view
 }
 
 shotactive() {
@@ -128,13 +141,18 @@ shotactive() {
 }
 
 shotswappy() {
+	# See shotarea above for why the exit code is checked.
+	region=$(rope-select) || return 0
+
 	tmpfile=$(mktemp)
-	grim -g "$(slurp)" - >"$tmpfile" 
+	grim -g "$region" - >"$tmpfile"
 
   # Copy without saving
   if [[ -s "$tmpfile" ]]; then
 		wl-copy <"$tmpfile"
     notify_view "swappy"
+  else
+    rm -f "$tmpfile"
   fi
 }
 

@@ -50,10 +50,12 @@ case "$chosen_option" in
         wf-recorder -a -g "$window_geo" -f "$output_file" &> /dev/null &
         ;;
     "󰩬 Select Region")
-        # Select a region using slurp
-        geometry=$(slurp)
+        # Select a region using rope-select, the animated slurp-compatible
+        # picker (home/quickshell/rope-select). It falls back to slurp on
+        # its own if the overlay cannot run, and signals cancel the same way.
+        geometry=$(rope-select)
         
-        # Exit if slurp was cancelled
+        # Exit if the selection was cancelled
         if [ -z "$geometry" ]; then
             notify "Recording cancelled."
             exit 0

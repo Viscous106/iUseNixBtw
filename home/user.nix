@@ -24,6 +24,7 @@
     ./modules/gtk.nix
     ./modules/icon-themes.nix
     ./modules/wallpaper-picker.nix
+    ./modules/rope-select.nix
     ./modules/nwg-look.nix
     ./modules/nwg-displays.nix
     ./modules/apps-browsers-comms.nix
