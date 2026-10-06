@@ -11,17 +11,22 @@
  impl DrawState<'_> {
      /// Render a complete row for a history item based on configured columns.
      fn render_row(&mut self, h: &History) {
-@@ -255,18 +251,31 @@
+@@ -255,18 +251,33 @@
              return;
          }
  
 -        // these encode the slices of `" > "`, `" {n} "`, or `"   "` in a compact form.
 -        // Yes, this is a hack, but it makes me feel happy
 -
-+        // Upstream encodes " > ", " 1 ".." 9 " and "   " as slices of a single
-+        // static string, which caps the numbering at 9 because that is how many
-+        // alt-N shortcuts exist. We want every visible row labelled, so the
-+        // counter is formatted instead of looked up.
++        // Upstream numbers rows by their distance from the selection, looked up
++        // as a slice of a static " > 1 2 3 4 5 6 7 8 9   " string. That caps the
++        // numbering at nine (one per alt-N shortcut) and, because the number is
++        // a distance, renumbers every row each time the selection moves.
++        //
++        // We want a stable index instead: the row's own position in the result
++        // list, so a given entry keeps its number no matter where the cursor is.
++        // `i` already includes the scroll offset, so numbering stays correct
++        // past the first screenful rather than restarting.
 +        //
 +        // The width stays exactly 3 columns: render_row hardcodes
 +        // `indicator_width: u16 = 3` when working out how much space the
@@ -33,23 +38,19 @@
 -        let i = i.unwrap_or(10).min(10) * 2;
 -        let prompt: &str = if i == 0 {
 -            self.indicator
--        } else {
++        if i == self.state.selected() {
++            self.draw(indicator, Style::default());
+         } else {
 -            &SLICES[i..i + 3]
 -        };
 -        self.draw(prompt, Style::default());
-+        match i.checked_sub(self.state.selected) {
-+            // the selected row keeps the configured indicator
-+            Some(0) => self.draw(indicator, Style::default()),
-+            Some(n) => {
-+                let text = if n < 100 {
-+                    format!("{n:>2} ")
-+                } else {
-+                    format!("{n:>3}")
-+                };
-+                self.draw(&text, Style::default());
-+            }
-+            // rows before the selection are blank, as before
-+            None => self.draw("   ", Style::default()),
++            let n = i + 1;
++            let text = if n < 100 {
++                format!("{n:>2} ")
++            } else {
++                format!("{n:>3}")
++            };
++            self.draw(&text, Style::default());
 +        }
      }
  

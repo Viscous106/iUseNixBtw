@@ -230,6 +230,22 @@
 
   # ── Helper Tools (Native Integrations) ──────────────────────────────────────
   programs.fzf.enable = true;
+  # Yield Ctrl-R to atuin explicitly instead of relying on load order.
+  #
+  # Both modules bind Ctrl-R, and home-manager now warns about the clash. It
+  # resolved itself in our favour anyway — fzf inits at mkOrder 910, atuin at
+  # the default 1000, so atuin bound last and won — but that is a race decided
+  # by two numbers neither module promises to keep.
+  #
+  # This is the supported way out. The option exports FZF_CTRL_R_COMMAND="",
+  # and fzf's generated init guards its binding with
+  # `if [[ ${FZF_CTRL_R_COMMAND-x} != "" ]]`: unset substitutes "x" and binds,
+  # set-but-empty substitutes "" and skips. fzf never defines the widget, so
+  # there is nothing left to race.
+  #
+  # Scoped to zsh, and only the history widget — Ctrl-T and the Alt-C cd widget
+  # (rebound to Alt-R in home/zsh/scripts/keybinds.sh) are untouched.
+  programs.fzf.historyWidget.zsh.command = "";
   programs.zoxide.enable = true;
 
   # nix-locate, the package-lookup backend pay-respects shells out to when a
