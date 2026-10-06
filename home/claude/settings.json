@@ -155,6 +155,39 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/viscous/.config/tmux/scripts/agent-state.sh claude",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/viscous/.config/tmux/scripts/agent-state.sh claude",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/viscous/.config/tmux/scripts/agent-state.sh claude",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
