@@ -71,6 +71,50 @@ die_unless_pane() {
   command -v tmux >/dev/null 2>&1 || exit 0
 }
 
+# Pull the client to whatever just blocked, the way Herdr jumps you to the pane
+# that needs an answer. Opt-out with `set -g @agent-autofocus off` in tmux.conf.
+#
+# Guarded three ways, because stealing focus mid-keystroke is worse than a
+# missed chip: only on `blocked`, only when that pane is not already the one you
+# are looking at, and never when a popup/copy-mode/prefix is active -- switching
+# out from under those eats the keystroke.
+autofocus() {
+  local pane=$1 sess win
+  [ "$(tmux show -gqv '@agent-autofocus')" = "off" ] && return 0
+
+  # Both guards below come from `list-clients`, NOT `display -p`. Two traps:
+  # `display -p` with no target resolves the pane from $TMUX_PANE, which a hook
+  # sets to the pane that just blocked -- so it always claims we are already
+  # looking at it. And `display -p -c <client>` does not fix that: -c only
+  # scopes #{client_*} formats, the pane target still comes from the env.
+  # list-clients reports each client's genuinely active pane.
+  local focused
+  focused=$(tmux list-clients -F '#{pane_id}' 2>/dev/null | head -1)
+  [ -n "$focused" ] || return 0            # nobody attached, nothing to focus
+
+  # Already looking at it?
+  [ "$focused" = "$pane" ] && return 0
+
+  # Mid-interaction: prefix held, or in copy-mode. Switching out from under
+  # either eats the keystroke.
+  case $(tmux list-clients -F '#{client_prefix}#{pane_in_mode}' 2>/dev/null | head -1) in
+    *1*) return 0 ;;
+  esac
+
+  sess=$(tmux display -p -t "$pane" '#{session_name}' 2>/dev/null) || return 0
+  [ -n "$sess" ] || return 0
+  win=$(tmux display -p -t "$pane" '#{window_id}' 2>/dev/null)
+
+  # Move every attached client, not just the "current" one -- a hook runs with
+  # no client of its own, so tmux would otherwise guess.
+  local c
+  for c in $(tmux list-clients -F '#{client_name}' 2>/dev/null); do
+    tmux switch-client -c "$c" -t "$sess" 2>/dev/null
+  done
+  tmux select-window -t "$win"  2>/dev/null
+  tmux select-pane   -t "$pane" 2>/dev/null
+}
+
 cmd_set() {
   local state=${1:-idle}
   die_unless_pane
@@ -79,6 +123,9 @@ cmd_set() {
   # Push the redraw instead of waiting for status-interval. This is what keeps
   # the bar instant without polling every pane on a timer.
   tmux refresh-client -S 2>/dev/null
+
+  [ "$state" = blocked ] && autofocus "$TMUX_PANE"
+  return 0
 }
 
 cmd_clear() {

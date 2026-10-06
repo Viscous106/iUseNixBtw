@@ -154,4 +154,40 @@
   # break that.
   home.file.".codex/config.toml".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/codex/config.toml";
+
+  # ── Agent state -> tmux status bar ─────────────────────────────────────────
+  # The renderer, the picker and all four hook adapters live in
+  # home/tmux/scripts/agent-state.sh, which is already live via the
+  # xdg.configFile."tmux" symlink above. What is left is pointing each agent at
+  # it. Claude Code is NOT here: its hooks are declared in
+  # home/claude/settings.json, which is linked by home.activation.linkClaudeSettings
+  # in home/user.nix rather than by this module.
+  #
+  # All three are mkOutOfStoreSymlink so hook wiring stays tweakable without a
+  # rebuild, matching how the rest of the agent config in this file is treated.
+
+  # Codex reads $CODEX_HOME (~/.codex), not an XDG path — same reason
+  # config.toml above uses home.file. Deliberately a separate hooks.json rather
+  # than a [hooks] table in config.toml: codex rewrites config.toml in place to
+  # record [projects.*] trust_level, and hook wiring has no business sitting in
+  # the path of those rewrites.
+  #
+  # NOTE: codex gates hooks behind a persisted *hook trust* prompt. Expect to
+  # approve this once on the next codex run, and again if the command changes.
+  home.file.".codex/hooks.json".source = config.lib.file.mkOutOfStoreSymlink
+    "/persist/nixos-config/home/codex/hooks.json";
+
+  # opencode is the odd one out — it has no hooks.json, it loads TypeScript
+  # plugins. Only this one file is managed; the rest of ~/.config/opencode
+  # (opencode.jsonc, auth, caches) stays as real files.
+  xdg.configFile."opencode/plugin/agent-state.ts".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "/persist/nixos-config/home/tmux/scripts/agent-state-opencode.ts";
+
+  # antigravity. ~/.gemini is not XDG either. agy has no permission/approval
+  # event among its five hooks, so it can only ever report working/done — it is
+  # the one agent of the four that cannot light up as blocked.
+  home.file.".gemini/antigravity-cli/hooks.json".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "/persist/nixos-config/home/agy/hooks.json";
 }

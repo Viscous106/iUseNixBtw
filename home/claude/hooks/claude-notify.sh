@@ -16,24 +16,36 @@ fi
 
 case $event in
   Notification)
+    state=blocked
     urgency=critical
     title="Claude needs you"
     body=${msg:-Waiting for your input}
     sound=/run/current-system/sw/share/sounds/freedesktop/stereo/message.oga
     ;;
   Stop)
+    state=done
     urgency=normal
     title="Claude finished"
     body="Turn complete — ready for the next instruction"
     sound=/run/current-system/sw/share/sounds/freedesktop/stereo/complete.oga
     ;;
   *)
+    state=
     urgency=normal
     title="Claude Code"
     body=${msg:-$event}
     sound=
     ;;
 esac
+
+# Feed the tmux status bar the same event we are about to toast. This script
+# already resolves $TMUX_PANE for the notification body, so the pane is known;
+# agent-state.sh turns it into a chip in status-right. See
+# home/tmux/scripts/agent-state.sh. Best-effort -- never block the notification.
+agent_state=$HOME/.config/tmux/scripts/agent-state.sh
+if [ -n "$state" ] && [ -x "$agent_state" ]; then
+  "$agent_state" set "$state" || true
+fi
 
 notify-send -a "Claude Code" -u "$urgency" -i utilities-terminal \
   -h "string:x-canonical-private-synchronous:claude-${TMUX_PANE:-0}" \
