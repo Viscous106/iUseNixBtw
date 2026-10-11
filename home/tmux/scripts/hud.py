@@ -17,8 +17,8 @@ import subprocess
 import sys
 
 OPTIONS = [
-    ("Pane L", "C-h", "select-pane -L"),
-    ("Pane R", "C-l", "select-pane -R"),
+    ("Win Prev", "C-h", "previous-window"),
+    ("Win Next", "C-l", "next-window"),
     ("Split H", "\\", "split-window -h"),
     ("Split V", "-", "split-window -v"),
     ("Sess Next", "C-j", "switch-client -n"),
