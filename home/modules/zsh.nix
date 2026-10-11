@@ -72,9 +72,21 @@
       #      (and deleting empty dirs) on every mv tab-complete.
       #      Delegating these to the real binary keeps completion, --help,
       #      and "missing operand" errors behaving like real cp/mv.
+      #   5. The `$# < 2` guard above only catches a flag-only probe, not a
+      #      real flagged call with 2+ remaining args. zsh's own compinit
+      #      runs exactly that on every login — `mv -f -- old new`, to
+      #      rotate .zcompdump — and with 4 args it sailed past that guard
+      #      straight into the srcs/dst split below, where "-f" and "--"
+      #      became "source paths" that obviously don't exist. Same
+      #      "cannot stat" false failure as gotcha 4, different shape: any
+      #      argument starting with "-" means this isn't a plain cp/mv we
+      #      can rsync, so bail to the real binary before the arg split.
       _rsync_transfer() {
         local remove=$1 name=cp; shift
         [[ $remove == 1 ]] && name=mv
+        for a in "$@"; do
+          [[ $a == -* ]] && { command "$name" "$@"; return }
+        done
         (( $# < 2 )) && { command "$name" "$@"; return }
         local dst=''${@[-1]}
         local srcs=(''${@[1,-2]})
