@@ -23,4 +23,22 @@
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
+
+  # ── Disable runtime D3 (RTD3) on the dGPU ─────────────────────────────────
+  # The open driver defaults to NVreg_DynamicPowerManagement=3, letting the GPU
+  # runtime-suspend while the panel is off. With no iGPU that saves ~nothing,
+  # and it deadlocks suspend: logind's VT switch holds console_lock →
+  # fbcon_switch → nvidia-drm modeset → nvRmSetGc6Allowed → runtime-resume →
+  # rm_transition_dynamic_power → console_lock again (self-deadlock,
+  # "blocked on a semaphore likely last held by task systemd-logind"). Result:
+  # black screen that never wakes; only a hard power-off recovers. Seen in the
+  # journal 2026-10-12 (two hangs on suspend-then-hibernate).
+  boot.extraModprobeConfig = ''
+    options nvidia NVreg_DynamicPowerManagement=0x00
+  '';
+  # Keep the GPU's PCI runtime PM pinned "on" so supergfxd (Hybrid mode sets
+  # it to "auto") can't re-enable runtime suspend behind the driver's back.
+  services.udev.extraRules = ''
+    ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="on"
+  '';
 }
