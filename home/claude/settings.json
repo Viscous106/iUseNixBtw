@@ -132,7 +132,7 @@
       "Bash(gh auth *)"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -272,6 +272,11 @@
       "podman"
     ]
   },
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "tui": "fullscreen",
   "voice": {
     "enabled": true,
@@ -280,5 +285,38 @@
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Bash(sshpass:*) — frequently used (250×) to drive non-interactive SSH/password auth; scope any carve-out narrowly and keep password-bearing invocations soft-blocked pending review"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: unknown — no git remotes configured in this repo (Repo path /home/viscous has no remotes); cannot infer visibility — assume private unless/until a remote is added",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: unknown — no remotes configured, default branch unset (origin/HEAD unset), and gh query not queryable here",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine or CI runner with open internet",
+      "**Source control**: no remotes configured for this repo (/home/viscous); no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured — config scan did not complete cleanly (bucket evidence unavailable, not absent)",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar — observed candidates in home directory: .kaggle/credentials.json, .local/share/jupyter/notebook_secret, Viscous/githubStats/.env, Viscous/githubStats/.env.example, .config/mov-cli/.env",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development",
+      "**Trusted repo**: the git repository at /home/viscous (no remotes configured) — this is the working directory the agent started in; visibility unknown/unverifiable since no remote exists",
+      "**Org-specific CLIs**: None configured — frequent non-standard CLIs observed (sshpass, nix, systemctl, direnv, lsblk, mount, udisksctl) appear to be personal system-administration tooling, not org-specific",
+      "no additional routine-under-<user>/ prefix qualifiers found"
+    ]
+  },
   "voiceEnabled": true
 }

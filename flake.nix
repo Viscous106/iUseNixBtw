@@ -48,7 +48,7 @@
     #
     # and paste the result here (plain `nix flake update` cannot move a
     # rev-pinned input).
-    nixpkgs-claude.url = "github:NixOS/nixpkgs/a251c42236bbff9f870fcdc513dac5873009c304";  # claude-code 2.1.278
+    nixpkgs-claude.url = "github:NixOS/nixpkgs/94d35c7c05087e8b07373a403c55e97d99ff9af9";  # claude-code 2.1.296
 
     home-manager = {
       url = "github:nix-community/home-manager";
