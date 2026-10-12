@@ -185,7 +185,8 @@ local function render(buf, results)
       if result then
         for row, label in pairs(contract_labels(buf, contract, result.abi, result.gas)) do
           vim.api.nvim_buf_set_extmark(buf, ns, row, 0, {
-            virt_text = { { '⛽ ' .. label, 'SolidityGas' } },
+            -- U+F0298 is nf-md-gas_station
+            virt_text = { { (vim.g.have_nerd_font and '\u{F0298} ' or '⛽ ') .. label, 'SolidityGas' } },
             virt_text_pos = 'eol',
           })
         end
