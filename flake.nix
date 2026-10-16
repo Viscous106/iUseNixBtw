@@ -126,6 +126,16 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # claude-lend — metered guest access to Claude through a gateway on this
+    # machine (home/modules/claude-lend.nix). Local checkout, git+file rather
+    # than path: so only git-tracked files are copied in (no .git, no
+    # grants.db). Locked by narHash like any other input: after changing the
+    # checkout, `nix flake update claude-lend` to pick the change up.
+    claude-lend = {
+      url = "git+file:///home/viscous/Viscous/I-have-claude-BTW";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:

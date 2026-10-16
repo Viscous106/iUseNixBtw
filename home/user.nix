@@ -41,6 +41,7 @@
     ./modules/wayvr.nix
     ./modules/battery-notify.nix
     ./modules/web3.nix
+    ./modules/claude-lend.nix
   ];
 
   # Both from ../user.nix (handed down as `user` through extraSpecialArgs), so

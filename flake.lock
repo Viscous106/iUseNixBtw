@@ -101,6 +101,26 @@
         "url": "https://github.com/caelestia-dots/shell"
       }
     },
+    "claude-lend": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791830103,
+        "narHash": "sha256-/MOBv5yQAS2Ix33Tjpfv5tdJa0cFRuDzH0Ib4KIvR1g=",
+        "ref": "refs/heads/main",
+        "rev": "db8d9b9f750dbe135278f30de346dfbbd6d63ee2",
+        "revCount": 8,
+        "type": "git",
+        "url": "file:///home/viscous/Viscous/I-have-claude-BTW"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/viscous/Viscous/I-have-claude-BTW"
+      }
+    },
     "codex-cli-nix": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -703,6 +723,7 @@
       "inputs": {
         "antigravity": "antigravity",
         "caelestia-shell": "caelestia-shell",
+        "claude-lend": "claude-lend",
         "codex-cli-nix": "codex-cli-nix",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
