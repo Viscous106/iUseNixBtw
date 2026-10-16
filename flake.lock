@@ -108,11 +108,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791830103,
-        "narHash": "sha256-/MOBv5yQAS2Ix33Tjpfv5tdJa0cFRuDzH0Ib4KIvR1g=",
+        "lastModified": 1792160274,
+        "narHash": "sha256-jeKLk40HBi93XZD4uUe5WRuHq2apQdvmM/tiTsh4CYI=",
         "ref": "refs/heads/main",
-        "rev": "db8d9b9f750dbe135278f30de346dfbbd6d63ee2",
-        "revCount": 8,
+        "rev": "d8dc19c6c1ac26b8a2854f33ec7e60ef450e8296",
+        "revCount": 9,
         "type": "git",
         "url": "file:///home/viscous/Viscous/I-have-claude-BTW"
       },

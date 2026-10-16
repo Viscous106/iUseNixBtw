@@ -28,5 +28,11 @@
     tokenFile = "${config.home.homeDirectory}/.config/claude-lend-token";
 
     # verbose = true;   # log every billed request to the journal
+
+    # HTTPS on 8443, all interfaces, for guests on the same Wi-Fi. The gateway
+    # runs its own CA; a LAN grant's message saves it on the guest's machine.
+    # The firewall port is opened in configuration.nix (home-manager can't).
+    lan.enable = true;
+    lan.port   = 8443;
   };
 }
