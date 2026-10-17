@@ -22,12 +22,12 @@ hl.on("hyprland.start", function()
   -- Caelestia shell: bar, notifications, launcher and OSDs in one process.
   hl.exec_cmd("caelestia-shell")
   -- With bar.persistent off the bar starts hidden; this shows it once IPC is up.
-  hl.exec_cmd(scriptsDir .. "/caelestia-bar-init.sh")
+  hl.exec_cmd(scriptsDir .. "/CaelestiaBarInit.sh")
   -- --prewarm: start hidden so the first SUPER+SHIFT+Return is instant.
-  hl.exec_cmd(scriptsDir .. "/Dropterminal.sh --prewarm kitty")
+  hl.exec_cmd(scriptsDir .. "/DropTerminal.sh --prewarm kitty")
 
   -- polkit agent (NixOS variant resolves the agent from /nix/store)
-  hl.exec_cmd(scriptsDir .. "/Polkit-NixOS.sh")
+  hl.exec_cmd(scriptsDir .. "/PolkitNixOS.sh")
 
   -- tray applets (idle/lock is caelestia's general.idle, home/desktop/caelestia.nix)
   hl.exec_cmd("nm-applet --indicator")
@@ -40,8 +40,8 @@ hl.on("hyprland.start", function()
 
   -- convertible: `init` resets rotation/keyboard in case the last session died
   -- folded; the daemon self-locks, so reloads don't stack copies.
-  hl.exec_cmd(scriptsDir .. "/auto-rotate.sh init")
-  hl.exec_cmd(scriptsDir .. "/auto-rotate.sh daemon")
+  hl.exec_cmd(scriptsDir .. "/AutoRotate.sh init")
+  hl.exec_cmd(scriptsDir .. "/AutoRotate.sh daemon")
 
   -- resume screen colour mode
   hl.exec_cmd(scriptsDir .. "/ScreenMode.sh init")

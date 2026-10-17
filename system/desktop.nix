@@ -26,7 +26,7 @@
   # Session plumbing only; user-facing tools live in home-manager.
   environment.systemPackages = with pkgs; [
     networkmanagerapplet   # nm-applet tray icon
-    polkit_gnome           # GUI auth popups (dotfiles/hypr/scripts/Polkit-NixOS.sh)
+    polkit_gnome           # GUI auth popups (dotfiles/hypr/scripts/PolkitNixOS.sh)
     gvfs                   # Thunar trash / network mounts
     libnotify
     xdg-utils

@@ -1,7 +1,0 @@
-/* Ja KooLit - Global rofi fonts */
-* {
-    font: "JetBrainsMono Nerd Font SemiBold 15";
-}
-element-text {
-    font: "JetBrainsMono Nerd Font SemiBold 13";
-}

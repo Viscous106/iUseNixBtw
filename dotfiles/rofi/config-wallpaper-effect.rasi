@@ -1,50 +1,37 @@
-/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
-/* Wallpaper Effects */
+/* Wallpaper effect picker with the current wallpaper as backdrop — WallpaperEffects.sh */
+@import "~/.config/rofi/config.rasi"
 
-@import "~/.config/rofi/config.rasi" 
-
-
-/* ---- Mainbox ---- */
-mainbox {
-  children:
-    [ "inputbar", "listview"];
-}
-
-/* ---- Entry ---- */ 
-entry {
-  width: 32%;
-  placeholder: " 🏙️ Search / Choose desired wallpaper effect";
-}
-
-/* ---- Window ---- */
 window {
-  width: inherit;
-  height: inherit;
+    width:  inherit;
+    height: inherit;
 }
 
-/* ---- Listview ---- */
-listview {
-  columns: 2;
-  lines: 7;
-  fixed-height: false;
-  scrollbar: true;
-  spacing: 6px;
-  cycle: true;
+mainbox {
+    children: [ "inputbar", "listview" ];
 }
 
-/* ---- Inputbar ---- */
 inputbar {
-  background-image: url("~/.cache/wallpaper-effects/preview.png", width);
+    background-image: url("~/.cache/wallpaper-effects/preview.png", width);
 }
 
-/* ---- Element ---- */
+entry {
+    width:       32%;
+    placeholder: " 🏙️ Search / Choose desired wallpaper effect";
+}
+
+listview {
+    columns:      2;
+    lines:        7;
+    fixed-height: false;
+    scrollbar:    true;
+    spacing:      6px;
+}
+
 element-icon {
-  size: 0%;
+    size: 0%;
 }
-
 element-text {
-  horizontal-align: 0.0;
-  vertical-align: 0.0;
-  margin: 0px;
-  padding: 0px;
+    vertical-align: 0.0;
+    margin:         0px;
+    padding:        0px;
 }

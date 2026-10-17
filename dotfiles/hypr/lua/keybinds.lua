@@ -22,12 +22,12 @@ hl.bind(mod .. " + C", hl.dsp.exec_cmd("qalculate-gtk"))
 -- App launcher (toggle: press again to dismiss).
 hl.bind(mod .. " + D", hl.dsp.exec_cmd("caelestia shell drawers toggle launcher"))
 hl.bind(mod .. " + E", hl.dsp.exec_cmd(files))
-hl.bind(mod .. " + H", hl.dsp.exec_cmd(sd .. "/toggle-wl-kbptr.sh left"))
+hl.bind(mod .. " + H", hl.dsp.exec_cmd(sd .. "/ToggleWlKbptr.sh left"))
 hl.bind(mod .. " + M", hl.dsp.window.fullscreen({ mode = "maximized" }))
 -- Two locks on purpose: SUPER+L = hyprlock, SUPER+N = caelestia's lock. The script
 -- clears a stale locked=true that would make `caelestia shell lock lock` a no-op.
-hl.bind(mod .. " + L", hl.dsp.exec_cmd(sd .. "/hyprlock.sh"))
-hl.bind(mod .. " + N", hl.dsp.exec_cmd(sd .. "/caelestia-lock.sh"))
+hl.bind(mod .. " + L", hl.dsp.exec_cmd(sd .. "/Hyprlock.sh"))
+hl.bind(mod .. " + N", hl.dsp.exec_cmd(sd .. "/CaelestiaLock.sh"))
 hl.bind(mod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + S", hl.dsp.exec_cmd(sd .. "/RofiSearch.sh"))
@@ -51,7 +51,7 @@ for code, ws in pairs(ws_codes) do
 end
 
 ------------------------------------------------------------ meta SHIFT (SUPER SHIFT)
-hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(sd .. "/Dropterminal.sh " .. term))
+hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(sd .. "/DropTerminal.sh " .. term))
 hl.bind(mod .. " + SHIFT + tab", hl.dsp.focus({ workspace = "m-1" }))
 hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("blueman-manager"))
 -- Dashboard. No Escape/click-away dismiss (focus-grab patch in
@@ -70,7 +70,7 @@ hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("caelestia shell drawers toggle b
 hl.bind(mod .. " + SHIFT + U", hl.dsp.window.move({ workspace = "special", follow = true }))
 hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd(sd .. "/WallpaperEffects.sh"))
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(sd .. "/ScreenShot.sh --now"))
-hl.bind(mod .. " + SHIFT + H", hl.dsp.exec_cmd(sd .. "/toggle-wl-kbptr.sh right"))
+hl.bind(mod .. " + SHIFT + H", hl.dsp.exec_cmd(sd .. "/ToggleWlKbptr.sh right"))
 hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd(sd .. "/ScreenRecord.sh"))
 -- resize active (repeating)
 hl.bind(mod .. " + SHIFT + left",  hl.dsp.window.resize({ x = -50, y = 0 }),  { repeating = true })
@@ -89,7 +89,7 @@ hl.bind(mod .. " + ALT + I", hl.dsp.exec_cmd("caelestia shell idleInhibitor togg
 hl.bind(mod .. " + ALT + L", hl.dsp.exec_cmd(sd .. "/ChangeLayout.sh"))
 hl.bind(mod .. " + ALT + M", hl.dsp.exec_cmd("nwg-displays"))
 -- switch saved monitor profiles without the GUI
-hl.bind(mod .. " + ALT + SHIFT + M", hl.dsp.exec_cmd(sd .. "/monitor-pick.sh"))
+hl.bind(mod .. " + ALT + SHIFT + M", hl.dsp.exec_cmd(sd .. "/MonitorPick.sh"))
 hl.bind(mod .. " + ALT + N", hl.dsp.exec_cmd("caelestia shell notifs toggleDnd"))
 hl.bind(mod .. " + ALT + O", hl.dsp.exec_cmd(sd .. "/ChangeBlur.sh"))
 hl.bind(mod .. " + ALT + R", hl.dsp.exec_cmd(sd .. "/Refresh.sh"))

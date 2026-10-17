@@ -1,15 +1,12 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Script for keyboard backlights (if supported) using brightnessctl
+# Keyboard backlight up/down via brightnessctl.
 
 iDIR="$HOME/.config/hypr/icons"
 
-# Get keyboard brightness
 get_kbd_backlight() {
 	echo $(brightnessctl -d '*::kbd_backlight' -m | cut -d, -f4)
 }
 
-# Get icons
 get_icon() {
 	current=$(get_kbd_backlight | sed 's/%//')
 	if   [ "$current" -le "20" ]; then
@@ -24,20 +21,15 @@ get_icon() {
 		icon="$iDIR/brightness-100.png"
 	fi
 }
-# Notify - no-op. Same stacking problem as Volume.sh: the synchronous-replace
-# hint is swaync-only. NOTE: unlike volume and screen brightness, caelestia has
-# no OSD for the KEYBOARD backlight (its brightness service targets monitors),
-# so these keys now change the backlight with no on-screen feedback.
+# No-op: caelestia has no OSD for the keyboard backlight.
 notify_user() {
 	:
 }
 
-# Change brightness
 change_kbd_backlight() {
 	brightnessctl -d *::kbd_backlight set "$1" && get_icon && notify_user
 }
 
-# Execute accordingly
 case "$1" in
 	"--get")
 		get_kbd_backlight

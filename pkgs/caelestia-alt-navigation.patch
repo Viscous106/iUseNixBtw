@@ -1,0 +1,25 @@
+vimKeybinds: next/previous on Alt+J/K instead of Ctrl, in launcher and session.
+diff -ruN a/modules/launcher/Content.qml b/modules/launcher/Content.qml
+--- a/modules/launcher/Content.qml
++++ b/modules/launcher/Content.qml
+@@ -89,7 +89,7 @@
+             if (!GlobalConfig.launcher.vimKeybinds)
+                 return;
+ 
+-            if (event.modifiers & Qt.ControlModifier) {
++            if (event.modifiers & Qt.AltModifier) {
+                 if (event.key === Qt.Key_J || event.key === Qt.Key_N) {
+                     list.currentList?.incrementCurrentIndex();
+                     event.accepted = true;
+diff -ruN a/modules/session/Content.qml b/modules/session/Content.qml
+--- a/modules/session/Content.qml
++++ b/modules/session/Content.qml
+@@ -106,7 +106,7 @@
+             if (!Config.session.vimKeybinds)
+                 return;
+ 
+-            if (event.modifiers & Qt.ControlModifier) {
++            if (event.modifiers & Qt.AltModifier) {
+                 if ((event.key === Qt.Key_J || event.key === Qt.Key_N) && KeyNavigation.down) {
+                     KeyNavigation.down.focus = true;
+                     event.accepted = true;

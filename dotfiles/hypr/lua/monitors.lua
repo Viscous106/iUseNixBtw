@@ -1,5 +1,5 @@
 -- Monitor layout is manual only: no hotplug/lid hooks, since they reverted
 -- nwg-displays changes. Geometry comes from nwg-displays' ~/.config/hypr/monitors.lua.
 --   SUPER+ALT+M        nwg-displays GUI
---   SUPER+ALT+SHIFT+M  saved profiles (scripts/monitor-pick.sh)
---   SUPER+ALT+R        auto layout from lid/plug state (scripts/monitor-auto.sh)
+--   SUPER+ALT+SHIFT+M  saved profiles (scripts/MonitorPick.sh)
+--   SUPER+ALT+R        auto layout from lid/plug state (scripts/MonitorAuto.sh)

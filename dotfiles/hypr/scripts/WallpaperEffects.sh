@@ -1,7 +1,6 @@
 #!/run/current-system/sw/bin/bash
-# Apply an ImageMagick effect to the focused monitor's wallpaper (SUPER+SHIFT+W).
-# Reads the original from wallpaper-picker's state, so effects never stack, and
-# writes the result to a cache file rather than touching the picker's state.
+# ImageMagick effect on the focused monitor's wallpaper (SUPER+SHIFT+W). Reads the
+# picker's original so effects never stack; output goes to a cache file.
 
 state="$HOME/.local/state/wallpaper-picker"
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-effects"

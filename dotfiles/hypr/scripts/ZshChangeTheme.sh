@@ -1,11 +1,6 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Script for Oh my ZSH theme ( CTRL SHIFT O)
+# Oh My Zsh theme picker (CTRL SHIFT O); new terminals pick up the change.
 
-# preview of theme can be view here: https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-# after choosing theme, TTY need to be closed and re-open
-
-# Variables
 iDIR="$HOME/.config/hypr/icons"
 rofi_theme="$HOME/.config/rofi/config-zsh-theme.rasi"
 
@@ -20,7 +15,6 @@ file_extension=".zsh-theme"
 
 themes_array=($(find -L "$themes_dir" -type f -name "*$file_extension" -exec basename {} \; | sed -e "s/$file_extension//"))
 
-# Add "Random" option to the beginning of the array
 themes_array=("Random" "${themes_array[@]}")
 
 rofi_command="rofi -i -dmenu -config $rofi_theme"
@@ -34,7 +28,6 @@ menu() {
 main() {
     choice=$(menu | ${rofi_command})
 
-    # if nothing selected, script won't change anything
     if [ -z "$choice" ]; then
         exit 0
     fi
@@ -43,12 +36,11 @@ main() {
     var_name="ZSH_THEME"
 
     if [[ "$choice" == "Random" ]]; then
-        # Pick a random theme from the original themes_array (excluding "Random")
+        # Index 0 is "Random" itself, so skip it.
         random_theme=${themes_array[$((RANDOM % (${#themes_array[@]} - 1) + 1))]}
         theme_to_set="$random_theme"
         notify-send -i "$iDIR/ja.png" "Random theme:" "selected: $random_theme"
     else
-        # Set theme to the selected choice
         theme_to_set="$choice"
         notify-send -i "$iDIR/ja.png" "Theme selected:" "$choice"
     fi
@@ -61,7 +53,6 @@ main() {
     fi
 }
 
-# Check if rofi is already running
 if pidof rofi > /dev/null; then
   pkill rofi
 fi

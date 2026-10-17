@@ -1,11 +1,9 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Scripts for volume controls for audio and mic 
+# Speaker and mic volume via pamixer.
 
 iDIR="$HOME/.config/hypr/icons"
 sDIR="$HOME/.config/hypr/scripts"
 
-# Get Volume
 get_volume() {
     volume=$(pamixer --get-volume)
     if [[ "$(pamixer --get-mute)" == "true" || "$volume" -eq "0" ]]; then
@@ -15,7 +13,6 @@ get_volume() {
     fi
 }
 
-# Get icons
 get_icon() {
     current=$(get_volume)
     if [[ "$current" == "Muted" ]]; then
@@ -29,22 +26,13 @@ get_icon() {
     fi
 }
 
-# Feedback
-# The notify-send calls that used to live here are gone. They relied on
-# x-canonical-private-synchronous:volume_notif, a swaync extension that made
-# each new popup REPLACE the previous one. Caelestia implements no equivalent
-# (nothing in Notifs.qml/NotifData.qml reads that hint), so every keypress
-# stacked another permanent notification instead of updating one.
-# Caelestia's OSD reads PipeWire directly — Connections { target: Audio } in
-# modules/osd/Wrapper.qml — so the level is displayed regardless of who changed
-# it. The volume feedback sound is kept.
+# No notification: caelestia's OSD reads PipeWire directly. Keep the feedback sound.
 notify_user() {
     if [[ "$(get_volume)" != "Muted" ]]; then
         "$sDIR/Sounds.sh" --volume
     fi
 }
 
-# Increase Volume
 inc_volume() {
     if [ "$(pamixer --get-mute)" == "true" ]; then
         toggle_mute
@@ -53,7 +41,6 @@ inc_volume() {
     fi
 }
 
-# Decrease Volume
 dec_volume() {
     if [ "$(pamixer --get-mute)" == "true" ]; then
         toggle_mute
@@ -62,7 +49,6 @@ dec_volume() {
     fi
 }
 
-# Toggle Mute
 toggle_mute() {
 	if [ "$(pamixer --get-mute)" == "false" ]; then
 		pamixer -m
@@ -71,14 +57,10 @@ toggle_mute() {
 	fi
 }
 
-# Toggle Mic
 toggle_mic() {
 	if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
 		pamixer --default-source -u
-		# The default source changes when a headset connects or drops, so a mute
-		# applied to one device could never be lifted from another. Clear mute on
-		# every real (non-monitor) source so the key always actually turns the
-		# microphone back on.
+		# The default source changes with headsets, so unmute every real source too.
 		for _src in $(pactl list short sources | awk '$2 !~ /\.monitor$/ { print $2 }'); do
 			pactl set-source-mute "$_src" 0 2>/dev/null
 		done
@@ -86,7 +68,6 @@ toggle_mic() {
 		pamixer --default-source -m
 	fi
 }
-# Get Mic Icon
 get_mic_icon() {
     if [[ "$(pamixer --default-source --get-mute)" == "true" ]]; then
         echo "$iDIR/microphone-mute.png"
@@ -95,7 +76,6 @@ get_mic_icon() {
     fi
 }
 
-# Get Microphone Volume
 get_mic_volume() {
     volume=$(pamixer --default-source --get-volume)
     if [[ "$(pamixer --default-source --get-mute)" == "true" || "$volume" -eq "0" ]]; then
@@ -105,12 +85,11 @@ get_mic_volume() {
     fi
 }
 
-# Notify for Microphone — see notify_user above for why this is now a no-op.
+# No-op, see notify_user.
 notify_mic_user() {
     :
 }
 
-# Increase MIC Volume
 inc_mic_volume() {
     if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
         toggle_mic
@@ -119,7 +98,6 @@ inc_mic_volume() {
     fi
 }
 
-# Decrease MIC Volume
 dec_mic_volume() {
     if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
         toggle_mic
@@ -128,7 +106,6 @@ dec_mic_volume() {
     fi
 }
 
-# Execute accordingly
 if [[ "$1" == "--get" ]]; then
 	get_volume
 elif [[ "$1" == "--inc" ]]; then
@@ -144,8 +121,6 @@ elif [[ "$1" == "--get-icon" ]]; then
 elif [[ "$1" == "--get-mic-icon" ]]; then
 	get_mic_icon
 elif [[ "$1" == "--get-mic" || "$1" == "--get-mic-volume" ]]; then
-	# get_mic_volume was defined but had no dispatch case, so asking for the mic
-	# level fell through to the final `else` and returned the SPEAKER volume.
 	get_mic_volume
 elif [[ "$1" == "--mic-inc" ]]; then
 	inc_mic_volume

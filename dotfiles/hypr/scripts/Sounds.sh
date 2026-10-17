@@ -1,21 +1,17 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# This script is used to play system sounds.
-# Script is used by Volume.Sh and ScreenShots.sh 
+# Play a freedesktop event sound; used by Volume.sh and ScreenShot.sh.
 
-theme="freedesktop" # Set the theme for the system sounds.
-mute=false          # Set to true to mute the system sounds.
+theme="freedesktop"
+mute=false
 
 # Mute individual sounds here.
 muteScreenshots=false
 muteVolume=false
 
-# Exit if the system sounds are muted.
 if [[ "$mute" = true ]]; then
     exit 0
 fi
 
-# Choose the sound to play.
 if [[ "$1" == "--screenshot" ]]; then
     if [[ "$muteScreenshots" = true ]]; then
         exit 0
@@ -36,9 +32,8 @@ else
     exit 0
 fi
 
-# Set the directory defaults for system sounds.
 if [ -d "/run/current-system/sw/share/sounds" ]; then
-    systemDIR="/run/current-system/sw/share/sounds" # NixOS
+    systemDIR="/run/current-system/sw/share/sounds"
 else
     systemDIR="/usr/share/sounds"
 fi
@@ -53,11 +48,9 @@ elif [ -d "$systemDIR/$theme" ]; then
     sDIR="$systemDIR/$theme"
 fi
 
-# Get the theme that it inherits.
 iTheme=$(cat "$sDIR/index.theme" | grep -i "inherits" | cut -d "=" -f 2)
 iDIR="$sDIR/../$iTheme"
 
-# Find the sound file and play it.
 sound_file=$(find -L $sDIR/stereo -name "$soundoption" -print -quit)
 if ! test -f "$sound_file"; then
     sound_file=$(find -L $iDIR/stereo -name "$soundoption" -print -quit)

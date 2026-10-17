@@ -1,40 +1,26 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-#
-# Made and brought to by Kiran George
-# /* -- ✨ https://github.com/SherLock707 ✨ -- */  ##
-# Dropdown Terminal
-# Usage: ./Dropterminal.sh [-d] <terminal_command>
-# Example: ./Dropterminal.sh foot
-#          ./Dropterminal.sh -d foot (with debug output)
-#          ./Dropterminal.sh "kitty -e zsh"
-#
-# NOTE: this script targets Hyprland's *Lua* config API (0.55+). Dispatchers are
-# issued as Lua, e.g.  hyprctl dispatch 'hl.dsp.window.pin({ window = "address:0x.." })'
-# The old hyprlang strings ("pin address:0x..") are no longer parsed and silently fail.
+# Dropdown terminal in the scratchpad (originally by Kiran George, SherLock707).
+# Usage: DropTerminal.sh [-d] [--prewarm] <terminal_command>
 
 DEBUG=false
 SPECIAL_WS="special:scratchpad"
-TAG="dropterm" # window tag used to identify our terminal
+TAG="dropterm"
 
-# Dropdown size and position configuration (percentages)
-WIDTH_PERCENT=50  # Width as percentage of screen width
-HEIGHT_PERCENT=50 # Height as percentage of screen height
-Y_PERCENT=10      # Y position as percentage from top (X is auto-centered)
+# Dropdown size and position, percent of screen (X is auto-centred).
+WIDTH_PERCENT=50
+HEIGHT_PERCENT=50
+Y_PERCENT=10
 
-# Animation settings
 SLIDE_STEPS=5
 
 # How long to wait for a freshly spawned terminal to map (0.1s per tick)
 SPAWN_TIMEOUT=50
 
-# Parse arguments
 PREWARM=false
 while true; do
   case "$1" in
   -d) DEBUG=true; shift ;;
-  # Spawn the terminal into the scratchpad and leave it hidden. Used at startup
-  # so the first toggle is instant, without the terminal popping open at login.
+  # --prewarm: spawn hidden at startup so the first toggle is instant.
   --prewarm) PREWARM=true; shift ;;
   *) break ;;
   esac
@@ -50,7 +36,6 @@ debug_echo() {
   fi
 }
 
-# Validate input
 if [ -z "$TERMINAL_CMD" ]; then
   echo "Missing terminal command. Usage: $0 [-d] <terminal_command>"
   echo "Examples:"
@@ -102,12 +87,8 @@ win_focus() { # addr
 
 # ------------------------------------------------------------ window discovery
 
-# The dropdown terminal is identified by its tag, not by a cached address.
-# A cached address is unreliable: addresses are reused, and if the lookup ever
-# resolves to the wrong window the script happily starts toggling *that* window
-# (e.g. your browser) in and out of the scratchpad.
-# Note: tags applied by a window rule are reported with a trailing "*"
-# (e.g. "dropterm*"), so match both forms.
+# Find the terminal by tag, not a cached address (addresses get reused). Rule-applied
+# tags are reported with a trailing "*", so match both.
 get_terminal_address() {
   hyprctl clients -j | jq -r --arg T "$TAG" \
     '[.[] | select(any(.tags[]; . == $T or . == $T + "*"))] | .[0].address // empty'
@@ -228,8 +209,7 @@ spawn_terminal() {
   pos_info=$(calculate_dropdown_position)
   read -r target_x target_y width height _ <<<"$pos_info"
 
-  # Spawn straight into the scratchpad so it never flashes on screen, and tag it
-  # so we can find it again without caching an address.
+  # Spawn hidden in the scratchpad, tagged so it can be found again.
   dispatch "hl.dsp.exec_cmd([[$TERMINAL_CMD]], {
       float = true,
       size = \"$width $height\",
@@ -240,9 +220,7 @@ spawn_terminal() {
     return 1
   }
 
-  # Poll until it maps. A fixed short sleep is not enough - terminals routinely
-  # take several hundred ms to appear, and the old code fell back to "grab some
-  # arbitrary window" when it lost that race.
+  # Poll until it maps: terminals routinely take several hundred ms.
   local addr="" i=0
   while [ $i -lt $SPAWN_TIMEOUT ]; do
     addr=$(get_terminal_address)

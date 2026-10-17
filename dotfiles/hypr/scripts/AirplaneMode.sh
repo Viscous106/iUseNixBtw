@@ -1,10 +1,8 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Airplane Mode. Turning on or off all wifi using rfkill. 
+# Toggle all wifi radios via rfkill.
 
 notif="$HOME/.config/hypr/icons/ja.png"
 
-# Check if any wireless device is blocked
 wifi_blocked=$(rfkill list wifi | grep -o "Soft blocked: yes")
 
 if [ -n "$wifi_blocked" ]; then

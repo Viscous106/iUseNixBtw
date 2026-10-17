@@ -5,7 +5,7 @@
 
 ## Problem
 
-Monitor layout on this machine is owned entirely by `dotfiles/hypr/scripts/monitor-auto.sh`,
+Monitor layout on this machine is owned entirely by `dotfiles/hypr/scripts/MonitorAuto.sh`,
 which hardcodes its geometry. There is no way to choose a layout interactively: no mirror
 / duplicate mode, no way to pick which side the external sits on, no manual override of
 the docked/undocked decision.
@@ -19,7 +19,7 @@ Three independent breaks cause this:
    different file from `~/.config/hypr/lua/monitors.lua`. Nothing requires it, and it is not
    symlinked into `/persist`, so it would not survive a rebuild.
 3. `hyprctl reload` (issued at the end of every Apply) re-runs `lua/monitors.lua`, which
-   re-pins `eDP-1` to `-1920x0` and can re-trigger `monitor-auto.sh`, reverting the change.
+   re-pins `eDP-1` to `-1920x0` and can re-trigger `MonitorAuto.sh`, reverting the change.
 
 This is a known upstream problem, not a local mistake:
 
@@ -39,7 +39,7 @@ rebuilds.
 
 ### The DP-link landmine
 
-`monitor-auto.sh` documents that `hl.monitor({ disabled = true })` on `eDP-1` releases its
+`MonitorAuto.sh` documents that `hl.monitor({ disabled = true })` on `eDP-1` releases its
 CRTC, and the resulting reshuffle drops the external's DP link entirely — the Dell goes to
 `disconnected` at the kernel level and only returns on a physical replug. The script
 therefore blanks with DPMS instead of disabling.
@@ -76,7 +76,7 @@ success. Its Lua output carries no DPMS field at all, so nothing survives into
 `monitors.lua` either.
 
 Consequently the ownership split narrows: **profiles own geometry only** - position,
-mode, scale, mirror, transform. `monitor-auto.sh` retains ownership of DPMS through
+mode, scale, mirror, transform. `MonitorAuto.sh` retains ownership of DPMS through
 its existing `dpms_set`, which uses the `hyprctl eval` + `hl.dsp.dpms` table form and
 already encodes the toggle-not-set semantics. The `docked-external` profile is still
 authored with `DPMS` unticked for documentation value, but the blanking that actually
@@ -98,7 +98,7 @@ happens is the script's.
 
 ## Architecture
 
-`monitor-auto.sh` stops computing geometry and becomes a profile selector:
+`MonitorAuto.sh` stops computing geometry and becomes a profile selector:
 
 ```
 (external present?, lid state) --> profile name --> nwg-displays-apply -p <name>
@@ -164,9 +164,9 @@ any behaviour depends on the answer.
 | `dotfiles/hypr/lua/monitors.lua` | remove the baseline `hl.monitor()` call; keep event hooks and lid binds |
 | `dotfiles/hypr/monitors.lua` | new, empty — so `require` succeeds before the first Apply |
 | `home/desktop/hyprland.nix` | add `mkOutOfStoreSymlink` for `hypr/monitors.lua` |
-| `dotfiles/hypr/scripts/monitor-auto.sh` | replace geometry logic with profile selection + fallback |
-| `dotfiles/hypr/scripts/monitor-pick.sh` | new — rofi profile picker |
-| `dotfiles/hypr/lua/keybinds.lua` | add `SUPER+SHIFT+M` -> `monitor-pick.sh` |
+| `dotfiles/hypr/scripts/MonitorAuto.sh` | replace geometry logic with profile selection + fallback |
+| `dotfiles/hypr/scripts/MonitorPick.sh` | new — rofi profile picker |
+| `dotfiles/hypr/lua/keybinds.lua` | add `SUPER+SHIFT+M` -> `MonitorPick.sh` |
 
 The baseline removal in `lua/monitors.lua` is required, not cosmetic: it runs at config-parse
 time on every reload and would overwrite the profile's position for `eDP-1`.
@@ -174,7 +174,7 @@ time on every reload and would overwrite the profile's position for `eDP-1`.
 Removing it does give up what the baseline was for — guaranteeing the panel has a picture during
 boot, before any profile is applied. Hyprland's built-in default for an unconfigured output
 (`preferred` mode, `auto` position) covers this, so the panel still lights up; what is lost is the
-specific `-1920x0` placement during the window between parse and the first `monitor-auto.sh` run.
+specific `-1920x0` placement during the window between parse and the first `MonitorAuto.sh` run.
 That window is the same one the current baseline already tolerates, and the selector runs on
 `hyprland.start`. If it proves visible in practice, the fix is to seed `hypr/monitors.lua` with a
 one-line panel entry rather than to restore the baseline in `lua/monitors.lua`.

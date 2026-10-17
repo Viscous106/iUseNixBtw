@@ -1,32 +1,8 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# ScreenMode.sh — evidence-based screen comfort / media profiles for Hyprland.
-#
-#   menu | next | prev | set <profile> | init | status | list | breaks [on|off|toggle]
-#
-# SUPER + SHIFT + M opens the rofi picker (see lua/keybinds.lua).
-#
-# ---------------------------------------------------------------- design notes
-#
-# LUMINANCE IS HANDLED BY THE BACKLIGHT, COLOUR BY THE SHADER. They are separate
-# knobs on purpose:
-#   * Dimming in the shader only scales the digital code values. The panel still
-#     emits the same light, you just lose shadow detail and get banding, and the
-#     melanopic dose barely moves.
-#   * Dimming the backlight removes actual photons. That is what the comfort and
-#     circadian research is measuring, and it costs no image quality.
-# So every shader here is normalised to peak white (max channel == 1.0) and does
-# pure chromaticity; brightnessctl carries the brightness.
-#
-# Colour maths is done in LINEAR light (sRGB decode -> scale -> re-encode).
-# Scaling gamma-encoded values crushes shadows non-uniformly and gets the
-# resulting chromaticity wrong.
-#
-# Backend is decoration:screen_shader — gamma-control (gammastep/wlsunset) is a
-# silent no-op on this machine, Hyprland reports "Zero outputs support gamma
-# adjustment". Under the Lua parser, runtime options go through `hyprctl eval
-# hl.config{...}`; plain `hyprctl keyword` is rejected.
+# Screen colour profiles via screen_shader (SUPER+SHIFT+M); gamma-control is a no-op here.
+# Commands: menu | next | prev | set <profile> | init | status | list | breaks [on|off|toggle]
 
 STATE_DIR="$HOME/.cache/hypr"
 STATE_FILE="$STATE_DIR/screenmode.state"
@@ -35,11 +11,7 @@ SHADER_DIR="$HOME/.config/hypr/shaders/screenmode"
 ROFI_THEME="$HOME/.config/rofi/config-screenmode.rasi"
 mkdir -p "$STATE_DIR" "$SHADER_DIR"
 
-# Profiles are COLOUR-ONLY: they set chromaticity via the screen shader and never
-# touch the backlight. Brightness is controlled by hand (XF86MonBrightness keys ->
-# caelestia). The backlight% column in PROFILES below is therefore inert; it is
-# kept so the table stays a complete description of each profile, and so setting
-# SCREENMODE_BACKLIGHT=1 restores the old couple-brightness-to-profile behaviour.
+# Profiles are colour-only; the backlight% column applies only with SCREENMODE_BACKLIGHT=1.
 USE_BACKLIGHT="${SCREENMODE_BACKLIGHT:-0}"
 
 # id|label|icon|kelvin|backlight%|shader-kind|blurb
@@ -79,10 +51,7 @@ profile_index() {
   printf '0'
 }
 
-# ------------------------------------------------------- temperature -> RGB gain
-# Tanner Helland's blackbody approximation, normalised twice: against its own value
-# at 6500K (so 6500K is exactly 1,1,1) and then against its own peak channel (so
-# white stays white and only the hue shifts — the backlight does the dimming).
+# Tanner Helland's blackbody approximation, normalised to 6500K, then to the peak channel.
 temp_rgb() { # temp_rgb <kelvin> -> "R G B"
   awk -v k="$1" '
     function clamp(v) { return v < 0 ? 0 : (v > 255 ? 255 : v) }
@@ -108,7 +77,7 @@ temp_rgb() { # temp_rgb <kelvin> -> "R G B"
     }'
 }
 
-# ------------------------------------------------------------------- shaders
+# Shaders work in linear light and keep peak white at 1.0 (chromaticity only).
 SRGB_HELPERS='
 // sRGB <-> linear. Clamped before pow() so a stray negative cannot produce NaN.
 vec3 toLinear(vec3 c) {
@@ -206,10 +175,7 @@ apply_profile() { # apply_profile <profile-id>
   echo "$1" > "$STATE_FILE"
 }
 
-# ------------------------------------------------------- 20-20-20 break reminder
-# The one intervention with decent trial evidence behind it: every 20 min, look at
-# something ~20 ft away for 20 s. Blink rate drops from ~15/min to ~5/min on screens,
-# which is what actually dries eyes out — no colour filter addresses that.
+# 20-20-20 break reminder: the one eye-strain intervention with decent trial evidence.
 breaks_running() {
   local pid
   pid="$(cat "$BREAK_PID" 2>/dev/null || true)"
@@ -297,10 +263,8 @@ cmd_menu() {
   cur="$(current_profile)"
   n="${#PROFILES[@]}"
 
-  # -format i returns the selected row index, so labels stay free-form.
-  # NOTE: the whole row-generating group must be piped into rofi. Losing that pipe
-  # makes the command substitution capture the menu text itself, which then fails the
-  # numeric test below and the script exits silently — no menu, no error.
+  # -format i returns the row index. The whole group must pipe into rofi, or the
+  # substitution captures the menu text and the script exits silently.
   idx="$(
     {
       for p in "${PROFILES[@]}"; do

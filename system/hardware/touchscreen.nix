@@ -5,7 +5,7 @@
 # reset so elants_i2c NAKs and never retries. Skipped if the device is absent.
 {
   # iio-sensor-proxy exposes orientation on D-Bus. The rotation itself runs in
-  # the Hyprland session (dotfiles/hypr/scripts/auto-rotate.sh via lua/laptops.lua).
+  # the Hyprland session (dotfiles/hypr/scripts/AutoRotate.sh via lua/laptops.lua).
   hardware.sensor.iio.enable = true;
 
   environment.systemPackages = with pkgs; [

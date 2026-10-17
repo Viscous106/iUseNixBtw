@@ -1,18 +1,10 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# for changing Hyprland Layouts (Master or Dwindle) on the fly
-#
-# WHY `hyprctl eval` AND NOT `hyprctl keyword` — same reason as ChangeBlur.sh.
-# This config is Lua, so Hyprland runs its non-legacy parser, which refuses
-# keyword ("keyword can't work with non-legacy parsers. Use eval."). hyprctl
-# still exited 0 and the notification still fired, so this bind reported a
-# layout change on every press while changing nothing.
+# Toggle master/dwindle layout. Uses `hyprctl eval`: the Lua parser rejects `keyword`.
 
 notif="$HOME/.config/hypr/icons/ja.png"
 
 hypr_eval() {
-	# eval exits 7 and prints "error: ..." on failure. Checking it is the point:
-	# unchecked success is what hid this for so long.
+	# eval exits non-zero on failure; check it so a rejected change isn't silent.
 	if ! hyprctl eval "$1" >/dev/null; then
 		notify-send -e -u critical " Layout toggle failed" "hyprctl eval rejected: $1"
 		exit 1

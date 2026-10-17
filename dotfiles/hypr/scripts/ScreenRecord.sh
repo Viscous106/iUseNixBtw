@@ -1,17 +1,12 @@
 #!/run/current-system/sw/bin/bash
+# Screen recording with wf-recorder: pick a target, then the audio source.
 
-# A rofi-based script to easily manage screen recording with wf-recorder.
-# Allows choosing between full screen, active window, or a selected region,
-# then what audio to capture: system audio, microphone, both, or none.
-
-# Function to display notifications
 notify() {
     notify-send "Screen Recorder" "$1" -u low
 }
 
-# "System + Mic" needs a temporary PulseAudio/PipeWire mix sink, since
-# wf-recorder only takes a single audio device. The module ids are kept here
-# so the stop branch can tear the mix down again.
+# wf-recorder takes one audio device, so "System + Mic" needs a temporary mix sink;
+# module ids are saved so stop can tear it down.
 mix_state="${XDG_RUNTIME_DIR:-/tmp}/screenrec-mix-modules"
 mix_sink="screenrec_mix"
 
@@ -37,9 +32,7 @@ setup_mix() {
     } > "$mix_state"
 }
 
-# Check if wf-recorder is already running
 if pgrep -x "wf-recorder" > /dev/null; then
-    # Stop the recording
     killall -s SIGINT wf-recorder
     # Let wf-recorder finish writing before pulling its audio source away.
     for _ in $(seq 50); do
@@ -54,18 +47,14 @@ fi
 # Leftover mix from a recording that died without going through the stop branch
 teardown_mix
 
-# Rofi menu options
 options="󰍹 Full Screen\n󰖵 Active Window\n󰩬 Select Region"
 
-# Show Rofi menu and get user choice
 chosen_option=$(echo -e "$options" | rofi -dmenu -p "REC" -i)
 
-# Exit if no option is chosen
 if [ -z "$chosen_option" ]; then
     exit 0
 fi
 
-# Ask what audio to capture
 audio_options="󰕾 System Audio\n󰍬 Microphone\n󰋎 System + Mic\n󰖁 No Audio"
 chosen_audio=$(echo -e "$audio_options" | rofi -dmenu -p "AUDIO" -i)
 
@@ -92,11 +81,9 @@ case "$chosen_audio" in
         ;;
 esac
 
-# Define the output file
 output_dir="$HOME/Videos"
 output_file="$output_dir/recording_$(date +'%Y-%m-%d-%H%M%S').mp4"
 
-# Create output directory if it doesn't exist
 mkdir -p "$output_dir"
 
 # Work out the geometry for the chosen option (empty = full screen)
@@ -106,19 +93,15 @@ case "$chosen_option" in
         target_label="full screen"
         ;;
     "󰖵 Active Window")
-        # Get the geometry of the active window
         geometry=$(hyprctl activewindow | grep "at:" | cut -d' ' -f2)
         size=$(hyprctl activewindow | grep "size:" | cut -d' ' -f2 | sed 's/,/x/')
         geometry_args=(-g "${geometry} ${size}")
         target_label="active window"
         ;;
     "󰩬 Select Region")
-        # Select a region using rope-select, the animated slurp-compatible
-        # picker (dotfiles/quickshell/rope-select). It falls back to slurp on
-        # its own if the overlay cannot run, and signals cancel the same way.
+        # rope-select: animated slurp-compatible picker (dotfiles/quickshell/rope-select).
         geometry=$(rope-select)
 
-        # Exit if the selection was cancelled
         if [ -z "$geometry" ]; then
             notify "Recording cancelled."
             exit 0

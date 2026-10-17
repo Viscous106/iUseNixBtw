@@ -1,7 +1,6 @@
 #!/run/current-system/sw/bin/bash
-# hyprlock with the focused monitor's current wallpaper as background (SUPER+L).
-# ~/.config/hypr/hyprlock.conf is a read-only store file, so a copy with the
-# path swapped in is written to $XDG_RUNTIME_DIR and passed with -c.
+# hyprlock with the focused monitor's wallpaper (SUPER+L). hyprlock.conf is a
+# read-only store file, so a patched copy goes in $XDG_RUNTIME_DIR.
 
 pidof hyprlock >/dev/null && exit 0
 

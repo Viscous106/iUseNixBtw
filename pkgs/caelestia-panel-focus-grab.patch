@@ -1,0 +1,27 @@
+Keep sidebar/dashboard open when another surface (wl-kbptr) takes focus.
+diff -ruN a/modules/drawers/ContentWindow.qml b/modules/drawers/ContentWindow.qml
+--- a/modules/drawers/ContentWindow.qml
++++ b/modules/drawers/ContentWindow.qml
+@@ -115,9 +115,9 @@
+         active: {
+             const s = root.screenState;
+             const conf = root.contentItem.Config;
+-            if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled) || (s.sidebar && conf.sidebar.enabled))
++            if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled)) // patched: sidebar dropped
+                 return true;
+-            if (!conf.dashboard.showOnHover && s.dashboard && conf.dashboard.enabled)
++            if (false) // patched: dashboard grab disabled
+                 return true;
+             if (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+                 return true;
+@@ -127,8 +127,8 @@
+         onCleared: {
+             root.screenState.launcher = false;
+             root.screenState.session = false;
+-            root.screenState.sidebar = false;
+-            root.screenState.dashboard = false;
++            // patched: sidebar is not auto-closed on focus loss
++            // patched: dashboard is not auto-closed on focus loss
+             panels.popouts.hasCurrent = false;
+             bar.closeTray();
+         }

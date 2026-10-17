@@ -1,8 +1,6 @@
 #!/run/current-system/sw/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Screenshots scripts
+# grim screenshots: now, delayed, window, area, or area into swappy.
 
-# variables
 time=$(date "+%d-%b_%H-%M-%S")
 dir="$(xdg-user-dir PICTURES)/Screenshots"
 file="Screenshot_${time}_${RANDOM}.png"
@@ -20,7 +18,6 @@ notify_cmd_shot="${notify_cmd_base} -i ${iDIR}/picture.png "
 notify_cmd_shot_win="${notify_cmd_base} -i ${iDIR}/picture.png "
 notify_cmd_NOT="notify-send -u low -i ${iDoR}/note.png "
 
-# notify and view screenshot
 notify_view() {
     if [[ "$1" == "active" ]]; then
         if [[ -e "${active_window_path}" ]]; then
@@ -71,7 +68,6 @@ notify_view() {
     fi
 }
 
-# countdown
 countdown() {
 	for sec in $(seq $1 -1 1); do
 		notify-send -h string:x-canonical-private-synchronous:shot-notify -t 1000 -i "$iDIR"/timer.png  " Taking shot" " in: $sec secs"
@@ -79,7 +75,6 @@ countdown() {
 	done
 }
 
-# take shots
 shotnow() {
 	cd ${dir} && grim - | tee "$file" | wl-copy
 	notify_view
@@ -106,15 +101,7 @@ shotwin() {
 }
 
 shotarea() {
-	# rope-select is the animated region picker (dotfiles/quickshell/rope-select).
-	# It is slurp-compatible and falls back to slurp itself if the overlay
-	# cannot run, so there is nothing to guard here beyond the exit code.
-	#
-	# That exit code now has to be honoured. Escape and right-click are
-	# first-class cancels, and the old inline command-substitution form could
-	# not see a cancel at all: grim got an empty -g, wrote nothing, and the
-	# script went on to announce "Screenshot Saved" and leave the temp file
-	# behind.
+	# rope-select (dotfiles/quickshell/rope-select) exits non-zero on Esc/right-click.
 	region=$(rope-select) || return 0
 
 	tmpfile=$(mktemp)

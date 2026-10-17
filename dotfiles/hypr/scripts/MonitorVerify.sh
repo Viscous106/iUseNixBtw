@@ -1,31 +1,22 @@
 #!/usr/bin/env bash
-# monitor-verify.sh — assert live display state matches an expected profile.
-#
-# Usage: monitor-verify.sh <laptop-only|docked-extend|docked-external|docked-mirror>
-# Exit 0 = every assertion passed. Exit 1 = at least one failed.
-#
-# check_ext_link_alive is the regression test for the DP-link landmine documented
-# in monitor-auto.sh: a profile that emits `disabled = true` instead of blanking
-# with DPMS drops the external's DP link at the kernel level, and this catches it.
+# Assert live display state matches a profile; exit 1 if any check fails.
+# Usage: MonitorVerify.sh <laptop-only|docked-extend|docked-external|docked-mirror>
 
 set -uo pipefail
 
 INT="eDP-1"
-WANT="${1:?usage: monitor-verify.sh <profile-name>}"
+WANT="${1:?usage: MonitorVerify.sh <profile-name>}"
 fails=0
 
 fail() { printf 'FAIL: %s\n' "$*" >&2; fails=$((fails + 1)); }
 pass() { printf 'ok:   %s\n' "$*"; }
 
 MONS="$(hyprctl -j monitors all)"
-# Non-`all` list excludes disabled outputs: presence here is what actually
-# distinguishes a DPMS-blanked panel from a disabled one (I-6).
+# The non-`all` list omits disabled outputs, which tells blanked from disabled.
 INT_MONS="$(hyprctl -j monitors)"
 
 field() {  # field <monitor-name> <jq-field>
-  # The // and | precedence matters: `.x | tostring // "MISSING"` parses as
-  # `.x | (tostring // "MISSING")`, and tostring(null) is the truthy string
-  # "null", so the fallback would never fire. Parenthesise before defaulting.
+  # Parenthesise before defaulting: tostring(null) is "null", which defeats //.
   printf '%s' "$MONS" | jq -r --arg m "$1" \
     "(map(select(.name == \$m)) | .[0].$2) // \"MISSING\" | tostring"
 }
@@ -39,9 +30,7 @@ assert() {  # assert <label> <actual> <expected>
   if [ "$2" = "$3" ]; then pass "$1 = $3"; else fail "$1 = $2 (expected $3)"; fi
 }
 
-# assert_num <label> <actual> <expected> [tolerance=0.01] — for floats like
-# `scale`, where the compositor's formatting (e.g. "1.000000" vs a profile's
-# "1") must not be compared as strings.
+# Numeric compare for floats like scale ("1.000000" vs "1").
 assert_num() {
   local label="$1" actual="$2" expected="$3" tol="${4:-0.01}"
   if [ -z "$actual" ] || [ -z "$expected" ] || [ "$actual" = MISSING ] || [ "$expected" = null ]; then
@@ -56,16 +45,8 @@ assert_num() {
   fi
 }
 
-# --- geometry expectations: profile JSON first, hardcoded constants only as
-# fallback ----------------------------------------------------------------
-# The GUI is the source of truth for geometry (Task 3). Hardcoding this
-# script's own idea of position/scale — as it used to — means any GUI-authored
-# layout that differs fails verification forever, $STATE is never written by
-# apply_profile()'s verify-gate, and the OSD reads "(failed)" permanently. So:
-# read expected x/y/scale for each output out of the profile JSON itself when
-# one exists, and fall back to the spec's hardcoded constants only when it
-# does not (monitor-auto.sh's fallback_layout path, whose geometry never
-# varies by construction).
+# Expected geometry comes from the profile JSON (the GUI is the source of truth);
+# the constants are only for MonitorAuto.sh's fallback layout.
 PROFILE_DIR="$HOME/.config/nwg-displays/profiles"
 INT_POS_DOCKED="0 0"
 INT_POS_SOLO="0 0"
@@ -77,12 +58,8 @@ profile_json_for() {  # profile_json_for <profile-name> -> path, or empty
   [ -f "$f" ] && printf '%s' "$f"
 }
 
-# expected_field <profile-json-path> <monitor-connector-name> <x|y|scale>
-# nwg-displays has use-desc:true, so profiles key each output by its
-# DESCRIPTION string, not its connector name (schema: {"displays":[{"name" or
-# "description": <desc>, "x", "y", "scale", "active"}], "config":{...}}). Look
-# the connector's live description up first, then match on either key name
-# since the exact field isn't pinned across nwg-displays versions.
+# Profiles key outputs by description (use-desc), under .name or .description
+# depending on the nwg-displays version.
 expected_field() {
   local pf="$1" mon="$2" key="$3" desc
   desc="$(field "$mon" description)"
@@ -118,9 +95,7 @@ expect_scale() {   # expect_scale <profile-json-or-empty> <mon> <fallback>
 }
 
 check_ext_link_alive() {
-  # Do NOT hardcode a connector: this box has had the external on both DP-1 and
-  # HDMI-A-1, which is why external_name() derives it. A hardcoded connector makes
-  # this check pass vacuously on the other one.
+  # Derived, not hardcoded: the external has been on both DP-1 and HDMI-A-1.
   local ext="$1" path s
   if [ -z "$ext" ]; then return 0; fi
   path="$(ls -d /sys/class/drm/card*-"$ext" 2>/dev/null | head -1)"
@@ -137,10 +112,7 @@ check_ext_link_alive() {
 }
 
 check_int_not_disabled() {
-  # dpmsStatus == false also matches a DISABLED eDP-1 (disabled outputs drop
-  # out of the non-`all` monitors list, but their dpmsStatus reads false too).
-  # Presence here is the assertion that actually catches the landmine at the
-  # compositor level.
+  # A disabled eDP-1 also reads dpmsStatus=false; only list presence tells them apart.
   if printf '%s' "$INT_MONS" | jq -e --arg i "$INT" 'any(.[]; .name == $i)' >/dev/null 2>&1; then
     pass "$INT present in active monitor list (not disabled)"
   else

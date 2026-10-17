@@ -20,7 +20,7 @@ hl.device({
 
 -- ── Convertible / tablet mode ─────────────────────────────────────────────
 -- Folding: auto-rotate on, keyboard/touchpad muted; unfolding restores both
--- (scripts/auto-rotate.sh). locked = true so unfolding works on the lock screen.
-local rotate = U.scriptsDir .. "/auto-rotate.sh"
+-- (scripts/AutoRotate.sh). locked = true so unfolding works on the lock screen.
+local rotate = U.scriptsDir .. "/AutoRotate.sh"
 hl.bind("switch:on:Tablet Mode Switch",  hl.dsp.exec_cmd(rotate .. " tablet on"),  { locked = true })
 hl.bind("switch:off:Tablet Mode Switch", hl.dsp.exec_cmd(rotate .. " tablet off"), { locked = true })

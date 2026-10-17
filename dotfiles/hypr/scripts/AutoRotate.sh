@@ -1,42 +1,18 @@
 #!/usr/bin/env bash
-# Accelerometer-driven screen rotation for this convertible Chromebook
-# (Google "Ampton", Octopus / Gemini Lake).
-#
-# Rotation is deliberately gated on TABLET MODE — the accelerometer is only
-# obeyed once the lid is folded past ~180° and the EC reports SW_TABLET_MODE.
-# In normal laptop mode the panel never rotates no matter how far you lean the
-# screen back. This is what ChromeOS does on this exact machine.
-#
-# Folding also mutes the built-in keyboard and touchpad, so palms on the back of
-# the panel don't type. Unfolding restores everything.
-#
-# Subcommands:
-#   init            session start: force the safe state, then correct it if we
-#                   booted already folded
-#   tablet on|off   called from the Hyprland switch binds in lua/laptops.lua
-#   daemon          follow iio-sensor-proxy and apply rotation while folded
-#
-# Portable-safe: `daemon` exits immediately on a machine with no accelerometer,
-# and `init` leaves a non-convertible in exactly the state it was already in.
+# Accelerometer rotation, only while folded into tablet mode (as ChromeOS does);
+# folding also mutes the keyboard/touchpad. Subcommands: init | tablet on|off | daemon.
 
 set -u
 
 INT="eDP-1"
-INT_MODE="1920x1080@144"   # keep in sync with monitor-auto.sh
+INT_MODE="1920x1080@144"   # keep in sync with MonitorAuto.sh
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
-TRANSFORM_FILE="$STATE_DIR/hypr-rotation"          # also read by monitor-auto.sh
+TRANSFORM_FILE="$STATE_DIR/hypr-rotation"          # also read by MonitorAuto.sh
 SENSOR_FILE="$STATE_DIR/hypr-rotation-sensor"      # last orientation the sensor reported
 TABLET_FILE="$STATE_DIR/hypr-tablet-mode"          # exists == folded
 
-# Devices muted while folded.
-#
-# keyd GRABS the physical keyboard and re-emits through keyd-virtual-keyboard —
-# Hyprland reports that virtual device as "main: yes". So disabling
-# at-translated-set-2-keyboard alone would do nothing at all; the virtual
-# devices have to go too.
-#
-# ydotoold-virtual-device is deliberately NOT muted: it is scripted/synthetic
-# input (wl-kbptr and friends), not something a palm can press.
+# keyd grabs the keyboard and re-emits via virtual devices, so those must go too.
+# ydotoold's virtual device stays: it's synthetic input, not palm-pressable.
 TABLET_MUTE=(
   at-translated-set-2-keyboard
   keyd-virtual-keyboard
@@ -44,16 +20,11 @@ TABLET_MUTE=(
   keyd-virtual-pointer
 )
 
-# Same call convention as monitor-auto.sh: this build uses the non-legacy (Lua)
-# parser, so `hyprctl keyword` is rejected outright ("keyword can't work with
-# non-legacy parsers. Use eval.") and everything goes through hyprctl eval.
+# The Lua parser rejects `hyprctl keyword`; everything goes through eval.
 hy() { hyprctl eval "$1" >/dev/null 2>&1; }
 
-# The mode has to be restated: hl.monitor only merges into an existing rule
-# with the same output string, and nwg-displays' monitors.lua names the panel
-# "desc:<description>", not "$INT" — so a bare output+transform rule starts
-# fresh with mode "preferred", which drops this panel from 144 Hz to 60 Hz
-# (see int_rule() in monitor-auto.sh).
+# Restate the mode: a bare output+transform rule starts fresh at "preferred" (60 Hz);
+# see int_rule() in MonitorAuto.sh.
 apply_transform() {
   local t="$1"
   echo "$t" > "$TRANSFORM_FILE"
@@ -110,13 +81,10 @@ tablet_is_folded() {
 
 case "${1:-}" in
   init)
-    # Fail safe: whatever a previous session left behind, come up unrotated with
-    # every input device live. If the script ever dies mid-fold, the next login
-    # hands the keyboard back.
+    # Fail safe: come up unrotated with every input live, then correct if booted folded.
     rm -f "$TABLET_FILE"
     set_devices true
     apply_transform 0
-    # ...then correct it if we actually booted folded.
     if tablet_is_folded; then
       exec "$0" tablet on
     fi
@@ -164,8 +132,7 @@ case "${1:-}" in
         t=$(orientation_to_transform "$o")
         [ -n "$t" ] || continue
 
-        # Always record what the sensor says, even in laptop mode — that is what
-        # makes the panel snap to the right orientation the instant you fold.
+        # Record even in laptop mode so folding snaps straight to the right orientation.
         echo "$t" > "$SENSOR_FILE"
 
         tablet_active || continue
