@@ -4,7 +4,6 @@
   networking.hostName = "nix";
   time.timeZone       = "Asia/Kolkata";
   i18n.defaultLocale  = "en_US.UTF-8";
-  networking.networkmanager.enable=true;
   # ── Nix settings ──────────────────────────────────────────────────────────
   nix = {
     settings = {
@@ -47,6 +46,23 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
     (final: prev: {
+      # Hyprland from its flake, used by both programs.hyprland and home-manager.
+      # wrapRuntimeDeps = false skips hyprland-guiutils, which fails to build
+      # upstream (libstdc++ ABI mismatch). Hyprland 0.56 needs glaze 7.x;
+      # nixpkgs has 8.x, so 7.2.0 is pinned for this build only.
+      hyprland-pinned = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.override {
+        wrapRuntimeDeps = false;
+        glaze-hyprland = prev.glaze.overrideAttrs (old: {
+          version = "7.2.0";
+          src = prev.fetchFromGitHub {
+            owner = "stephenberry";
+            repo  = "glaze";
+            rev   = "v7.2.0";
+            hash  = "sha256-f3NVRi3SXKo42hn0WCw7JsOK3EkdOVJIcuzhPorKjFY=";
+          };
+        });
+      };
+
       # claude-code from its own pinned input rather than the main snapshot,
       # so the CLI can be bumped on its own cadence. See the long note on the
       # nixpkgs-claude input in flake.nix. Overriding the attr (rather than
@@ -134,9 +150,6 @@
       });
     })
   ];
-  # ── Boot — keep only 3 generations to save ESP space (1 GiB partition) ───
-  boot.loader.grub.configurationLimit = 3;
-
   # ── User ──────────────────────────────────────────────────────────────────
   # Name and password both come from ./user.nix, which setup.sh rewrites on a
   # fresh install from what the installer typed at the prompt. Nothing here

@@ -164,7 +164,7 @@
   # Nix-side additions (cfg/rebuild/update, better ls/cat/grep/find) ─────────
   home.shellAliases = {
     # From Arch's alias.sh
-    ls      = "lsd";
+    ls      = "eza --icons";
     l       = "ls -l";
     la      = "ls -a";
     lla     = "ls -la";
@@ -200,7 +200,6 @@
     # Rescued from home/zsh/scripts/alias.sh before it was deleted: that file was
     # never in the source loop above, so these two had never actually worked.
     gfa     = "git fetch --all && for branch in $(git branch --format=\"%(refname:short)\"); do git checkout $branch && git pull --rebase; done";
-    guvcview = "guvcview -d /dev/video1";  # /dev/video0 is the metadata node
     cfg     = "nvim /persist/nixos-config/";
     # No `#nix` on the end: that attribute is the portable-USB host, so running
     # this while booted from the internal NVMe switched the laptop onto the USB

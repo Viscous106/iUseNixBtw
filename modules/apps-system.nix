@@ -141,10 +141,8 @@
     # nvtop: already added as `nvtopPackages.full` in modules/apps-gaming.nix
     # — not duplicated here.
 
-    # ── Terminal / TUI toys & multiplexers ───────────────────────────────
-    alacritty
+    # ── Terminal / TUI toys ───────────────────────────────────────────────
     eza
-    zellij
     asciiquarium
     cmatrix
     sl
@@ -171,7 +169,6 @@
     # kdeconnect: handled via `programs.kdeconnect.enable` above, not a plain
     # package.
     input-remapper # GUI (input-remapper-gtk) + CLI; service enabled above
-    evtest
 
     # ── Networking / diagnostics ──────────────────────────────────────────
     iptables       # CLI only — see firewall note above; NOT the active backend
@@ -200,13 +197,7 @@
     torsocks
 
     # ── Remote access / transfer ──────────────────────────────────────────
-    rclone
-    # sshpass, keychain, putty: already added in
-    # home/modules/apps-browsers-comms.nix — not duplicated here.
-    proton-vpn     # nixpkgs renamed Arch's `proton-vpn-gtk-app` to this
-                    # attribute (it's literally built from the
-                    # ProtonVPN/proton-vpn-gtk-app upstream repo — verified
-                    # in pkgs/by-name/pr/proton-vpn/linux.nix)
+    # rclone and proton-vpn: modules/proton.nix
     # localsend: already added in home/modules/apps-browsers-comms.nix — not
     # duplicated here.
 

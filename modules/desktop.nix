@@ -5,25 +5,7 @@
   programs.hyprland = {
     enable          = true;
     xwayland.enable = true;
-    # wrapRuntimeDeps disabled here too: same reasoning as home/modules/hyprland.nix
-    # -- this is the system-level programs.hyprland package (separate from
-    # home-manager's wayland.windowManager.hyprland), and it also pulled in the
-    # broken hyprland-guiutils build unless overridden here independently.
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland.override {
-      wrapRuntimeDeps = false;
-      # Hyprland's CMakeLists.txt requires glaze 7.x (find_package(glaze 7...<8)),
-      # but current nixpkgs' glaze is 8.1.0 -- pinned back to 7.2.0 for this
-      # build only (doesn't affect the system-wide glaze package).
-      glaze-hyprland = pkgs.glaze.overrideAttrs (old: {
-        version = "7.2.0";
-        src = pkgs.fetchFromGitHub {
-          owner = "stephenberry";
-          repo = "glaze";
-          rev = "v7.2.0";
-          hash = "sha256-f3NVRi3SXKo42hn0WCw7JsOK3EkdOVJIcuzhPorKjFY=";
-        };
-      });
-    };
+    package = pkgs.hyprland-pinned;  # overlay in configuration.nix
   };
 
   # ── Wayland-native Chromium / Electron ────────────────────────────────────
@@ -52,61 +34,15 @@
   };
 
   # ── System-level desktop packages ─────────────────────────────────────────
+  # User-facing desktop tools (terminal, screenshot, clipboard, media keys) are
+  # in home-manager; only session plumbing lives here.
   environment.systemPackages = with pkgs; [
-    # Terminal
-    kitty
-
-    # Launcher / menus
-    wofi
-    cliphist         # clipboard history manager (wofi integration)
-
-    # Clipboard
-    wl-clipboard
-
-    # Screenshots
-    grim
-    slurp
-    swappy           # screenshot annotation
-
-    # Wallpaper
-    awww             # animated wallpaper daemon (swww was renamed to awww in nixpkgs)
-
-    # Brightness / volume / media
-    brightnessctl
-    pamixer
-    playerctl
-
-    # Network / Bluetooth tray
-    networkmanagerapplet   # provides nm-applet
-    # NOTE: lua/startup_apps.lua also execs `nm-tray`, which Arch has but NixOS
-    # cannot provide — nixpkgs removed nm-tray on 2025-08-30 ("only works with
-    # Plasma 5"); referencing it now throws at eval time. The exec-once simply
-    # no-ops here. Nothing is lost: `nm-applet --indicator`, launched on the line
-    # above it in startup_apps.lua, provides the same NetworkManager tray icon.
-    blueman
-
-    # Screen locker (idle is handled by caelestia)
-    hyprlock
-
-    # Polkit agent (GUI auth popups)
-    polkit_gnome
-
-    # File manager: NOT listed here — see programs.thunar below. Installing the
-    # thunar package plainly is what broke plugins: thunar only scans
-    # $THUNARX_DIRS, or its OWN store lib/thunarx-3 when that is unset. Its store
-    # path ships just apr/sbr/uca/wallpaper, so thunar-archive-plugin sitting in
-    # the user profile was never loaded — right-click "Extract Here" simply did
-    # not exist. programs.thunar builds a wrapper with THUNARX_DIRS pointing at
-    # the plugins listed there.
-    gvfs                 # needed for Thunar trash / network mounts
-
-    # Volume GUI
-    pavucontrol
-
-    # Misc desktop utils
+    networkmanagerapplet   # nm-applet tray icon
+    polkit_gnome           # GUI auth popups (scripts/Polkit-NixOS.sh)
+    gvfs                   # Thunar trash / network mounts
     libnotify
     xdg-utils
-    qt6Packages.qt6ct    # QT theme picker
+    qt6Packages.qt6ct
   ];
 
   # ── Fonts ─────────────────────────────────────────────────────────────────

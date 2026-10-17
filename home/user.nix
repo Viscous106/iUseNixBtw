@@ -14,7 +14,6 @@
     ./modules/kitty.nix
     ./modules/zen.nix
     ./modules/gpg.nix
-    ./modules/mpv.nix
     ./modules/btop.nix
     ./modules/yazi.nix
     ./modules/cava.nix
@@ -40,6 +39,7 @@
     ./modules/wayvr.nix
     ./modules/battery-notify.nix
     ./modules/web3.nix
+    ./modules/ai-agents.nix
     ./modules/claude-lend.nix
   ];
 
@@ -177,20 +177,11 @@
   # ── XDG dirs ──────────────────────────────────────────────────────────────
   # ── Extra user packages required by hypr scripts ─────────────────────────
   home.packages = with pkgs; [
-    claude-code  # pinned via the nixpkgs-claude input; see flake.nix
-    (pkgs.lib.lowPrio python3)  # redundant vs pythonWithLibs (home/modules/python-env.nix); kept for the plain interpreter, lowPrio to resolve bin/idle3.14 collision
     pkgs.ghgrab
-    inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-ide  # IDE (upstream renamed google-antigravity -> the 2.0 base app)
-    inputs.antigravity.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli  # `agy` terminal CLI
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex  # OpenAI Codex CLI (native binary, not the node wrapper)
-    pkgs.codex-whoami  # which OpenAI org/project is Codex actually billing
-    pkgs.claude-whoami # which Anthropic org/workspace is Claude Code using
     obsidian
     fd
     psmisc         # provides killall
     ripgrep
-    lsd           # better ls
-    pyenv         # python version manager
     pulseaudio    # provides paplay
     bc            # math in shell scripts (Brightness, Volume, etc.)
     jq            # JSON parsing (hyprctl -j in scripts)
@@ -201,7 +192,7 @@
     slurp         # region selection for screenshots
     grim          # screenshot tool
     awww          # wallpaper daemon (formerly swww)
-    rofi          # app launcher (Super+D)
+    rofi          # menus for RofiSearch / ScreenMode / ZshChangeTheme / WallpaperEffects
     # thunar / thunar-volman intentionally absent: they come from
     # programs.thunar in modules/desktop.nix, which is the only way the plugins
     # actually load. A second unwrapped copy here would shadow the wrapper.
@@ -209,7 +200,6 @@
     pamixer       # volume control
     brightnessctl # brightness control
     pavucontrol   # audio GUI (Super+Alt+S)
-    blueman       # bluetooth GUI (Super+Shift+B)
     tmux          # terminal multiplexer
 
     # Cursor
@@ -219,15 +209,13 @@
     antigen       # zsh plugin manager
     bat           # better cat
     chafa
-    cheese        # webcam app
     fastfetch     # system info
     gh            # github cli
     mysql84       # mysql 8.4 database
     hyprland-qtutils
-    mpv           # media player
+    (mpv.override { scripts = [ mpvScripts.mpris ]; })  # media keys via MPRIS
     nix-tree      # visualize nix dependencies
     wl-kbptr      # wayland keyboard pointer
-    xev           # x11 event viewer
     kind          # kubernetes IN docker - local clusters
     kubectl       # kubernetes control cli
     vite          # frontend build tool

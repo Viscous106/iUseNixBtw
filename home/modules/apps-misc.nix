@@ -39,19 +39,5 @@
 
     # GIS
     qgis
-
-    # AI agent / coding CLIs
-    goose-cli       # Block's AI agent (github.com/block/goose). NOTE: the
-                    # bare `goose` attribute in nixpkgs is an UNRELATED Go
-                    # database-migration tool (pressly/goose) — using it here
-                    # would be wrong, so goose-cli is the correct pick.
-    opencode        # AI coding agent CLI, verified present at
-                    # pkgs/by-name/op/opencode
-    github-copilot-cli  # NOTE: contrary to expectation this is NOT just a
-                        # `gh` extension — nixpkgs packages it standalone
-                        # (fetches github/copilot-cli's own release tarball,
-                        # installs a `copilot` binary). Unfree license.
-                        # Do NOT confuse with the `copilot-cli` attribute,
-                        # which is AWS's unrelated ECS deployment tool.
   ];
 }

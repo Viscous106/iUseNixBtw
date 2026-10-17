@@ -67,8 +67,7 @@
     #   Settings: home/user.nix  (my.web3)
 
     # ── Embedded / keyboard firmware ────────────────────────────────────
-    arduino-cli
-    qmk
+    arduino-cli  # qmk CLI: modules/apps-gaming.nix
 
     # ── Git extras / VCS ────────────────────────────────────────────────
     # (git itself is already a system package via configuration.nix)

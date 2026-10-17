@@ -22,11 +22,6 @@
     spotify
     spicetify-cli
 
-    # Wallpaper (see redundancy note in report — awww/swww is the daemon
-    # actually driving wallpapers on this system; swaybg was still an
-    # explicit Arch install so it's included here too)
-    swaybg
-
     # PipeWire graph/patch tools
     qpwgraph             # PipeWire patchbay GUI
     # NOTE: helvum was requested but has been REMOVED from nixpkgs
@@ -42,9 +37,6 @@
     # Screenshots / input-visualization
     silicon              # code screenshot tool
     showmethekey         # on-screen keypress visualizer
-
-    # Webcam
-    guvcview             # webcam viewer/capture utility
 
     # DLNA/UPnP media sharing
     rygel                # UPnP/DLNA media server
@@ -65,12 +57,6 @@
 
     # PulseAudio prefs GUI
     paprefs
-
-    # Fonts
-    font-awesome         # otf-font-awesome -> closest nixpkgs equivalent;
-                          # ships the OTF Font Awesome glyphs (currently v7,
-                          # Arch's build is v6 — check icon coverage if used
-                          # for a specific glyph set)
 
     # Color temperature (f.lux-style)
     gammastep

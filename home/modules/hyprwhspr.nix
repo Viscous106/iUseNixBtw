@@ -39,7 +39,7 @@ let
   };
 in
 {
-  home.packages = [ hyprwhspr pkgs.ydotool pkgs.wtype ];
+  home.packages = [ hyprwhspr pkgs.wtype ];  # ydotool comes from ydotoold.nix
 
   # ── Config — vendored verbatim from Arch's ~/.config/hyprwhspr/config.json ─
   xdg.configFile."hyprwhspr/config.json".source = config.lib.file.mkOutOfStoreSymlink

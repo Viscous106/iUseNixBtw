@@ -24,11 +24,4 @@
   services.udev.extraRules = ''
     KERNEL=="uinput", GROUP="input", MODE="0660"
   '';
-
-  # ── OpenRGB ───────────────────────────────────────────────────────────────
-  # Arch just runs the OpenRGB GUI app manually (no systemd service was
-  # enabled for it) — so this stays a plain package + vendored user config
-  # (home/modules/extras.nix), not services.hardware.openrgb (which runs it
-  # as an always-on system server with a different profile-storage model).
-  environment.systemPackages = [ pkgs.openrgb ];
 }

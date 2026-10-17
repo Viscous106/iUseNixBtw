@@ -88,12 +88,5 @@
     # here guarantees the plugin is actually present in the profile.
     qt5.qtwayland
     qt6.qtwayland
-
-    # X11-only display-layout GUI (arandr). nwg-displays (already installed
-    # per earlier work this session) is the native Wayland/Hyprland
-    # equivalent, so this is redundant for the Hyprland session itself —
-    # kept anyway since it's cheap and still useful for configuring XWayland
-    # apps or any X11 fallback.
-    arandr
   ];
 }
