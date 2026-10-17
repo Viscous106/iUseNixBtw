@@ -1,0 +1,69 @@
+{ config, pkgs, ... }:
+
+{
+  # ── Media, graphics & audio tools ──────────────────────────────────────────
+  # Ported from Arch's explicitly-installed package list. See report for
+  # anything skipped (no nixpkgs equivalent) and redundancy notes.
+  home.packages = with pkgs; [
+    (mpv.override { scripts = [ mpvScripts.mpris ]; })  # media keys via MPRIS
+    cava
+    # Streaming / recording
+    obs-studio          # screen recording & streaming
+    streamlink          # pull live streams into a local player
+
+    # Downloaders
+    yt-dlp              # video/audio downloader
+    spotdl              # Spotify track downloader
+
+    # mpv companions
+    mpvpaper            # use mpv as a live-wallpaper renderer
+
+    # Spotify + spicetify (Arch's ~/.config/spicetify only has the
+    # Marketplace custom app installed — no config-xpui.ini/Themes were ever
+    # set up, so there's no active theme, just the base packages + app)
+    spotify
+    spicetify-cli
+
+    # PipeWire graph/patch tools
+    qpwgraph             # PipeWire patchbay GUI
+    # NOTE: helvum was requested but has been REMOVED from nixpkgs
+    # (unmaintained upstream, vulnerable dependency — the `helvum` attr
+    # now throws). Upstream nixpkgs points to `crosspipe` as a
+    # replacement; not added automatically, see report.
+
+    # Audio/video CLI utilities
+    sox                  # audio processing swiss-army-knife
+    ffmpegthumbnailer    # video thumbnail generator (file manager previews)
+    exiftool             # perl-image-exiftool -> nixpkgs attr is `exiftool`
+
+    # Screenshots / input-visualization
+    silicon              # code screenshot tool
+    showmethekey         # on-screen keypress visualizer
+
+    # DLNA/UPnP media sharing
+    rygel                # UPnP/DLNA media server
+    grilo-plugins        # media discovery plugins (used by Rygel/GNOME media apps)
+
+    # GNOME Circle apps
+    decibels             # audio player
+    showtime             # video player
+    loupe                # image viewer
+    papers               # document viewer (formerly Evince/Papers)
+    simple-scan          # scanner front-end
+    snapshot             # webcam/photo booth app
+    sushi                # Nautilus quick-preview (GNOME Files)
+
+    # PDF viewer
+    zathura              # nixpkgs' `zathura` already bundles the mupdf PDF
+                          # backend by default, no extra plugin package needed
+
+    # PulseAudio prefs GUI
+    paprefs
+
+    # Color temperature (f.lux-style)
+    gammastep
+
+    # Android screen mirroring
+    scrcpy
+  ];
+}

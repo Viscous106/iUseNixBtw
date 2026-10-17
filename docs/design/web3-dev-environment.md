@@ -5,7 +5,7 @@
 
 ## Problem
 
-`home/modules/dev-toolchains.nix` already installs `foundry` and `solc`, flake-locked, and
+`home/dev/toolchains.nix` already installs `foundry` and `solc`, flake-locked, and
 its comment explicitly reasons through why `foundryup` was rejected. That covers "the tools
 exist on PATH" and nothing beyond it. Three gaps remain, all of which caused concrete
 failures while following a Solidity course on 2026-09-27.
@@ -50,7 +50,7 @@ Note that `forge build` resolves the same argument relative to the working direc
 `forge create` resolves it relative to the detected project root. That inconsistency is
 invisible until it bites.
 
-`home/modules/git.nix:33` already gitignores `.direnv` and `.envrc`, so the configuration
+`home/shell/git.nix:33` already gitignores `.direnv` and `.envrc`, so the configuration
 anticipated direnv, but direnv is not installed.
 
 ### Gap 3 — no project scaffold
@@ -135,7 +135,7 @@ that should not grow submodules.
 
 ## Design
 
-### Component 1 — `home/modules/web3.nix`
+### Component 1 — `home/dev/web3.nix`
 
 A new home-manager module following the style of `dev-toolchains.nix`. The full option
 surface:

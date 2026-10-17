@@ -4,7 +4,7 @@
 #
 # Run this booted from a NixOS installer ISO (minimal or graphical) to turn a
 # blank disk into a bootable copy of this exact system. Safe to run from
-# ANY machine — hardware-configuration.nix already uses generic drivers and
+# ANY machine — hosts/usb.nix already uses generic drivers and
 # filesystem-by-label, which is the whole point of this repo.
 #
 # Usage:
@@ -19,10 +19,10 @@
 # What it does:
 #   1. Partitions the disk you choose (GPT: 1GiB EFI + rest as btrfs)  — DESTRUCTIVE
 #   2. Creates the @, @home, @nix, @persist, @snapshots btrfs subvolumes
-#   3. Mounts everything under /mnt exactly as hardware-configuration.nix expects
+#   3. Mounts everything under /mnt exactly as hosts/usb.nix expects
 #   4. Copies this repo (the directory this script lives in) to /mnt/persist/nixos-config
 #   5. Prompts for the login username + password and writes them into the
-#      COPIED user.nix, hashed with `mkpasswd -m sha-512` — the checkout you
+#      COPIED identity.nix, hashed with `mkpasswd -m sha-512` — the checkout you
 #      ran this from keeps its own values
 #   6. Runs `nixos-install --flake .../nixos-config#nix`
 #
@@ -101,7 +101,7 @@ echo
 # ── Disk selection ───────────────────────────────────────────────────────────
 if [ "${SKIP_PARTITION:-0}" = "1" ]; then
   echo "SKIP_PARTITION=1 set — assuming /mnt is already partitioned and mounted"
-  echo "the way hardware-configuration.nix expects. Skipping to the copy+install step."
+  echo "the way hosts/usb.nix expects. Skipping to the copy+install step."
   echo
 else
   echo "Block devices on this machine:"
@@ -152,7 +152,7 @@ else
   done
   umount /mnt
 
-  echo "── Mounting (matches hardware-configuration.nix exactly) ────────────"
+  echo "── Mounting (matches hosts/usb.nix exactly) ────────────"
   BTRFS_OPTS="noatime,compress=zstd:3,space_cache=v2,discard=async"
   mount -o "subvol=@,${BTRFS_OPTS},autodefrag"    "$NIXOS_PART" /mnt
   mkdir -p /mnt/{home,nix,persist,.snapshots,boot}
@@ -164,32 +164,32 @@ else
 fi
 
 # ── GPU driver selection ─────────────────────────────────────────────────────
-# modules/hardware-nvidia.nix hard-forces the NVIDIA driver for this repo's
+# hosts/nvidia.nix hard-forces the NVIDIA driver for this repo's
 # reference machine (RTX 4050 Max-Q) — it is NOT auto-detected. Including it
 # on a laptop without that exact GPU can leave Hyprland with no working
 # display driver (CPU-rendered via llvmpipe at best, black screen at worst).
 echo
 echo "── GPU configuration ───────────────────────────────────────────────────"
-echo "modules/hardware-nvidia.nix force-enables the NVIDIA driver (RTX 4050"
+echo "hosts/nvidia.nix force-enables the NVIDIA driver (RTX 4050"
 echo "Max-Q, this repo's reference machine). It is not auto-detected."
 echo
 read -rp "Does THIS laptop have that same NVIDIA GPU? [y/N] " NVIDIA_ANSWER
 NVIDIA_ANSWER="${NVIDIA_ANSWER:-N}"
 if [[ "$NVIDIA_ANSWER" =~ ^[Yy]$ ]]; then
-  echo "Keeping modules/hardware-nvidia.nix enabled."
+  echo "Keeping hosts/nvidia.nix enabled."
 else
-  echo "Will disable modules/hardware-nvidia.nix after copying the repo —"
+  echo "Will disable hosts/nvidia.nix after copying the repo —"
   echo "falls back to hardware-universal.nix's generic modesetting driver."
 fi
 
 # ── Login account ────────────────────────────────────────────────────────────
-# flake.nix imports ./user.nix and hands it to every module as `user`;
-# configuration.nix then creates users.users.${user.username} with
+# flake.nix imports ./identity.nix and hands it to every module as `user`;
+# system/core/users.nix then creates users.users.${user.username} with
 # initialHashedPassword = user.hashedPassword. Ask for both here and write them
-# into the COPIED user.nix after cp below — the checkout this script runs from
+# into the COPIED identity.nix after cp below — the checkout this script runs from
 # keeps its original values, so `nixos-rebuild switch` on an existing machine
 # is unaffected.
-USER_NIX="$REPO_DIR/user.nix"
+USER_NIX="$REPO_DIR/identity.nix"
 if [ ! -f "$USER_NIX" ]; then
   echo "$USER_NIX not found — flake.nix imports it for the username and password" >&2
   echo "hash, so the install would fail to evaluate. Can't continue." >&2
@@ -200,7 +200,7 @@ DEFAULT_USERNAME="${DEFAULT_USERNAME:-nixos}"
 
 echo
 echo "── Login account ───────────────────────────────────────────────────────"
-echo "These go into the installed copy's user.nix. This checkout is left alone,"
+echo "These go into the installed copy's identity.nix. This checkout is left alone,"
 echo "so the hash committed to git is never what ends up on the new system."
 echo
 
@@ -240,26 +240,26 @@ cp -a "$REPO_DIR"/. /mnt/persist/nixos-config/
 rm -rf /mnt/persist/nixos-config/result  # stale build symlink, if present
 
 if [[ ! "$NVIDIA_ANSWER" =~ ^[Yy]$ ]]; then
-  echo "Disabling modules/hardware-nvidia.nix in the copied flake.nix ..."
+  echo "Disabling hosts/nvidia.nix in the copied flake.nix ..."
   sed -i \
-    's|^\([[:space:]]*\)\./modules/hardware-nvidia\.nix|\1# ./modules/hardware-nvidia.nix (disabled by setup.sh — no matching NVIDIA GPU)|' \
+    's|^\([[:space:]]*\)\./hosts/nvidia\.nix|\1# ./hosts/nvidia.nix (disabled by setup.sh — no matching NVIDIA GPU)|' \
     /mnt/persist/nixos-config/flake.nix
 fi
 
-echo "Writing the login account into the copied user.nix ..."
+echo "Writing the login account into the copied identity.nix ..."
 sed -i \
   -e "s|^\([[:space:]]*\)username[[:space:]]*=.*|\1username = \"$ACCOUNT_USER\";|" \
   -e "s|^\([[:space:]]*\)hashedPassword[[:space:]]*=.*|\1hashedPassword = \"$ACCOUNT_HASH\";|" \
-  /mnt/persist/nixos-config/user.nix
+  /mnt/persist/nixos-config/identity.nix
 
 # A silent no-match here would quietly install this repo's committed username
 # and password hash instead of the ones just entered, so verify rather than
 # trust the sed. grep -F because a sha-512 hash is full of regex metacharacters.
-if ! grep -qF "username = \"$ACCOUNT_USER\";" /mnt/persist/nixos-config/user.nix \
-  || ! grep -qF "hashedPassword = \"$ACCOUNT_HASH\";" /mnt/persist/nixos-config/user.nix; then
-  echo "Couldn't write the account into /mnt/persist/nixos-config/user.nix — the" >&2
+if ! grep -qF "username = \"$ACCOUNT_USER\";" /mnt/persist/nixos-config/identity.nix \
+  || ! grep -qF "hashedPassword = \"$ACCOUNT_HASH\";" /mnt/persist/nixos-config/identity.nix; then
+  echo "Couldn't write the account into /mnt/persist/nixos-config/identity.nix — the" >&2
   echo "install would fall back to this repo's committed hash. Aborting before" >&2
-  echo "nixos-install; check that user.nix still has 'username =' and" >&2
+  echo "nixos-install; check that identity.nix still has 'username =' and" >&2
   echo "'hashedPassword =' lines." >&2
   exit 1
 fi

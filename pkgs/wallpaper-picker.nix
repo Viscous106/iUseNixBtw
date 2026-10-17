@@ -1,7 +1,7 @@
 # ── wallpaper-picker ────────────────────────────────────────────────────────
 # Wrapper for the Quickshell wallpaper selector whose QML lives at
-# home/quickshell/wallpaper-picker/ and is symlinked live into
-# ~/.config/quickshell/wallpaper-picker (see home/modules/wallpaper-picker.nix).
+# dotfiles/quickshell/wallpaper-picker/ and is symlinked live into
+# ~/.config/quickshell/wallpaper-picker (see home/desktop/session-tools.nix).
 #
 # The QML is deliberately NOT copied into the store: keeping it out-of-store
 # means it can be edited and re-run without a rebuild, matching how rofi, qt6ct

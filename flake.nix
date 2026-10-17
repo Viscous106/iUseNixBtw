@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # A second nixpkgs, deliberately NOT following the one above, used for
-    # exactly one package: wivrn (see modules/vr.nix).
+    # exactly one package: wivrn (see system/services/vr.nix).
     #
     # This breaks the one-snapshot rule the other inputs follow, so it needs a
     # reason. WiVRn refuses to connect unless the PC server and the headset
@@ -22,7 +22,7 @@
     nixpkgs-wivrn.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
     # A third nixpkgs, again on the Hydra-tested small channel, for exactly one
-    # package: claude-code (wired up in the overlay in configuration.nix).
+    # package: claude-code (wired up in overlays/default.nix).
     #
     # Same one-snapshot exception as nixpkgs-wivrn above, different reason.
     # claude-code ships several releases a week; our main snapshot only moves
@@ -96,7 +96,7 @@
 
     # Prebuilt nix-locate database, regenerated upstream on every channel bump.
     #
-    # pay-respects (home/modules/zsh.nix) owns command_not_found_handler, and
+    # pay-respects (home/shell/zsh.nix) owns command_not_found_handler, and
     # the way it answers "command not found" is to ask nix-locate which package
     # ships the missing binary. With no nix-locate on PATH it cannot even try —
     # it just prints "nix-locate or nix-search is required to find packages"
@@ -114,7 +114,7 @@
     };
 
     # claude-lend — metered guest access to Claude through a gateway on this
-    # machine (home/modules/claude-lend.nix). Local checkout, git+file rather
+    # machine (home/dev/claude-lend.nix). Local checkout, git+file rather
     # than path: so only git-tracked files are copied in (no .git, no
     # grants.db). Locked by narHash like any other input: after changing the
     # checkout, `nix flake update claude-lend` to pick the change up.
@@ -124,36 +124,18 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, codex-cli-nix, ... }@inputs:
+  outputs = { nixpkgs, home-manager, hyprland, ... }@inputs:
   let
     system = "x86_64-linux";
 
-    # Who this install belongs to — username + password hash, the one place
-    # either is written down. setup.sh rewrites ./user.nix in the copy it
-    # installs, so a fresh machine gets whatever name and password were typed
-    # at the prompt instead of this repo's owner. Threaded into every NixOS
-    # module via specialArgs and every home-manager module via
-    # extraSpecialArgs, both as `user`.
-    user = import ./user.nix;
+    # Username + password hash; setup.sh rewrites identity.nix on install.
+    # Passed to every module as `user`.
+    user = import ./identity.nix;
 
-    # Everything both machines share. The ONLY difference between the portable
-    # USB install and the internal encrypted NVMe install is which
-    # hardware-configuration is appended to this list.
+    # Shared by both hosts; they differ only in the hosts/<name>.nix file.
     commonModules = [
-      ./configuration.nix
-      ./modules/hardware-universal.nix
-      ./modules/hardware-nvidia.nix
-      ./modules/desktop.nix
-      ./modules/keyboard.nix
-      ./modules/apps-gaming.nix
-      ./modules/apps-databases.nix
-      ./modules/atuin.nix
-      ./modules/apps-system.nix
-      ./modules/proton.nix
-      ./modules/peripherals.nix
-      ./modules/audio.nix
-      ./modules/touchscreen.nix
-      ./modules/vr.nix
+      ./system                 # imports every .nix under system/
+      ./hosts/nvidia.nix       # explicit so setup.sh can comment it out
 
       hyprland.nixosModules.default
 
@@ -163,23 +145,21 @@
         home-manager.useUserPackages  = true;
         home-manager.extraSpecialArgs = { inherit inputs user; };
         home-manager.backupFileExtension = "backup";
-        home-manager.users.${user.username} = import ./home/user.nix;
+        home-manager.users.${user.username} = import ./home;
       }
     ];
 
-    mkHost = hardware: nixpkgs.lib.nixosSystem {
+    mkHost = host: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { inherit inputs user; };
-      modules = commonModules ++ [ hardware ];
+      modules = commonModules ++ [ host ];
     };
   in
   {
-    # Portable USB drive: btrfs by-label, GRUB-as-removable, no NVRAM writes.
-    nixosConfigurations.nix = mkHost ./hardware-configuration.nix;
+    # Portable USB drive: btrfs by label, GRUB as removable, no NVRAM writes.
+    nixosConfigurations.nix = mkHost ./hosts/usb.nix;
 
-    # Internal NVMe: LUKS2 + btrfs, systemd-boot. hostName is forced to
-    # "laptop" there, so `nixos-rebuild switch --flake /persist/nixos-config`
-    # resolves to this host automatically once you are booted from it.
-    nixosConfigurations.laptop = mkHost ./hardware-configuration-laptop.nix;
+    # Internal NVMe: LUKS2 + btrfs, systemd-boot.
+    nixosConfigurations.laptop = mkHost ./hosts/nvme.nix;
   };
 }

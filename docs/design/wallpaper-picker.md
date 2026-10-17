@@ -29,7 +29,7 @@ Quickshell but superseded. So: take the design, build it here.
 
 Standalone Quickshell config, launched on demand. No daemon, no idle cost.
 
-QML source lives in the repo at `home/quickshell/wallpaper-picker/` and is
+QML source lives in the repo at `dotfiles/quickshell/wallpaper-picker/` and is
 symlinked live into `~/.config/quickshell/wallpaper-picker` with
 `mkOutOfStoreSymlink` — matching the existing convention for `rofi`, `qt6ct` and
 `hypr`, so the QML can be edited and re-run without a rebuild.
@@ -43,7 +43,7 @@ in, because Hyprland's exec environment does not reliably carry all of them.
 Considered and rejected. A caelestia drawer would open instantly and inherit its
 tokens natively, but delivering a whole new QML module by `postPatch` is far
 beyond the six one-line substitutions already carried in
-`home/modules/caelestia-quickshell.nix`, and every caelestia update would risk
+`home/desktop/caelestia.nix`, and every caelestia update would risk
 breaking it. Reading `scheme.json` gets the integration through a data file
 instead of a code patch.
 

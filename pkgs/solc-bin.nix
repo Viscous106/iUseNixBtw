@@ -8,7 +8,7 @@
 #
 # Foundry's own answer is `svm`, which downloads compilers into ~/.svm at first
 # use. That is rejected here for the same reason `foundryup` was rejected in
-# home/modules/dev-toolchains.nix: it is mutable state outside the flake lock,
+# home/dev/toolchains.nix: it is mutable state outside the flake lock,
 # and it fails outright on a read-only filesystem.
 #
 # The upstream Linux release binaries are *statically linked*, so unlike most
@@ -21,7 +21,7 @@
 # generic build, so no fixup or strip phase runs and the static binary is
 # installed byte-for-byte as upstream shipped it.
 #
-# Usage (see home/modules/web3.nix):
+# Usage (see home/dev/web3.nix):
 #   pkgs.solc-bin { version = "0.6.12"; sha256 = "f6cb519b..."; }
 #
 # To add a version, get its hash with:

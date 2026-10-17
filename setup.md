@@ -1,6 +1,6 @@
 # Setting up this NixOS config on a new device
 
-This repo is a **portable NixOS install**: `hardware-configuration.nix` uses
+This repo is a **portable NixOS install**: `hosts/usb.nix` uses
 generic drivers and filesystem-*by-label* (not by-UUID or by-disk-path), and
 GRUB installs itself the "removable media" way (`efiInstallAsRemovable`,
 never touches NVRAM). That combination is what makes the exact same config
@@ -20,9 +20,9 @@ This doc is only about the first case.
 
 Everything above is genuinely portable *except* the GPU driver. This repo's
 reference machine has an RTX 4050 wired as the only display-capable GPU, and
-`modules/hardware-nvidia.nix` — unconditionally imported by `flake.nix` —
+`hosts/nvidia.nix` — unconditionally imported by `flake.nix` —
 forces that with `lib.mkForce [ "nvidia" ]` plus a pinned
-`hardware.nvidia.package`. `modules/hardware-universal.nix` only sets a
+`hardware.nvidia.package`. `system/hardware/universal.nix` only sets a
 `mkDefault` fallback (`modesetting`/`fbdev`), which `hardware-nvidia.nix`
 always wins over.
 
@@ -33,7 +33,7 @@ Does THIS laptop have that same NVIDIA GPU? [y/N]
 ```
 
 Answer `N` (or just press enter) on any machine that isn't that exact RTX
-4050 setup, and it comments out the `./modules/hardware-nvidia.nix` line in
+4050 setup, and it comments out the `./hosts/nvidia.nix` line in
 the *copied* `flake.nix` (at `/mnt/persist/nixos-config/flake.nix`) before
 running `nixos-install` — your original repo checkout is untouched. That
 falls back to `hardware-universal.nix`'s generic `modesetting`/`fbdev`
@@ -80,7 +80,7 @@ It will:
    `@home`, `@nix`, `@persist` (survives everything, holds this repo + your
    secrets), `@snapshots`.
 4. Mount all of that under `/mnt` with the exact options
-   `hardware-configuration.nix` declares (`compress=zstd:3`, `discard=async`,
+   `hosts/usb.nix` declares (`compress=zstd:3`, `discard=async`,
    etc.) — if these ever drift from what's in that file, fix the file, not
    the script (the file is what actually matters at every boot after this
    one; the script only matters once).
@@ -136,7 +136,7 @@ codex-whoami          # confirm which org/project it will bill
 Then:
 
 1. `passwd` — set a real login password (the one baked into
-   `configuration.nix` is a hash, not a fresh secret, but change it if you
+   `identity.nix` is a hash, not a fresh secret, but change it if you
    want a different one on this install).
 2. Log out/in (or reboot) so the shell picks up the restored secrets.
 3. `ssh-add -l` should show your key without you doing anything (plain
@@ -166,7 +166,7 @@ Edits to a skill take effect in the next session — no rebuild, and no
 this machine; that is for other people, and installing it here would shadow
 these with a stale version-pinned copy.
 
-**Plugins.** `home/claude/settings.json` tracks `enabledPlugins`, but the
+**Plugins.** `dotfiles/claude/settings.json` tracks `enabledPlugins`, but the
 installed plugin cache under `~/.config/claude/plugins/` is runtime state and
 is not in git. Until you reinstall them, Claude Code starts with plugins
 enabled but absent. Inside Claude Code:
@@ -204,7 +204,7 @@ wipe and start over.
   bootstrap step to reproduce what one `git clone` already does, so it is
   step 4 of the post-install instructions above instead.
 - **Claude Code plugins** — `enabledPlugins` is tracked in
-  `home/claude/settings.json`, but installing them hits the network, and a
+  `dotfiles/claude/settings.json`, but installing them hits the network, and a
   failed fetch inside `home.activation` would wedge a `nixos-rebuild switch`.
   Reinstall them by hand with `/plugin install`.
 - **Picking a different disk layout** — this repo assumes the whole disk is

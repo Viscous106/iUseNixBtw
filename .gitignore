@@ -26,17 +26,46 @@ flake.lock.backup
 home/OpenRGB/
 home/openrgb/
 home/scaler-content/
+dotfiles/OpenRGB/
+dotfiles/openrgb/
 .superpowers/
 
 # Runtime state apps write back through the live-edit symlinks
-home/rofi/.current_wallpaper
-home/tmux/plugins/
-home/btop/themes/caelestia.theme
-home/spicetify/Themes/caelestia/
-home/obs-studio/plugin_config/obs-websocket/
-home/obs-studio/plugin_config/rtmp-services/
-home/obs-studio/plugin_manager/
-home/obs-studio/basic/scenes/
+dotfiles/tmux/plugins/
+dotfiles/btop/themes/caelestia.theme
+dotfiles/spicetify/Themes/caelestia/
+dotfiles/obs-studio/plugin_config/obs-websocket/
+dotfiles/obs-studio/plugin_config/rtmp-services/
+dotfiles/obs-studio/plugin_manager/
+dotfiles/obs-studio/basic/scenes/
+
+# TEMPORARY: home/<app> -> ../dotfiles/<app> links that keep the running session
+# working until the next switch. Delete them (and this block) after switching.
+/home/agy
+/home/btop
+/home/cava
+/home/claude
+/home/codex
+/home/gtk-3.0
+/home/hypr
+/home/hyprwhspr
+/home/keyd
+/home/nvim
+/home/nwg-displays
+/home/nwg-look
+/home/obs-studio
+/home/qt5ct
+/home/qt6ct
+/home/quickshell
+/home/rofi
+/home/spicetify
+/home/swappy
+/home/tmux
+/home/tmuxifier
+/home/web3
+/home/wl-kbptr
+/home/yazi
+/home/zsh
 
 # 0-byte mount stubs the Claude Code sandbox creates for deny-listed paths
 .bash_profile

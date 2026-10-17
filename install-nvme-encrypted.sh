@@ -18,7 +18,7 @@
 #   6. Copies /home across from a read-only snapshot of the USB's @home
 #   7. nixos-install --flake ...#laptop
 #
-# The partition names in step 2 are what hardware-configuration-laptop.nix
+# The partition names in step 2 are what hosts/nvme.nix
 # points at (/dev/disk/by-partlabel/...), which is why nothing in this script
 # ever has to rewrite UUIDs into a .nix file.
 #
@@ -60,8 +60,8 @@ command -v nixos-install >/dev/null 2>&1 \
   || die "nixos-install not found — boot the USB NixOS (or a NixOS ISO) first."
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-[ -f "$REPO_DIR/hardware-configuration-laptop.nix" ] \
-  || die "$REPO_DIR has no hardware-configuration-laptop.nix — wrong directory?"
+[ -f "$REPO_DIR/hosts/nvme.nix" ] \
+  || die "$REPO_DIR has no hosts/nvme.nix — wrong directory?"
 
 # ── Where are we running from? ───────────────────────────────────────────────
 ROOT_SRC="$(findmnt -no SOURCE / | sed 's/\[.*\]//')"
@@ -123,7 +123,7 @@ else
   partprobe "$DISK"; udevadm settle; sleep 2
 
   [ -e /dev/disk/by-partlabel/nixesp ] && [ -e /dev/disk/by-partlabel/nixcrypt ] \
-    || die "/dev/disk/by-partlabel/{nixesp,nixcrypt} did not appear — hardware-configuration-laptop.nix depends on those names"
+    || die "/dev/disk/by-partlabel/{nixesp,nixcrypt} did not appear — hosts/nvme.nix depends on those names"
 
   mkfs.fat -F32 -n NIXBOOT "$ESP"
 
@@ -184,7 +184,7 @@ EOF
   done
   umount /mnt
 
-  say "Mounting (must match hardware-configuration-laptop.nix exactly)"
+  say "Mounting (must match hosts/nvme.nix exactly)"
   O=noatime,compress=zstd:3,space_cache=v2,discard=async
   mount -o "subvol=@,${O},autodefrag"     /dev/mapper/cryptroot /mnt
   mkdir -p /mnt/{home,nix,persist,.snapshots,swap,boot}
@@ -237,7 +237,7 @@ fi
 # ── Install ──────────────────────────────────────────────────────────────────
 say "Installing"
 echo "Using path: so the flake is read straight from disk — no 'git add' needed"
-echo "for hardware-configuration-laptop.nix, which flakes would otherwise skip."
+echo "for hosts/nvme.nix, which flakes would otherwise skip."
 echo
 nixos-install --root /mnt --flake "path:/mnt/persist/nixos-config#laptop" --no-root-passwd
 
@@ -262,7 +262,7 @@ Then:
 
 Pick the internal disk in the firmware boot menu. Expect: systemd-boot menu →
 LUKS passphrase prompt → NixOS. Log in as viscous with the password from
-configuration.nix's initialHashedPassword.
+system/core/users.nix's initialHashedPassword.
 
 Keep the USB drive as-is for a few days. It is your only fallback until the
 internal install has proven itself; encrypting it is a separate, later step

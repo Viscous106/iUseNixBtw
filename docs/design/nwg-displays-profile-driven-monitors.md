@@ -5,7 +5,7 @@
 
 ## Problem
 
-Monitor layout on this machine is owned entirely by `home/hypr/scripts/monitor-auto.sh`,
+Monitor layout on this machine is owned entirely by `dotfiles/hypr/scripts/monitor-auto.sh`,
 which hardcodes its geometry. There is no way to choose a layout interactively: no mirror
 / duplicate mode, no way to pick which side the external sits on, no manual override of
 the docked/undocked decision.
@@ -13,7 +13,7 @@ the docked/undocked decision.
 nwg-displays is installed and bound to `SUPER+ALT+M`, but every Apply is a silent no-op.
 Three independent breaks cause this:
 
-1. `~/.config/hypr/monitors.conf` is symlinked into place by `home/modules/hyprland.nix:83`
+1. `~/.config/hypr/monitors.conf` is symlinked into place by `home/desktop/hyprland.nix:83`
    but is never sourced. The Lua entry point `hyprland.lua` only does `require("lua.monitors")`.
 2. nwg-displays 0.4.3 writes its Lua output to `~/.config/hypr/monitors.lua`, which is a
    different file from `~/.config/hypr/lua/monitors.lua`. Nothing requires it, and it is not
@@ -92,7 +92,7 @@ happens is the script's.
 - Hyprland 0.56.2 (pinned in `flake.nix:31`), native Lua config parser.
 - `hyprctl keyword` and plain `hyprctl dispatch <name> <args>` are rejected under this
   parser; everything goes through `hyprctl eval` against the `hl.*` API.
-- nwg-displays 0.4.3, config dir symlinked live-editable from `/persist/nixos-config/home/nwg-displays`.
+- nwg-displays 0.4.3, config dir symlinked live-editable from `/persist/nixos-config/dotfiles/nwg-displays`.
 - `use-desc: true` — profiles match on monitor description, not connector name.
 - `confirm-timeout: 10` — a confirm-or-revert dialog already guards bad applies.
 
@@ -117,7 +117,7 @@ profile JSON authored through the GUI.
 ### Profiles
 
 Stored in `~/.config/nwg-displays/profiles/<name>.json`, which is already symlinked to
-`/persist/nixos-config/home/nwg-displays/profiles/`, so they persist across rebuilds with
+`/persist/nixos-config/dotfiles/nwg-displays/profiles/`, so they persist across rebuilds with
 no Nix changes.
 
 | Profile | eDP-1 | External | Selected when |
@@ -160,13 +160,13 @@ any behaviour depends on the answer.
 
 | File | Change |
 |---|---|
-| `home/hypr/hyprland.lua` | add `require("monitors")` |
-| `home/hypr/lua/monitors.lua` | remove the baseline `hl.monitor()` call; keep event hooks and lid binds |
-| `home/hypr/monitors.lua` | new, empty — so `require` succeeds before the first Apply |
-| `home/modules/hyprland.nix` | add `mkOutOfStoreSymlink` for `hypr/monitors.lua` |
-| `home/hypr/scripts/monitor-auto.sh` | replace geometry logic with profile selection + fallback |
-| `home/hypr/scripts/monitor-pick.sh` | new — rofi profile picker |
-| `home/hypr/lua/keybinds.lua` | add `SUPER+SHIFT+M` -> `monitor-pick.sh` |
+| `dotfiles/hypr/hyprland.lua` | add `require("monitors")` |
+| `dotfiles/hypr/lua/monitors.lua` | remove the baseline `hl.monitor()` call; keep event hooks and lid binds |
+| `dotfiles/hypr/monitors.lua` | new, empty — so `require` succeeds before the first Apply |
+| `home/desktop/hyprland.nix` | add `mkOutOfStoreSymlink` for `hypr/monitors.lua` |
+| `dotfiles/hypr/scripts/monitor-auto.sh` | replace geometry logic with profile selection + fallback |
+| `dotfiles/hypr/scripts/monitor-pick.sh` | new — rofi profile picker |
+| `dotfiles/hypr/lua/keybinds.lua` | add `SUPER+SHIFT+M` -> `monitor-pick.sh` |
 
 The baseline removal in `lua/monitors.lua` is required, not cosmetic: it runs at config-parse
 time on every reload and would overwrite the profile's position for `eDP-1`.

@@ -1,11 +1,11 @@
 # ── rope-select ─────────────────────────────────────────────────────────────
 # Wrapper for the animated region selector whose QML lives at
-# home/quickshell/rope-select/ and is symlinked live into
-# ~/.config/quickshell/rope-select (see home/modules/rope-select.nix).
+# dotfiles/quickshell/rope-select/ and is symlinked live into
+# ~/.config/quickshell/rope-select (see home/desktop/session-tools.nix).
 #
 # Drop-in replacement for slurp: prints "X,Y WxH" and exits 0, or exits
 # non-zero on cancel. ScreenShot.sh and ScreenRecord.sh call it in place of
-# slurp; see home/quickshell/rope-select/select.sh for the contract.
+# slurp; see dotfiles/quickshell/rope-select/select.sh for the contract.
 #
 # Same split as wallpaper-picker: the QML is deliberately NOT copied into the
 # store, so the rope physics can be retuned and re-run without a rebuild. What
