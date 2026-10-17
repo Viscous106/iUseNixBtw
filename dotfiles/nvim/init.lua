@@ -768,7 +768,7 @@ vim.api.nvim_create_autocmd('BufReadCmd', {
     vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.fn.readfile(tmp))
     vim.fn.delete(tmp)
     vim.bo.modified = false
-    -- ft=python enables LSP, treesitter and molten auto-attach (custom/plugins/init.lua).
+    -- ft=python enables LSP, treesitter and molten auto-attach (custom/plugins/molten.lua).
     vim.cmd 'setlocal filetype=python'
   end,
 })
