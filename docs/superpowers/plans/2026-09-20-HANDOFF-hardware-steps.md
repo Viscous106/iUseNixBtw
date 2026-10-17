@@ -63,7 +63,7 @@ their intent.
 
 | Profile | eDP-1 | LG (DP-1) | How to build it |
 |---|---|---|---|
-| `docked-extend` | Active ✓, DPMS ✓, pos `-1920`,`0`, 1920x1080@144.060, scale 1, Mirror None | Active ✓, DPMS ✓, pos `0`,`0`, scale 1, Mirror None | New → name → Save → Apply |
+| `docked-extend` | Active ✓, DPMS ✓, pos `0`,`0`, 1920x1080@144.060, scale 1, Mirror None | Active ✓, DPMS ✓, pos `1920`,`0`, scale 1, Mirror None | New → name → Save → Apply |
 | `docked-external` | as above but DPMS unticked | unchanged | New → name → Save → Apply |
 | `docked-mirror` | as `docked-extend`, but Mirror → the LG | unchanged | New → name → Save → Apply |
 | `laptop-only` | Active ✓, DPMS ✓, pos `0`,`0`, 1920x1080@144.060, scale 1, Mirror None | unplug the LG first | New → name → Save → Apply |

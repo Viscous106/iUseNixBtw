@@ -67,9 +67,9 @@ assert_num() {
 # does not (monitor-auto.sh's fallback_layout path, whose geometry never
 # varies by construction).
 PROFILE_DIR="$HOME/.config/nwg-displays/profiles"
-INT_POS_DOCKED="-1920 0"
+INT_POS_DOCKED="0 0"
 INT_POS_SOLO="0 0"
-EXT_POS="0 0"
+EXT_POS="1920 0"
 FALLBACK_SCALE="1"
 
 profile_json_for() {  # profile_json_for <profile-name> -> path, or empty

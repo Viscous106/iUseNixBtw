@@ -20,23 +20,21 @@ EXT_MODE="preferred"        # never hardcode a mode: an invalid one silently
                             # falls back to 1024x768 (bit us with @100 on the LG)
 SETTLE=2                    # seconds to hold the lock after applying (see below)
 
-# --- geometry: why the laptop lives at a NEGATIVE x -------------------------
-# The external is pinned at 0x0 and the laptop sits immediately to its LEFT, at
-# -1920x0. That keeps the physical arrangement (laptop left, monitor right) while
-# making the two regions disjoint no matter which one is placed first.
+# --- geometry: the laptop is pinned at 0x0, the external sits to its right --
+# All coordinates must be NON-NEGATIVE. nwg-displays (the GUI that authors the
+# profiles) cannot represent a negative position: its X/Y spinbuttons have
+# lower=0, dragging clamps to 0, and its canvas starts at 0x0. The old layout
+# (laptop at -1920x0) made the panel vanish off the GUI's canvas, showed its X
+# as 0, and let a drag/Apply write nonsense like the external at 4780x0.
 #
-# The obvious layout — laptop at 0x0, external at 1920x0 — cannot be reached from
-# "external only" (external 0..3840, laptop 3840..5760) without passing through an
-# overlap: move the laptop first and it lands inside the external, move the
-# external first and it swallows the laptop. Hyprland notices that intermediate
-# state and latches the "Monitor eDP-1 overlaps with other monitor(s)" warning.
-#
-# With the external fixed at 0x0 the coordinates never have to change when
-# toggling docked layouts, so switching is a pure dpms flip: no modeset, no
-# overlap, and near-instant instead of several seconds of mode changes.
-EXT_POS="0x0"
-INT_POS_DOCKED="-1920x0"    # left of the external; disjoint from it by construction
-INT_POS_SOLO="0x0"          # nothing else on screen, so the origin is free
+# Overlaps are still avoided by never moving anything: eDP-1 is at 0x0 in every
+# state (solo, extended, blanked), and the external always lands at 1920x0,
+# immediately to its right — the same spot Hyprland auto-places a hotplugged
+# output. Switching docked layouts stays a pure dpms flip: no modeset, no
+# intermediate overlap, so the "Monitor eDP-1 overlaps" warning never latches.
+EXT_POS="1920x0"            # right of the laptop; disjoint from it by construction
+INT_POS_DOCKED="0x0"
+INT_POS_SOLO="0x0"
 
 # --- reentrancy guard -------------------------------------------------------
 # Reconfiguring an output makes Hyprland emit monitor.removed / monitor.added,
