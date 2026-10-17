@@ -154,15 +154,6 @@ check_no_disable() {
   else
     pass "no disable directive in generated monitor config"
   fi
-  # ~/.config/hypr/configs/ is dead, unreferenced legacy from the pre-Lua
-  # config (Monitor_Profiles/{External,Laptop}-Only.conf and configs/
-  # monitors.conf still have `,disable` in them). Nothing sources it, so this
-  # is detection, not deletion — deletion is the user's call on a tree with no
-  # git to recover from it if that call is wrong. Informational only: it does
-  # NOT fail verification.
-  if grep -rqE '(disabled\s*=\s*true|,disable\b)' "$HOME/.config/hypr/configs/" 2>/dev/null; then
-    printf 'note: a disable directive exists in a dead legacy conf under ~/.config/hypr/configs/ (not sourced, informational only)\n'
-  fi
 }
 
 EXT="$(external_name)"

@@ -17,7 +17,7 @@
 # GameMode, monitor_connect, mirror_connectToPhone) were deleted as unwanted
 # rather than fixed, along with the binds and menu entries that called them.
 
-notif="$HOME/.config/swaync/images"
+notif="$HOME/.config/hypr/icons"
 
 # The normal values must track lua/decorations.lua. The previous version
 # restored size 5 against a configured 6, so the first toggle cycle quietly

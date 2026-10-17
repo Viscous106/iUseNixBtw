@@ -5,7 +5,7 @@
 
 state="$HOME/.local/state/wallpaper-picker"
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-effects"
-icon="$HOME/.config/swaync/images/ja.png"
+icon="$HOME/.config/hypr/icons/ja.png"
 rofi_theme="$HOME/.config/rofi/config-wallpaper-effect.rasi"
 transition=(--transition-type wipe --transition-duration 2 --transition-fps 60 --transition-bezier .43,1.19,1,.4)
 

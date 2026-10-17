@@ -14,7 +14,7 @@
 
     oh-my-zsh = {
       enable  = true;
-      plugins = [ "git" "archlinux" ]; # zsh-autosuggestions/zsh-syntax-highlighting
+      plugins = [ "git" ]; # zsh-autosuggestions/zsh-syntax-highlighting
                                         # are the standalone modules above instead
     };
 
@@ -35,11 +35,11 @@
       bindkey '^[[1;5C' forward-word  # Ctrl+Right
       bindkey '^[[1;5D' backward-word # Ctrl+Left
 
-      # ── Real Arch scripts, sourced verbatim (live-editable) ─────────────────
+      # ── Live-editable shell scripts (home/zsh/scripts) ───────────────────────
       for _f in \
-        variable android-spawn clearandff git_worspace_tmux \
-        gpg-git keybinds optimisation startup \
-        tmux_copy_wayland_fix tmux_start cmd-notify
+        variable clearandff git_worspace_tmux \
+        gpg-git keybinds optimisation \
+        tmux_copy_wayland_fix cmd-notify
       do
         [ -f "$HOME/.config/zsh/scripts/$_f.sh" ] && source "$HOME/.config/zsh/scripts/$_f.sh"
       done
@@ -193,7 +193,6 @@
     ga      = "git add";
     gc      = "git commit";
     gco     = "git checkout";
-    lg      = "lazygit";
     gwl     = "git worktree list";
     gwa     = "git worktree add";
     gwr     = "git worktree remove";

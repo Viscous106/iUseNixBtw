@@ -1,7 +1,7 @@
 # Profile-Driven Monitor Management via nwg-displays
 
 **Date:** 2026-09-20
-**Status:** Approved, pending implementation
+**Status:** Implemented
 
 ## Problem
 

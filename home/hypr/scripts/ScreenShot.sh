@@ -7,8 +7,8 @@ time=$(date "+%d-%b_%H-%M-%S")
 dir="$(xdg-user-dir PICTURES)/Screenshots"
 file="Screenshot_${time}_${RANDOM}.png"
 
-iDIR="$HOME/.config/swaync/icons"
-iDoR="$HOME/.config/swaync/images"
+iDIR="$HOME/.config/hypr/icons"
+iDoR="$HOME/.config/hypr/icons"
 sDIR="$HOME/.config/hypr/scripts"
 
 active_window_class=$(hyprctl -j activewindow | jq -r '(.class)')

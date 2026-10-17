@@ -1,7 +1,7 @@
 // Skewed-carousel wallpaper selector.
 //
 // Layout and behaviour are specified in
-// docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
+// docs/design/wallpaper-picker.md
 import QtQuick
 import QtQuick.Layouts
 import Quickshell

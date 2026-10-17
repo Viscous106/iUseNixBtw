@@ -6,7 +6,7 @@
 # after choosing theme, TTY need to be closed and re-open
 
 # Variables
-iDIR="$HOME/.config/swaync/images"
+iDIR="$HOME/.config/hypr/icons"
 rofi_theme="$HOME/.config/rofi/config-zsh-theme.rasi"
 
 if [ -n "$(grep -i nixos < /etc/os-release)" ]; then

@@ -8,7 +8,7 @@
 # still exited 0 and the notification still fired, so this bind reported a
 # layout change on every press while changing nothing.
 
-notif="$HOME/.config/swaync/images/ja.png"
+notif="$HOME/.config/hypr/icons/ja.png"
 
 hypr_eval() {
 	# eval exits 7 and prints "error: ..." on failure. Checking it is the point:

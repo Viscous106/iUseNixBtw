@@ -154,26 +154,6 @@
   # every launch.
   programs.xfconf.enable = true;
 
-  # ── skwd-wall — wallpaper selector on SUPER+W ─────────────────────────────
-  # Installs skwd-wall (the Quickshell selector UI), the `skwd` CLI, and
-  # skwd-daemon, which is what actually renders the wallpaper. The daemon
-  # replaces awww/mpvpaper for this purpose, so nothing else may paint the
-  # background: caelestia already has background.wallpaperEnabled = false, and
-  # the awww restore was dropped from startup_apps.lua.
-  #
-  # The module also does systemd.packages = [ skwd ], which INSTALLS
-  # skwd-daemon.service but does not start it: systemd.packages only places the
-  # unit file, it never runs `systemctl --user enable`, so the unit's [Install]
-  # WantedBy=graphical-session.target is inert — no graphical-session.target.wants
-  # symlink is ever created. startup_apps.lua launches the daemon instead — the
-  # same workaround caelestia needs.
-  # (This used to read "this session never reaches that target". That is no longer
-  # why: startup_apps.lua now starts nixos-fake-graphical-session.target so the
-  # xdg-desktop-portal units can activate, so the target IS active. skwd-daemon
-  # still does not auto-start, purely because it was never enabled — which is what
-  # keeps that change from double-starting a second wallpaper daemon.)
-  programs.skwd-wall.enable = true;
-
   # ── Bluetooth ─────────────────────────────────────────────────────────────
   hardware.bluetooth.enable      = true;
   hardware.bluetooth.powerOnBoot = true;

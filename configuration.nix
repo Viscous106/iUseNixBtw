@@ -47,11 +47,6 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
     (final: prev: {
-      unstable = import inputs.nixpkgs {
-        system = prev.stdenv.hostPlatform.system;
-        config.allowUnfree = true;
-      };
-
       # claude-code from its own pinned input rather than the main snapshot,
       # so the CLI can be bumped on its own cadence. See the long note on the
       # nixpkgs-claude input in flake.nix. Overriding the attr (rather than
@@ -67,7 +62,7 @@
       opera = final.callPackage ./pkgs/opera.nix { };
 
       # Our own Quickshell wallpaper selector; see pkgs/wallpaper-picker.nix and
-      # docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
+      # docs/design/wallpaper-picker.md
       wallpaper-picker = final.callPackage ./pkgs/wallpaper-picker.nix { };
 
       # Animated region selector standing in for slurp in the screenshot and

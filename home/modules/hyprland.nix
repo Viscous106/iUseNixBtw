@@ -84,33 +84,17 @@
     "hypr/lua".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/lua";
 
-    # animations/ — selectable animation presets
-    "hypr/animations".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/animations";
-
-    # top-level state/meta files referenced by lua/monitors.lua + setup scripts.
-    # monitors.conf used to live here too: nwg-displays still writes that file,
-    # but nothing has sourced it since the move to the Lua parser, so it was a
-    # decoy that only ever disagreed with the live layout. Removed 2026-09-21.
-    "hypr/workspaces.conf".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/workspaces.conf";
     # monitors.lua — nwg-displays' Lua output, loaded by require("monitors").
     # Separate from lua/monitors.lua, which owns the event hooks and lid binds.
     "hypr/monitors.lua".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/monitors.lua";
-    # hypr-setup.sh, sync.sh, pkglist.txt and aurlist.txt were removed: all
-    # four were pacman/AUR-based Arch migration leftovers with no meaning on
-    # NixOS (pkglist.txt was a 3223-line `pacman -Qqen` dump).
-
-    # configs/ — mostly dead weight left over from the pre-Lua config (kept
-    # for parity with what's still on Arch), but user-defaults.sh and
-    # wallpaper_effects/ are still live-read by the Lua config/scripts.
-    "hypr/configs".source = config.lib.file.mkOutOfStoreSymlink
-      "/persist/nixos-config/home/hypr/configs";
-
     # scripts/ — live editable without a rebuild
     "hypr/scripts".source = config.lib.file.mkOutOfStoreSymlink
       "/persist/nixos-config/home/hypr/scripts";
+
+    # icons/ — notification artwork used by the scripts
+    "hypr/icons".source = config.lib.file.mkOutOfStoreSymlink
+      "/persist/nixos-config/home/hypr/icons";
 
     # shaders/ — screen mode shaders (ScreenMode.sh)
     "hypr/shaders".source = config.lib.file.mkOutOfStoreSymlink
@@ -118,8 +102,5 @@
   };
 
   # ── Hyprlock screen locker ──────────────────────────────────────────────────
-  programs.hyprlock = {
-    enable      = true;
-    extraConfig = ""; # config managed via xdg.configFile above
-  };
+  programs.hyprlock.enable = true;  # config is hypr/hyprlock.conf above
 }

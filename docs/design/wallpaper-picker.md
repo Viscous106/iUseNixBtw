@@ -1,7 +1,7 @@
 # Wallpaper picker — design
 
 **Date:** 2026-09-05
-**Status:** approved, ready for implementation planning
+**Status:** Implemented
 **Replaces:** `qs-wallpaper-picker` (third-party, `pkgs/qs-wallpaper-picker.nix`)
 
 ## Goal

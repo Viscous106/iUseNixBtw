@@ -12,7 +12,7 @@
 # asuf1204:00-2808:0202-touchpad — and hl.device() accepts an unknown name and
 # returns ok, so a wrong name fails silently with no way to notice.
 
-notif="$HOME/.config/swaync/images/ja.png"
+notif="$HOME/.config/hypr/icons/ja.png"
 STATUS_FILE="$XDG_RUNTIME_DIR/touchpad.status"
 
 DEVICE=$(hyprctl devices | grep -oE "[a-z0-9:_.-]+-touchpad" | head -1)

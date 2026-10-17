@@ -52,7 +52,7 @@
   # ── Solidity / EVM ────────────────────────────────────────────────────────
   # The knobs for the whole EVM toolchain. Retune here rather than inside any
   # project. Option docs live in home/modules/web3.nix; the reasoning behind
-  # the design is in docs/superpowers/specs/2026-09-27-web3-dev-environment-design.md
+  # the design is in docs/design/web3-dev-environment.md
   my.web3 = {
     enable = true;
 
@@ -193,7 +193,7 @@
     pyenv         # python version manager
     pulseaudio    # provides paplay
     bc            # math in shell scripts (Brightness, Volume, etc.)
-    jq            # JSON parsing (WallpaperSelect, Weather, etc.)
+    jq            # JSON parsing (hyprctl -j in scripts)
     imagemagick   # image manipulation (WallpaperEffects)
     swappy        # screenshot annotation (ScreenShot.sh --swappy)
     wl-clipboard  # wl-copy / wl-paste (clipboard manager)

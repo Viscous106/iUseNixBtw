@@ -2,14 +2,7 @@
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
 # For Searching via web browsers
 
-# Shell defaults — mirrors lua/user_defaults.lua (see configs/user-defaults.sh)
-source "$HOME/.config/hypr/configs/user-defaults.sh"
-
-# Check if $term is set correctly
-if [[ -z "$Search_Engine" ]]; then
-    echo "Error: \$Search_Engine is not set in the configuration file!"
-    exit 1
-fi
+Search_Engine="https://www.google.com/search?q={}"
 
 # Rofi theme and message
 rofi_theme="$HOME/.config/rofi/config-search.rasi"

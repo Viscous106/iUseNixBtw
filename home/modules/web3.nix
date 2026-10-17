@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 # ── Solidity / EVM development environment ───────────────────────────────────
-# Spec: docs/superpowers/specs/2026-09-27-web3-dev-environment-design.md
+# Spec: docs/design/web3-dev-environment.md
 #
 # This owns everything Solidity-related that used to live as a bare package list
 # in dev-toolchains.nix. It is the one options-driven module in this config

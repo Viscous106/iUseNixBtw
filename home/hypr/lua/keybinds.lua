@@ -53,7 +53,7 @@ hl.bind(mod .. " + U", hl.dsp.workspace.toggle_special())
 -- startup_apps.lua) and renders it with fuzzel.
 hl.bind(mod .. " + V", hl.dsp.exec_cmd("caelestia clipboard"))
 -- Wallpaper picker: our own Quickshell skewed-carousel selector.
--- See docs/superpowers/specs/2026-09-05-wallpaper-picker-design.md
+-- See docs/design/wallpaper-picker.md
 hl.bind(mod .. " + W", hl.dsp.exec_cmd("wallpaper-picker"))
 -- move focus
 hl.bind(mod .. " + left",  hl.dsp.focus({ direction = "l" }))

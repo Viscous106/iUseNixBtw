@@ -1,10 +1,3 @@
-export ZSH="$HOME/.config/zsh/ohmyzsh"
-export ZSH_CUSTOM="$ZSH/custom"
-# BROWSER is set by home-manager (home/modules/zen.nix: BROWSER=zen-beta,
-# the zen-browser flake's actual binary name) — don't override it here.
-export fpath=(~/.zsh/completions $fpath)
-
-
 export PATH="$HOME/.cargo/bin:$PATH" # cargo rust
 
 export PYENV_ROOT="$HOME/.pyenv" # python env

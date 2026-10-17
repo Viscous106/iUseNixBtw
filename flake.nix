@@ -90,20 +90,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # skwd-wall — Quickshell wallpaper selector (SUPER+W): images, video and
-    # Wallpaper Engine scenes, colour sorting, Wallhaven browser, matugen.
-    # ref=main because the default branch (v2) has a flake input pointing at a
-    # `nix` branch that does not exist on the GitHub mirror, so it cannot resolve.
-    # Both nixpkgs follows matter: left alone it pins its own nixpkgs AND
-    # quickshell's (from 2026-01-11), which pulled a second full Qt stack —
-    # 211 derivations to build and 2.8 GiB unpacked. Its quickshell is the same
-    # revision caelestia already uses (2d3b3e9), so sharing our snapshot lets the
-    # two share almost everything.
-    skwd-wall = {
-      url = "git+https://github.com/liixini/skwd-wall?ref=main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.inputs.nixpkgs.follows = "nixpkgs";
-    };
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
     };
@@ -138,7 +124,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, skwd-wall, codex-cli-nix, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, zen-browser, antigravity, hyprland, codex-cli-nix, ... }@inputs:
   let
     system = "x86_64-linux";
 
@@ -170,7 +156,6 @@
       ./modules/vr.nix
 
       hyprland.nixosModules.default
-      skwd-wall.nixosModules.default
 
       home-manager.nixosModules.home-manager
       {

@@ -86,19 +86,7 @@
     geckodriver
     playwright  # = playwright-driver: bundles the CLI + managed browsers
 
-    # ── Android SDK / tooling ────────────────────────────────────────────
-    # Deliberately NOT setting up pkgs.androidenv.androidPkgs.androidsdk
-    # here (the flat android-sdk / android-sdk-build-tools names from Arch
-    # don't exist in nixpkgs — that's a composition you build by picking
-    # exact platform/build-tools versions, not a package lookup). More
-    # importantly: home/zsh/scripts/android-spawn.sh already hardcodes
-    # ANDROID_SDK_ROOT=/opt/android-sdk and launches
-    # /opt/android-sdk/emulator/emulator directly, which is an existing,
-    # working, non-Nix SDK install this system already depends on (see the
-    # CakePhone AVD setup from prior work). Adding a parallel Nix-built SDK
-    # here risks a second, conflicting ANDROID_SDK_ROOT and duplicated
-    # multi-GB downloads for no benefit. Only adding the standalone adb/
-    # fastboot CLI, which doesn't touch that setup:
+    # ── Android ──────────────────────────────────────────────────────────
     android-tools  # adb, fastboot (standalone; not the full licensed SDK)
   ];
 }

@@ -380,10 +380,7 @@
       # the background layer. With caelestia also painting there, the two fight
       # over the same surface. awww/mpvpaper wins ownership because it is the
       # only one of the two that can do video at all.
-      # Consequence: the wallpaper no longer drives caelestia's Material colour
-      # scheme. Use `caelestia scheme set …` by hand, or set
-      # enableDynamicColors in the picker's Settings.qml to hand that job to
-      # matugen (already on the picker's PATH).
+      # So the wallpaper does not drive the colour scheme; use `caelestia scheme set`.
       background.wallpaperEnabled = false;
 
       # SUPER+SHIFT+T toggles the bar via `drawers toggle bar`, which flips

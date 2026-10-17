@@ -37,10 +37,8 @@ hl.on("hyprland.start", function()
   -- NixOS ships nixos-fake-graphical-session.target for exactly this case: it is
   -- BindsTo=graphical-session.target, so starting it activates the target without
   -- adopting any of the hyprland-session.target machinery systemd.enable = false
-  -- deliberately avoids. This starts no extra daemons — nothing here is actually
-  -- enabled into the target (skwd-daemon.service ships an [Install] WantedBy= but
-  -- was never `systemctl --user enable`d, and there is no .wants directory), so
-  -- the only effect is that the portals can finally D-Bus activate on demand.
+  -- deliberately avoids. Nothing is enabled into the target, so the only effect
+  -- is that the portals can D-Bus activate on demand.
   -- Must run AFTER the two env lines above: the portal backend reads
   -- HYPRLAND_INSTANCE_SIGNATURE from the activation environment to find Hyprland.
   hl.exec_cmd("systemctl --user start nixos-fake-graphical-session.target")

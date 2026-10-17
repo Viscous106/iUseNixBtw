@@ -6,17 +6,6 @@
   xdg.configFile."rofi".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/rofi";
 
-  # ── Swaync config tree — kept for its ICON ASSETS ONLY ────────────────────
-  # The swaynotificationcenter daemon itself is gone: Caelestia owns
-  # org.freedesktop.Notifications. This directory stays because fifteen of the
-  # Hypr scripts read their notification artwork out of it — Volume.sh,
-  # BrightnessKbd.sh, ScreenShot.sh, WallpaperSelect.sh, AirplaneMode.sh and
-  # friends all do iDIR="$HOME/.config/swaync/icons" (or .../images). Deleting
-  # this tree alongside the package would silently blank the volume, mic and
-  # brightness OSD icons.
-  xdg.configFile."swaync".source = config.lib.file.mkOutOfStoreSymlink
-    "/persist/nixos-config/home/swaync";
-
   # ── Tmux ──────────────────────────────────────────────────────────────────
   xdg.configFile."tmux".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/tmux";
