@@ -352,6 +352,19 @@
       # (favs, scene, animeGirls, …) are all picked up from this one path.
       paths.wallpaperDir = "~/Pictures/wallpapers";
 
+      # Caelestia is the only idle manager (no hypridle). Upstream defaults, except
+      # 600 s is plain suspend: upstream's suspend-then-hibernate needs a resume
+      # offset for the btrfs swapfile, which is not configured.
+      general.idle = {
+        lockBeforeSleep  = true;
+        inhibitWhenAudio = true;
+        timeouts = [
+          { timeout = 180; idleAction = "lock"; }
+          { timeout = 300; idleAction = "dpms off"; returnAction = "dpms on"; }
+          { timeout = 600; idleAction = [ "suspend" ]; }
+        ];
+      };
+
       # Upstream defaults dashboard.showOnHover to true, which makes the whole
       # top edge of the screen a hover trigger: moving the pointer up to reach a
       # window's own top-right controls slides the dashboard down over them, so

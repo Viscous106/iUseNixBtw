@@ -8,7 +8,6 @@
     ./modules/atuin.nix
     ./modules/neovim.nix
     ./modules/hyprland.nix
-    ./modules/hypridle.nix
     ./modules/caelestia-quickshell.nix
     ./modules/extras.nix
     ./modules/git.nix

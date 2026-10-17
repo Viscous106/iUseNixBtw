@@ -17,30 +17,6 @@
   xdg.configFile."swaync".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/swaync";
 
-  # hypridle is launched solely via exec-once (startup_apps.lua), matching the
-  # original Arch/JaKooLit design (no systemd unit involved, on Arch). The
-  # package ships its own bundled systemd --user unit
-  # (share/systemd/user/hypridle.service)
-  # that gets auto-discovered purely because the package sits in home.packages
-  # / environment.systemPackages -- independent of services.hypridle.enable
-  # (set false in hyprland.nix) or any home-manager option for swaync (there
-  # is none). If graphical-session.target is ever activated (now that
-  # wayland.windowManager.hyprland.systemd.enable is false, it normally
-  # isn't), these bundled units would race the exec-once instances: whichever
-  # starts second dies (swaync errors "An instance ... is already running!")
-  # and crash-loops to start-limit-hit. Mask both (symlink to /dev/null) the
-  # same way `systemctl --user mask` would, via an activation script --
-  # home-manager's xdg.configFile can't express a literal "/dev/null" source
-  # (Nix's pure-evaluation mode forbids reading absolute host paths at eval
-  # time), and systemd.user.services has no generic mask-an-external-unit
-  # option.
-  home.activation.maskDuplicateSessionUnits = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "$HOME/.config/systemd/user"
-    # The swaync line went with the swaynotificationcenter package: no package
-    # in the profile means no bundled unit to race, so nothing left to mask.
-    ln -sf /dev/null "$HOME/.config/systemd/user/hypridle.service"
-  '';
-
   # ── Tmux ──────────────────────────────────────────────────────────────────
   xdg.configFile."tmux".source = config.lib.file.mkOutOfStoreSymlink
     "/persist/nixos-config/home/tmux";

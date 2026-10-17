@@ -67,26 +67,14 @@ hl.on("hyprland.start", function()
   -- path instead and is the one that actually works here.
   hl.exec_cmd(scriptsDir .. "/Polkit-NixOS.sh")
 
-  -- tray / network / notifications / widgets
+  -- tray applets (idle/lock is handled by caelestia: general.idle in caelestia-quickshell.nix)
   hl.exec_cmd("nm-applet --indicator")
-  hl.exec_cmd("nm-tray")
-  -- swaync disabled: caelestia ships its own notification daemon, and whichever
-  -- process claims org.freedesktop.Notifications first wins — leaving swaync
-  -- here means caelestia's notification centre silently receives nothing.
-  -- hl.exec_cmd("swaync")
-  -- StartAGS.sh does not exist in this repo (it was never carried over from the
-  -- Arch dots), so this line has always been a no-op. Left commented rather than
-  -- deleted to keep the diff against the upstream dots readable.
-  -- hl.exec_cmd(scriptsDir .. "/StartAGS.sh")
   hl.exec_cmd("kdeconnect")
   hl.exec_cmd("blueman-applet")
 
   -- clipboard history
   hl.exec_cmd("wl-paste --type text --watch cliphist store")
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
-
-  -- idle daemon (hyprlock) — hypridle keeps its own .conf
-  hl.exec_cmd("hypridle -c " .. os.getenv("HOME") .. "/.config/hypr/configs/hypridle.conf")
 
   -- convertible: accelerometer rotation + tablet-mode input muting.
   -- `init` first, so the session always starts unrotated with the keyboard live

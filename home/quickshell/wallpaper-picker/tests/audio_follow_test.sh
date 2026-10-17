@@ -22,11 +22,12 @@ check() { # check <label> <expected> <actual>
 # Desktop state the hyprctl stub reports.
 echo 1 > "$work/ws_windows"
 echo 0xabc > "$work/active"
+echo HDMI-A-1 > "$work/ws_monitor"
 export HYPRCTL_BIN="$work/hyprctl"
 cat > "$HYPRCTL_BIN" <<STUB
 #!/usr/bin/env bash
 case "\$2" in
-  activeworkspace) printf '{"id":1,"windows":%s}' "\$(cat "$work/ws_windows")" ;;
+  activeworkspace) printf '{"id":1,"windows":%s,"monitor":"%s"}' "\$(cat "$work/ws_windows")" "\$(cat "$work/ws_monitor")" ;;
   activewindow)    a="\$(cat "$work/active")"
                    if [ -n "\$a" ]; then printf '{"address":"%s"}' "\$a"; else printf '{}'; fi ;;
 esac
@@ -52,7 +53,7 @@ last_mute() {
 }
 sends() { grep -c '"mute"' "$work/mpv.log"; }
 
-"$SUT" "$mpv" 2>"$work/err" &
+"$SUT" "$mpv" HDMI-A-1 2>"$work/err" &
 follow=$!; pids+=($follow)
 
 check "window on workspace: muted"  "true"  "$(last_mute)"
@@ -78,6 +79,18 @@ check "last window closed: unmuted" "false" "$(last_mute)"
 echo 0xfff > "$work/active"             # special workspace over an empty one
 echo "activespecialv2>>-98,special:magic,HDMI-A-1" >&4
 check "focused window on special workspace: muted" "true" "$(last_mute)"
+
+: > "$work/active"
+echo "activespecialv2>>,,HDMI-A-1" >&4
+check "special closed: unmuted" "false" "$(last_mute)"
+
+echo eDP-1 > "$work/ws_monitor"          # other monitor's empty workspace
+echo "focusedmon>>eDP-1,4" >&4
+check "focus on another monitor's empty workspace: muted" "true" "$(last_mute)"
+
+echo HDMI-A-1 > "$work/ws_monitor"
+echo "focusedmon>>HDMI-A-1,1" >&4
+check "focus back on its own empty workspace: unmuted" "false" "$(last_mute)"
 
 # mpv gone (next apply killed mpvpaper): follower must exit by itself.
 kill "${pids[0]}" 2>/dev/null; rm -f "$mpv"

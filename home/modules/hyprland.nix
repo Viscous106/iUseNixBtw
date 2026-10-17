@@ -75,7 +75,6 @@
         (builtins.readFile ../hypr/hyprlock.conf);
       force = true;
     };
-    "hypr/hypridle.conf" = { source = ../hypr/hypridle.conf; force = true; };
 
     # hyprland.lua — entry point; requires("lua.<module>") resolves relative to it
     "hypr/hyprland.lua".source = config.lib.file.mkOutOfStoreSymlink
@@ -123,15 +122,4 @@
     enable      = true;
     extraConfig = ""; # config managed via xdg.configFile above
   };
-
-  # ── Hypridle idle daemon ────────────────────────────────────────────────────
-  # Deliberately NOT using services.hypridle. Its unit is WantedBy/PartOf
-  # graphical-session.target. That target now DOES activate (startup_apps.lua
-  # starts nixos-fake-graphical-session.target so the portals can come up), so
-  # enabling this would no longer merely fail — it would run a
-  # SECOND hypridle alongside the one lua/startup_apps.lua execs directly with
-  # `hypridle -c ~/.config/hypr/configs/hypridle.conf`. Arch runs exactly one
-  # hypridle, started from the Lua config; this matches that.
-  # The package itself is installed via modules/desktop.nix systemPackages.
-  services.hypridle.enable = false;
 }

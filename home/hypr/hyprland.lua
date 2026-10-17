@@ -21,8 +21,3 @@ require("lua.monitors")
 -- select. Resolves to ~/.config/hypr/monitors.lua via package.path.
 require("monitors")
 
--- extras that lived directly in hyprland.conf:
--- exec-once = $HOME/.config/hypr/initial-boot.sh  (kept for parity; script is optional)
-hl.on("hyprland.start", function()
-  hl.exec_cmd(HOME .. "/.config/hypr/initial-boot.sh")
-end)

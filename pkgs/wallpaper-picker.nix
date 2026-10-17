@@ -11,12 +11,12 @@
 # keybind the process inherits Hyprland's PATH, which does not reliably carry
 # quickshell/awww/mpvpaper/jq — hence the explicit wrapping.
 #
-# hyprctl, which apply.sh and audio-follow.sh also call (to pick a monitor for
-# apply_video, and to follow focus for a sound-enabled video), is
+# hyprctl, which this wrapper, apply.sh and audio-follow.sh also call (to find
+# the focused monitor, and to follow focus for a sound-enabled video), is
 # deliberately NOT in runtimeInputs: writeShellApplication's generated wrapper
 # PREFIXES this closure onto PATH rather than replacing it, so hyprctl still
 # resolves from the session PATH where Hyprland already put it. If it is ever
-# unavailable there, apply_video falls back to mon="*".
+# unavailable there, wallpapers go on every monitor (see apply.sh).
 {
   lib,
   writeShellApplication,
@@ -67,6 +67,12 @@ writeShellApplication {
     # exported here directly instead — the smaller change for a single plain
     # env var, versus restructuring this derivation just to gain makeWrapper.
     export QT_PLUGIN_PATH="${qt6.qtimageformats}/lib/qt-6/plugins''${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+
+    # Wallpapers are per monitor: pin this session to the one focused when the
+    # picker was opened, before the overlay exists and can affect focus.
+    # Empty (no hyprctl) is fine — apply.sh then resolves it per call.
+    WP_OUTPUT="$(hyprctl -j monitors 2>/dev/null | jq -r '.[] | select(.focused) | .name' 2>/dev/null | head -1 || true)"
+    export WP_OUTPUT
 
     exec quickshell -p "$CONFIG_DIR"
   '';

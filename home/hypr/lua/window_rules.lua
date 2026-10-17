@@ -41,10 +41,6 @@ hl.window_rule({
   tag = "+browser",
 })
 hl.window_rule({
-  match = { class = "^(swaync-control-center|swaync-notification-window|swaync-client|class)$" },
-  tag = "+notif",
-})
-hl.window_rule({
   match = { title = "^(KooL Quick Cheat Sheet)$" },
   tag = "+KooL_Cheat",
 })

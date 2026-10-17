@@ -85,9 +85,8 @@
     # above it in startup_apps.lua, provides the same NetworkManager tray icon.
     blueman
 
-    # Screen locker + idle daemon
+    # Screen locker (idle is handled by caelestia)
     hyprlock
-    hypridle
 
     # Polkit agent (GUI auth popups)
     polkit_gnome

@@ -12,6 +12,12 @@ Item {
 
     property string script: Quickshell.env("HOME") + "/.config/quickshell/wallpaper-picker/apply.sh"
 
+    // Monitor every call targets — previews, applies, the capture and the
+    // revert alike, so the whole session stays on one monitor even if focus
+    // moves while the picker is open. "" lets apply.sh use the focused one.
+    property string output: ""
+    readonly property var _outputArgs: output !== "" ? ["--output", output] : []
+
     // Wallpaper in place when the picker opened, so Escape can put it back.
     readonly property string original: _original
     property string _original: ""
@@ -66,7 +72,8 @@ Item {
     Process {
         id: currentProc
         // $(...) strips trailing newlines, so this is exactly two lines.
-        command: ["sh", "-c", 'printf "%s\\n" "$("$0" --current)" "$("$0" --current-audio)"', root.script]
+        command: ["sh", "-c", 'printf "%s\\n" "$("$0" --current "$@")" "$("$0" --current-audio "$@")"',
+                  root.script].concat(root._outputArgs)
         stdout: StdioCollector {
             onStreamFinished: {
                 const lines = text.split("\n");
@@ -101,7 +108,7 @@ Item {
     // is indistinguishable from the apply the user is waiting on.
     function _run(path, sound) {
         root._queue = root._queue.concat([path]);
-        proc.command = sound ? [root.script, path, "--sound"] : [root.script, path];
+        proc.command = [root.script, path].concat(sound ? ["--sound"] : [], root._outputArgs);
         proc.running = true;
     }
 

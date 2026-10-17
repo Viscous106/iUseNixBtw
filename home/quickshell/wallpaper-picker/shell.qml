@@ -10,7 +10,10 @@ import Quickshell.Wayland
 ShellRoot {
     Theme   { id: appTheme }
     Library { id: lib }
-    Applier { id: applier }
+    // The monitor this picker is for: the one focused when Meta+W was
+    // pressed, resolved once by the wrapper (pkgs/wallpaper-picker.nix) so
+    // moving the mouse to the other monitor mid-pick can't retarget it.
+    Applier { id: applier; output: Quickshell.env("WP_OUTPUT") || "" }
 
     Component.onCompleted: applier.captureOriginal()
 
@@ -26,6 +29,18 @@ ShellRoot {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
         WlrLayershell.namespace: "wallpaper-picker"
+
+        // Open on the monitor being changed. Assigned only on a match: left
+        // alone, the layer surface lands on the focused monitor anyway, which
+        // is the right fallback when no monitor was named.
+        Component.onCompleted: {
+            const all = Quickshell.screens;
+            for (let i = 0; i < all.length; i++)
+                if (all[i].name === applier.output) {
+                    win.screen = all[i];
+                    break;
+                }
+        }
 
         // Dim the desktop, but leave it visible — the point of preview-on-pause
         // is judging the wallpaper behind this window.
@@ -360,7 +375,8 @@ ShellRoot {
                     }
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: (lib.breadcrumb !== "" ? lib.breadcrumb : "wallpapers")
+                        text: (applier.output !== "" ? applier.output + " · " : "")
+                              + (lib.breadcrumb !== "" ? lib.breadcrumb : "wallpapers")
                               // With a filter active, Backspace deletes a
                               // character rather than going up a level.
                               + " · " + (lib.count > 0 ? (lib.index + 1) + " of " + lib.count

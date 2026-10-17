@@ -70,8 +70,8 @@ mkdir -p "$WORK/lib_root_slash/child"
 #   WP_TEST_STUB2 - answers --current SLOWLY with a known path, logs other
 #                   invocations to WP_TEST_LOG2
 #   WP_TEST_STUB3 - answers --current / --current-audio with a video that
-#                   had sound, logs every other invocation's full argv to
-#                   WP_TEST_LOG3
+#                   had sound -- but only when asked about monitor eDP-1 --
+#                   and logs every other invocation's full argv to WP_TEST_LOG3
 #   WP_TEST_LOG / WP_TEST_LOG2 / WP_TEST_LOG3 - the log files those stubs write to
 # ---------------------------------------------------------------------------
 stub "$WORK/stub1.sh" \
@@ -89,9 +89,10 @@ stub "$WORK/stub2.sh" \
   'exit 0'
 
 stub "$WORK/stub3.sh" \
-  'case "${1-}" in' \
-  '  --current)       echo "/tmp/original.mp4"; exit 0 ;;' \
-  '  --current-audio) echo on; exit 0 ;;' \
+  'case "$*" in' \
+  '  "--current --output eDP-1")       echo "/tmp/original.mp4"; exit 0 ;;' \
+  '  "--current-audio --output eDP-1") echo on; exit 0 ;;' \
+  '  --current*)                       echo "/tmp/wrong-monitor.mp4"; exit 0 ;;' \
   'esac' \
   'printf '"'"'%s\n'"'"' "$*" >> "$WP_TEST_LOG3"' \
   'exit 0'

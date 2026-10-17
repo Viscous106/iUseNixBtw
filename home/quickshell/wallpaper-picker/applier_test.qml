@@ -35,10 +35,10 @@ ShellRoot {
     // guaranteed to be called while the capture is still in flight.
     Applier { id: app2; script: Quickshell.env("WP_TEST_STUB2") }
 
-    // --- Test 3: sound reaches apply.sh, and a revert restores it. ---
+    // --- Test 3: sound and monitor reach apply.sh; a revert restores both. ---
 
-    // A stub whose original is a video that was playing WITH sound.
-    Applier { id: app3; script: Quickshell.env("WP_TEST_STUB3") }
+    // A stub whose original ON eDP-1 is a video that was playing WITH sound.
+    Applier { id: app3; script: Quickshell.env("WP_TEST_STUB3"); output: "eDP-1" }
 
     Component.onCompleted: {
         // Three rapid schedules must collapse to exactly one apply, of the last path.
@@ -90,8 +90,9 @@ ShellRoot {
                 poll3.stop();
                 const log = lastText3.trim().split("\n").filter(l => l !== "");
                 check("sound apply + revert ran", "2", String(log.length));
-                check("applyNow(sound) passes --sound", "/tmp/new.mp4 --sound", log[0]);
-                check("revert restores original sound", "/tmp/original.mp4 --sound", log[1]);
+                check("applyNow passes --sound and --output", "/tmp/new.mp4 --sound --output eDP-1", log[0]);
+                check("revert restores that monitor's original, with sound",
+                      "/tmp/original.mp4 --sound --output eDP-1", log[1]);
                 soundDone = true;
                 maybeFinish();
             }

@@ -12,7 +12,12 @@ export AWWW_BIN="$work/awww-stub"
 export MPVPAPER_BIN="$work/mpvpaper-stub"
 # Overridden too, so stop_video's `pkill -f $FOLLOW` can never hit the real one.
 export WP_FOLLOW_BIN="$work/follow-stub"
-export WP_MPV_SOCK="$work/mpv.sock"
+export WP_MPV_SOCK_DIR="$work"
+# hyprctl reports whatever monitors.json says; with no such file it fails, which
+# is the "monitor unknown → every monitor" fallback the first half tests.
+export HYPRCTL_BIN="$work/hyprctl-stub"
+printf '#!/usr/bin/env bash\n[ "$2" = monitors ] && cat "%s/monitors.json" 2>/dev/null\n' "$work" > "$HYPRCTL_BIN"
+chmod +x "$HYPRCTL_BIN"
 # apply.sh only checks socat exists (the follower is stubbed), so any binary does.
 export SOCAT_BIN=true
 printf '#!/usr/bin/env bash\necho "awww $*" >> "%s/calls"\n' "$work" > "$AWWW_BIN"
@@ -59,8 +64,8 @@ check "muted video starts no follower" "0" "$(grep -c '^follow ' "$work/calls" 2
 "$SUT" "$vid" --sound >/dev/null 2>&1; settle
 check "sound video records audio on"  "on" "$(cat "$WP_STATE_DIR/audio" 2>/dev/null)"
 check "sound video starts muted with IPC" "1" \
-  "$(grep -c "^mpvpaper -o loop mute=yes input-ipc-server=$WP_MPV_SOCK " "$work/calls" 2>/dev/null || echo 0)"
-check "sound video starts follower on the socket" "follow $WP_MPV_SOCK" "$(grep '^follow ' "$work/calls" 2>/dev/null)"
+  "$(grep -c "^mpvpaper -o loop mute=yes input-ipc-server=$work/wallpaper-picker-mpv-all.sock \\* " "$work/calls" 2>/dev/null || echo 0)"
+check "sound video starts follower on the socket" "follow $work/wallpaper-picker-mpv-all.sock" "$(grep '^follow ' "$work/calls" 2>/dev/null)"
 check "--current-audio prints on" "on" "$("$SUT" --current-audio)"
 
 : > "$work/calls"
@@ -87,6 +92,52 @@ check "unknown second arg exits 1" "1" "$?"
 # State written before the audio file existed reads as muted.
 rm -f "$WP_STATE_DIR/audio"
 check "--current-audio defaults off" "off" "$("$SUT" --current-audio)"
+
+# ── Per monitor ────────────────────────────────────────────────────────────
+printf '[{"name":"eDP-1","focused":false},{"name":"HDMI-A-1","focused":true}]' > "$work/monitors.json"
+vid2="$work/other.webm"; : > "$vid2"
+mstate() { cat "$WP_STATE_DIR/outputs/$1/$2" 2>/dev/null; }
+
+: > "$work/calls"
+"$SUT" "$img" >/dev/null 2>&1
+check "no --output targets focused monitor" "$img" "$(mstate HDMI-A-1 current)"
+check "image only on that monitor" "1" "$(grep -c '^awww img -o HDMI-A-1 ' "$work/calls" 2>/dev/null || echo 0)"
+check "other monitor untouched" "" "$(mstate eDP-1 current)"
+
+: > "$work/calls"
+"$SUT" --output eDP-1 "$vid2" --sound >/dev/null 2>&1; settle
+check "--output records under that monitor" "$vid2" "$(mstate eDP-1 current)"
+check "--output records its audio" "on" "$(mstate eDP-1 audio)"
+check "video plays only on that monitor" "1" \
+  "$(grep -c "^mpvpaper -o loop mute=yes input-ipc-server=$work/wallpaper-picker-mpv-eDP-1.sock eDP-1 $vid2" "$work/calls" 2>/dev/null || echo 0)"
+check "follower watches that monitor" "follow $work/wallpaper-picker-mpv-eDP-1.sock eDP-1" "$(grep '^follow ' "$work/calls")"
+check "focused monitor kept its wallpaper" "$img" "$(mstate HDMI-A-1 current)"
+
+check "--current is per monitor (focused)" "$img"  "$("$SUT" --current)"
+check "--current is per monitor (--output)" "$vid2" "$("$SUT" --output eDP-1 --current)"
+check "--current-audio is per monitor" "off on" \
+  "$("$SUT" --current-audio) $("$SUT" --current-audio --output eDP-1)"
+
+: > "$work/calls"
+"$SUT" --restore >/dev/null 2>&1; settle
+check "restore: image back on its monitor" "1" "$(grep -c '^awww img -o HDMI-A-1 .*pic.png' "$work/calls" 2>/dev/null || echo 0)"
+check "restore: video back on its monitor" "1" "$(grep -c "^mpvpaper .* eDP-1 $vid2" "$work/calls" 2>/dev/null || echo 0)"
+check "restore: sound kept per monitor" "1" "$(grep -c '^follow .* eDP-1$' "$work/calls" 2>/dev/null || echo 0)"
+
+# A monitor with nothing of its own falls back to the old every-monitor state.
+printf '[{"name":"DP-9","focused":true}]' > "$work/monitors.json"
+printf '%s' "$img" > "$WP_STATE_DIR/current"
+printf 'image' > "$WP_STATE_DIR/kind"
+check "new monitor inherits old state" "$img" "$("$SUT" --current)"
+
+# An every-monitor apply (monitor unknown) overrides every monitor's own.
+rm -f "$work/monitors.json"
+"$SUT" "$img" >/dev/null 2>&1
+check "unknown-monitor apply clears per-monitor state" "0" \
+  "$([ -d "$WP_STATE_DIR/outputs" ] && echo 1 || echo 0)"
+
+"$SUT" --output >/dev/null 2>&1
+check "--output without a name exits 1" "1" "$?"
 
 "$SUT" "$work/missing.png" >/dev/null 2>&1
 check "missing file exits 1" "1" "$?"

@@ -1,42 +1,23 @@
 #!/run/current-system/sw/bin/bash
-# Hyprlock wallpaper sync script
-# Automatically uses current awww wallpaper for lockscreen
+# hyprlock with the focused monitor's current wallpaper as background (SUPER+L).
+# ~/.config/hypr/hyprlock.conf is a read-only store file, so a copy with the
+# path swapped in is written to $XDG_RUNTIME_DIR and passed with -c.
 
-HYPRLOCK_CONF="$HOME/.config/hypr/hyprlock.conf"
-CACHE_DIR="$HOME/.cache/hyprlock"
-LOG_FILE="$CACHE_DIR/wallpaper_sync.log"
+pidof hyprlock >/dev/null && exit 0
 
-mkdir -p "$CACHE_DIR"
+conf="$HOME/.config/hypr/hyprlock.conf"
+runtime_conf="${XDG_RUNTIME_DIR:-/tmp}/hyprlock.conf"
+state="$HOME/.local/state/wallpaper-picker"
 
-echo "=== Wallpaper sync at $(date) ===" >> "$LOG_FILE"
+mon=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused) | .name')
+read_state() {
+  if [ -f "$state/outputs/$mon/$1" ]; then cat "$state/outputs/$mon/$1"; else cat "$state/$1" 2>/dev/null; fi
+}
 
-# Get current wallpaper from awww
-WALLPAPER=""
-if command -v awww &> /dev/null; then
-    # Parse awww query to get current wallpaper
-    SWWW_OUTPUT=$(awww query 2>/dev/null | head -1)
-    if [[ "$SWWW_OUTPUT" =~ image:\ (.+)$ ]]; then
-        WALLPAPER="${BASH_REMATCH[1]}"
-        echo "Found wallpaper: $WALLPAPER" >> "$LOG_FILE"
-    fi
+wallpaper=$(read_state current)
+# hyprlock cannot draw videos; keep hyprlock.conf's own default for those.
+if [ "$(read_state kind)" = image ] && [ -f "$wallpaper" ]; then
+  sed "s|^    path = .*|    path = $wallpaper|" "$conf" > "$runtime_conf"
+  exec hyprlock -c "$runtime_conf"
 fi
-
-# Fallback to default if no wallpaper found
-if [ -z "$WALLPAPER" ] || [ ! -f "$WALLPAPER" ]; then
-    WALLPAPER="$HOME/Pictures/wallpapers/favs/swiss-alps-moewalls-com.mp4"
-    echo "Using fallback: $WALLPAPER" >> "$LOG_FILE"
-fi
-
-# Update hyprlock config with current wallpaper
-if [ -f "$HYPRLOCK_CONF" ]; then
-    # Create backup
-    cp "$HYPRLOCK_CONF" "$CACHE_DIR/hyprlock.conf.bak"
-    
-    # Update path line in background section
-    sed -i "s|^    path = .*|    path = $WALLPAPER|" "$HYPRLOCK_CONF"
-    echo "Updated hyprlock config" >> "$LOG_FILE"
-fi
-
-# Launch hyprlock
-echo "Launching hyprlock..." >> "$LOG_FILE"
 exec hyprlock
