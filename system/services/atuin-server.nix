@@ -15,7 +15,7 @@
     openFirewall = false;
 
     # TEMPORARY: set to false once both hosts have run `atuin register`.
-    openRegistration = true;
+    openRegistration = false;
 
     # Default 8192 silently drops longer commands.
     maxHistoryLength = 65536;
