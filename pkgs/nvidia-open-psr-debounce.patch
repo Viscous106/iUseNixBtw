@@ -1,0 +1,81 @@
+--- a/kernel-open/nvidia/nv-acpi.c
++++ b/kernel-open/nvidia/nv-acpi.c
+@@ -51,6 +51,19 @@
+ static acpi_handle psr_device_handle = NULL;
+ static nv_acpi_t  *psr_nv_acpi_object = NULL;
+ 
++/*
++ * Debounce for _PSR notifications. A flaky adapter/EC can toggle the AC state
++ * ~10 times a second; handling every one in RM races nvidia-drm init and has
++ * been seen to deadlock boot (rmapiLock vs console_lock). Instead, (re)arm a
++ * delayed work on each event and only tell RM once the source has been quiet
++ * for NV_ACPI_PSR_DEBOUNCE_MS. The work owns its own stack so it never touches
++ * psr_nv_acpi_object, which is freed in nv_acpi_methods_uninit().
++ */
++#define NV_ACPI_PSR_DEBOUNCE_MS 2000
++static void nv_acpi_powersource_debounce_work(struct work_struct *);
++static DECLARE_DELAYED_WORK(psr_debounce_work, nv_acpi_powersource_debounce_work);
++static nvidia_stack_t *psr_debounce_sp = NULL;
++
+ static NvBool battery_present = NV_FALSE;
+ 
+ #define BIX_BATTERY_TECHNOLOGY_OFFSET 0x4
+@@ -132,18 +145,24 @@
+      * This function will handle acpi events from the linux kernel, used
+      * to detect notifications from Power Source device
+      */
+-    nv_acpi_t *pNvAcpiObject = data;
+-    u32 ac_plugged = 0;
+-
+     if (event_type == ACPI_POWER_SOURCE_CHANGE_EVENT || event_type == ACPI_POWER_SOURCE_BUS_CHANGE_EVENT)
+     {
+-        if (nv_acpi_get_powersource(&ac_plugged) != NV_OK)
+-            return;
+-
+-        rm_power_source_change_event(pNvAcpiObject->sp, !ac_plugged);
++        // Restart the quiet-period timer; RM is notified from the work below.
++        cancel_delayed_work(&psr_debounce_work);
++        schedule_delayed_work(&psr_debounce_work, msecs_to_jiffies(NV_ACPI_PSR_DEBOUNCE_MS));
+     }
+ }
+ 
++static void nv_acpi_powersource_debounce_work(struct work_struct *work)
++{
++    u32 ac_plugged = 0;
++
++    if (nv_acpi_get_powersource(&ac_plugged) != NV_OK)
++        return;
++
++    rm_power_source_change_event(psr_debounce_sp, !ac_plugged);
++}
++
+ static void nv_acpi_nvpcf_event(acpi_handle handle, u32 event_type, void *data)
+ {
+     nv_acpi_t *pNvAcpiObject = data;
+@@ -319,7 +338,8 @@
+         // Since _PSR is not a per-GPU construct we only need to register a
+         // single notifier for the _PSR event. Skip registration for subsequent
+         // devices
+-        if (psr_nv_acpi_object == NULL)
++        if (psr_nv_acpi_object == NULL &&
++            (psr_debounce_sp != NULL || nv_kmem_cache_alloc_stack(&psr_debounce_sp) == 0))
+         {
+             psr_nv_acpi_object = nv_install_notifier(psr_device_handle, nv_acpi_powersource_hotplug_event, NULL);
+         }
+@@ -381,6 +401,16 @@
+         psr_nv_acpi_object = NULL;
+     }
+ 
++    // The notify handler is removed (acpi_remove_notify_handler waits for
++    // in-flight notifies), so nothing can re-arm the work: flush it, then
++    // free its stack.
++    cancel_delayed_work_sync(&psr_debounce_work);
++    if (psr_debounce_sp != NULL)
++    {
++        nv_kmem_cache_free_stack(psr_debounce_sp);
++        psr_debounce_sp = NULL;
++    }
++
+     if (nvpcf_nv_acpi_object != NULL)
+     {
+         nv_uninstall_notifier(nvpcf_nv_acpi_object, nv_acpi_nvpcf_event);

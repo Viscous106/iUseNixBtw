@@ -21,7 +21,21 @@
     # modules; nvidia recommends `open` for Turing and newer.
     open = true;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # Open kernel module patched to debounce AC power-source (_PSR) ACPI
+    # notifications. On 2026-10-17 the AC adapter flapped online/offline ~10×/s
+    # (100k+ events per session); every flip called rm_power_source_change_event,
+    # which raced nvidia-drm init at boot and deadlocked it ("Assertion failed:
+    # !rmapiLockIsOwner()", systemd:1 hung on console_lock) — three boots in a
+    # row hung until a hard power-off. The patch tells RM about the power source
+    # only after it has been stable for 2 s. Drop it once the charger is fixed
+    # or if a driver bump makes it stop applying.
+    package =
+      let base = config.boot.kernelPackages.nvidiaPackages.stable;
+      in base // {
+        open = base.open.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ../pkgs/nvidia-open-psr-debounce.patch ];
+        });
+      };
   };
 
   # ── Disable runtime D3 (RTD3) on the dGPU ─────────────────────────────────
