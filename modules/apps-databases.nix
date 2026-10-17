@@ -112,6 +112,12 @@
   # as unavailable — docker-machine has been unmaintained upstream for years,
   # which likely explains the removal.
   virtualisation.docker.enable = true;
+  # Socket-activated: dockerd starts on the first `docker` command instead of
+  # at boot. At boot it sat on the critical chain (docker.service wants
+  # network-online.target → NetworkManager-wait-online, ~6 s + 1.25 s start),
+  # delaying multi-user.target by ~7 s. Caveat: containers with a restart
+  # policy no longer come back on their own after a reboot until dockerd runs.
+  virtualisation.docker.enableOnBoot = false;
 
   # ── Podman ─────────────────────────────────────────────────────────────────
   # virtualisation.podman.enable exists (nixos/modules/virtualisation/podman).
