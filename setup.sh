@@ -179,7 +179,7 @@ if [[ "$NVIDIA_ANSWER" =~ ^[Yy]$ ]]; then
   echo "Keeping hosts/nvidia.nix enabled."
 else
   echo "Will disable hosts/nvidia.nix after copying the repo —"
-  echo "falls back to hardware-universal.nix's generic modesetting driver."
+  echo "falls back to system/hardware/universal.nix's generic modesetting driver."
 fi
 
 # ── Login account ────────────────────────────────────────────────────────────
