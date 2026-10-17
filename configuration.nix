@@ -327,7 +327,7 @@
   # Tailscale is a private overlay; traffic arriving on it is already
   # authenticated by Tailscale itself, so it does not need a second gate.
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
-
+  networking.firewall.allowedTCPPorts = [ 8443 ];
   programs.ssh = {
     startAgent  = true;
     agentTimeout = "4h";

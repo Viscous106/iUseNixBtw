@@ -11,7 +11,8 @@
 # keybind the process inherits Hyprland's PATH, which does not reliably carry
 # quickshell/awww/mpvpaper/jq — hence the explicit wrapping.
 #
-# hyprctl, which apply.sh also calls (to pick a monitor for apply_video), is
+# hyprctl, which apply.sh and audio-follow.sh also call (to pick a monitor for
+# apply_video, and to follow focus for a sound-enabled video), is
 # deliberately NOT in runtimeInputs: writeShellApplication's generated wrapper
 # PREFIXES this closure onto PATH rather than replacing it, so hyprctl still
 # resolves from the session PATH where Hyprland already put it. If it is ever
@@ -24,6 +25,7 @@
   mpvpaper,
   ffmpegthumbnailer,
   jq,
+  socat,
   procps,
   coreutils,
   qt6,
@@ -38,6 +40,7 @@ writeShellApplication {
     mpvpaper
     ffmpegthumbnailer
     jq
+    socat         # audio-follow.sh: Hyprland event stream + mpv IPC
     procps        # pkill, used when swapping between image and video
     coreutils
   ];

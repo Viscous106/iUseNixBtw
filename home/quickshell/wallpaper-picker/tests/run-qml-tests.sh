@@ -69,7 +69,10 @@ mkdir -p "$WORK/lib_root_slash/child"
 #   WP_TEST_STUB  - appends its argv[1] to WP_TEST_LOG
 #   WP_TEST_STUB2 - answers --current SLOWLY with a known path, logs other
 #                   invocations to WP_TEST_LOG2
-#   WP_TEST_LOG / WP_TEST_LOG2 - the log files those stubs write to
+#   WP_TEST_STUB3 - answers --current / --current-audio with a video that
+#                   had sound, logs every other invocation's full argv to
+#                   WP_TEST_LOG3
+#   WP_TEST_LOG / WP_TEST_LOG2 / WP_TEST_LOG3 - the log files those stubs write to
 # ---------------------------------------------------------------------------
 stub "$WORK/stub1.sh" \
   'printf '"'"'%s\n'"'"' "$1" >> "$WP_TEST_LOG"' \
@@ -81,11 +84,21 @@ stub "$WORK/stub2.sh" \
   '  echo "/tmp/original.png"' \
   '  exit 0' \
   'fi' \
+  'if [ "${1-}" = "--current-audio" ]; then echo off; exit 0; fi' \
   'printf '"'"'%s\n'"'"' "$1" >> "$WP_TEST_LOG2"' \
+  'exit 0'
+
+stub "$WORK/stub3.sh" \
+  'case "${1-}" in' \
+  '  --current)       echo "/tmp/original.mp4"; exit 0 ;;' \
+  '  --current-audio) echo on; exit 0 ;;' \
+  'esac' \
+  'printf '"'"'%s\n'"'"' "$*" >> "$WP_TEST_LOG3"' \
   'exit 0'
 
 : > "$WORK/log1"
 : > "$WORK/log2"
+: > "$WORK/log3"
 
 # ---------------------------------------------------------------------------
 # Fixtures: shell_test.qml
@@ -138,6 +151,8 @@ export WP_TEST_STUB="$WORK/stub1.sh"
 export WP_TEST_STUB2="$WORK/stub2.sh"
 export WP_TEST_LOG="$WORK/log1"
 export WP_TEST_LOG2="$WORK/log2"
+export WP_TEST_STUB3="$WORK/stub3.sh"
+export WP_TEST_LOG3="$WORK/log3"
 run_test "applier_test.qml" "applier_test.qml" 15
 
 export WP_TEST_ROOT="$WORK/shell_root"

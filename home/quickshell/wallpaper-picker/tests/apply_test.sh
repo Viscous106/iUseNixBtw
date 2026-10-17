@@ -10,9 +10,15 @@ work="$(mktemp -d)"; trap 'rm -rf "$work"' EXIT
 export WP_STATE_DIR="$work/state"
 export AWWW_BIN="$work/awww-stub"
 export MPVPAPER_BIN="$work/mpvpaper-stub"
+# Overridden too, so stop_video's `pkill -f $FOLLOW` can never hit the real one.
+export WP_FOLLOW_BIN="$work/follow-stub"
+export WP_MPV_SOCK="$work/mpv.sock"
+# apply.sh only checks socat exists (the follower is stubbed), so any binary does.
+export SOCAT_BIN=true
 printf '#!/usr/bin/env bash\necho "awww $*" >> "%s/calls"\n' "$work" > "$AWWW_BIN"
 printf '#!/usr/bin/env bash\necho "mpvpaper $*" >> "%s/calls"\n' "$work" > "$MPVPAPER_BIN"
-chmod +x "$AWWW_BIN" "$MPVPAPER_BIN"
+printf '#!/usr/bin/env bash\necho "follow $*" >> "%s/calls"\n' "$work" > "$WP_FOLLOW_BIN"
+chmod +x "$AWWW_BIN" "$MPVPAPER_BIN" "$WP_FOLLOW_BIN"
 
 img="$work/pic.png"; : > "$img"
 vid="$work/clip.mp4"; : > "$vid"
@@ -38,6 +44,49 @@ check "--current prints path" "$vid" "$("$SUT" --current)"
 : > "$work/calls"
 "$SUT" --restore >/dev/null 2>&1
 check "restore reapplied video" "1" "$(grep -c '^mpvpaper ' "$work/calls" 2>/dev/null || echo 0)"
+
+# ── Sound ──────────────────────────────────────────────────────────────────
+# The video and follower are backgrounded, so give them a moment to log.
+settle() { sleep 0.2; }
+
+: > "$work/calls"
+"$SUT" "$vid" >/dev/null 2>&1; settle
+check "muted video records audio off" "off" "$(cat "$WP_STATE_DIR/audio" 2>/dev/null)"
+check "muted video has no audio track" "1" "$(grep -c '^mpvpaper -o no-audio' "$work/calls" 2>/dev/null || echo 0)"
+check "muted video starts no follower" "0" "$(grep -c '^follow ' "$work/calls" 2>/dev/null)"
+
+: > "$work/calls"
+"$SUT" "$vid" --sound >/dev/null 2>&1; settle
+check "sound video records audio on"  "on" "$(cat "$WP_STATE_DIR/audio" 2>/dev/null)"
+check "sound video starts muted with IPC" "1" \
+  "$(grep -c "^mpvpaper -o loop mute=yes input-ipc-server=$WP_MPV_SOCK " "$work/calls" 2>/dev/null || echo 0)"
+check "sound video starts follower on the socket" "follow $WP_MPV_SOCK" "$(grep '^follow ' "$work/calls" 2>/dev/null)"
+check "--current-audio prints on" "on" "$("$SUT" --current-audio)"
+
+: > "$work/calls"
+"$SUT" --restore >/dev/null 2>&1; settle
+check "restore keeps sound" "1" "$(grep -c '^mpvpaper -o loop mute=yes' "$work/calls" 2>/dev/null || echo 0)"
+check "restore restarts follower" "1" "$(grep -c '^follow ' "$work/calls" 2>/dev/null || echo 0)"
+
+"$SUT" "$img" --sound >/dev/null 2>&1
+check "image ignores --sound" "off" "$(cat "$WP_STATE_DIR/audio" 2>/dev/null)"
+check "--current-audio prints off" "off" "$("$SUT" --current-audio)"
+
+# No socat: the follower could never unmute, so refuse rather than go silent,
+# and leave the running wallpaper and its state alone.
+"$SUT" "$vid" >/dev/null 2>&1; settle
+: > "$work/calls"
+SOCAT_BIN="$work/no-such-socat" "$SUT" "$vid" --sound >/dev/null 2>&1
+check "sound without socat exits 1" "1" "$?"
+check "sound without socat starts nothing" "" "$(cat "$work/calls")"
+check "sound without socat keeps state" "off" "$(cat "$WP_STATE_DIR/audio" 2>/dev/null)"
+
+"$SUT" "$vid" --loud >/dev/null 2>&1
+check "unknown second arg exits 1" "1" "$?"
+
+# State written before the audio file existed reads as muted.
+rm -f "$WP_STATE_DIR/audio"
+check "--current-audio defaults off" "off" "$("$SUT" --current-audio)"
 
 "$SUT" "$work/missing.png" >/dev/null 2>&1
 check "missing file exits 1" "1" "$?"

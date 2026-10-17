@@ -15,6 +15,9 @@ Item {
     // Wallpaper in place when the picker opened, so Escape can put it back.
     readonly property string original: _original
     property string _original: ""
+    // Whether that wallpaper was playing with sound, so a revert restores it
+    // as it was rather than silently dropping to muted.
+    property bool _originalSound: false
 
     property string _pending: ""
 
@@ -58,12 +61,17 @@ Item {
                 root.applySucceeded(path);
         }
     }
+    // Not a second Process for --current-audio: one capture means one
+    // completion to wait on before a deferred revert may run.
     Process {
         id: currentProc
-        command: [root.script, "--current"]
+        // $(...) strips trailing newlines, so this is exactly two lines.
+        command: ["sh", "-c", 'printf "%s\\n" "$("$0" --current)" "$("$0" --current-audio)"', root.script]
         stdout: StdioCollector {
             onStreamFinished: {
-                root._original = text.trim();
+                const lines = text.split("\n");
+                root._original = (lines[0] || "").trim();
+                root._originalSound = (lines[1] || "").trim() === "on";
                 root._captureInFlight = false;
                 if (root._revertPending) {
                     root._revertPending = false;
@@ -91,9 +99,9 @@ Item {
     // the path that actually ran. Consumers correlate on that path to tell their
     // own operation's completion from a preview's — without it, a preview's exit
     // is indistinguishable from the apply the user is waiting on.
-    function _run(path) {
+    function _run(path, sound) {
         root._queue = root._queue.concat([path]);
-        proc.command = [root.script, path];
+        proc.command = sound ? [root.script, path, "--sound"] : [root.script, path];
         proc.running = true;
     }
 
@@ -104,9 +112,10 @@ Item {
         debounce.restart();
     }
 
-    function applyNow(path) {
+    // `sound` only matters for videos; see apply.sh.
+    function applyNow(path, sound) {
         debounce.stop();
-        _run(path);
+        _run(path, sound === true);
     }
 
     // If captureOriginal() is still in flight, defer: remember the request and
@@ -124,13 +133,13 @@ Item {
 
     function _doRevert() {
         if (_original !== "")
-            _run(_original);
+            _run(_original, _originalSound);
     }
 
     Timer {
         id: debounce
         interval: 250
         repeat: false
-        onTriggered: if (root._pending !== "") root._run(root._pending)
+        onTriggered: if (root._pending !== "") root._run(root._pending, false)
     }
 }

@@ -16,8 +16,9 @@ ShellRoot {
 
     property bool debounceDone: false
     property bool revertDone: false
+    property bool soundDone: false
     function maybeFinish() {
-        if (debounceDone && revertDone) {
+        if (debounceDone && revertDone && soundDone) {
             console.log(fails === 0 ? "ALL PASS" : "FAILURES=" + fails);
             Qt.exit(fails === 0 ? 0 : 1);
         }
@@ -34,6 +35,11 @@ ShellRoot {
     // guaranteed to be called while the capture is still in flight.
     Applier { id: app2; script: Quickshell.env("WP_TEST_STUB2") }
 
+    // --- Test 3: sound reaches apply.sh, and a revert restores it. ---
+
+    // A stub whose original is a video that was playing WITH sound.
+    Applier { id: app3; script: Quickshell.env("WP_TEST_STUB3") }
+
     Component.onCompleted: {
         // Three rapid schedules must collapse to exactly one apply, of the last path.
         app.schedulePreview("/tmp/a.png");
@@ -45,6 +51,51 @@ ShellRoot {
         // stay empty forever instead of eventually getting the captured path.
         app2.captureOriginal();
         app2.revert();
+
+        // applyNow runs at once; the revert waits for the capture, so the
+        // log order is deterministic.
+        app3.captureOriginal();
+        app3.applyNow("/tmp/new.mp4", true);
+        app3.revert();
+    }
+
+    FileView {
+        id: readLog3
+        path: Quickshell.env("WP_TEST_LOG3")
+        watchChanges: true
+        onFileChanged: reload()
+    }
+
+    property string lastText3: ""
+    property int stableTicks3: 0
+    property int attempts3: 0
+
+    Timer {
+        id: poll3
+        running: true
+        interval: 50
+        repeat: true
+        onTriggered: {
+            attempts3++;
+            readLog3.reload();
+            const text = readLog3.text();
+            if (text === lastText3) {
+                stableTicks3++;
+            } else {
+                lastText3 = text;
+                stableTicks3 = 0;
+            }
+
+            if ((attempts3 >= 10 && stableTicks3 >= 5) || attempts3 >= 80) {
+                poll3.stop();
+                const log = lastText3.trim().split("\n").filter(l => l !== "");
+                check("sound apply + revert ran", "2", String(log.length));
+                check("applyNow(sound) passes --sound", "/tmp/new.mp4 --sound", log[0]);
+                check("revert restores original sound", "/tmp/original.mp4 --sound", log[1]);
+                soundDone = true;
+                maybeFinish();
+            }
+        }
     }
 
     FileView {

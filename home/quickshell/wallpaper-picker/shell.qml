@@ -179,8 +179,28 @@ ShellRoot {
                 lib.descend();      // the preview follows reactively once the
                 return;             // model settles; never read it here
             }
-            win.awaitingPath = e.path;
-            applier.applyNow(e.path);
+            // A video asks first whether to play its audio; the answer lands
+            // in answerSound(). Images have no audio to ask about.
+            if (e.isVideo) {
+                win.soundPromptPath = e.path;
+                return;
+            }
+            win.applyPath(e.path, false);
+        }
+
+        // The video awaiting a sound/muted answer, "" when not asking.
+        property string soundPromptPath: ""
+
+        function answerSound(sound) {
+            const path = win.soundPromptPath;
+            win.soundPromptPath = "";
+            if (path !== "")
+                win.applyPath(path, sound);
+        }
+
+        function applyPath(path, sound) {
+            win.awaitingPath = path;
+            applier.applyNow(path, sound);
             win.previewed = true;
             win.applying = true;
             exitGrace.restart();
@@ -218,6 +238,20 @@ ShellRoot {
             focus: true
 
             Keys.onPressed: event => {
+                // While asking about sound, only the answer keys do anything,
+                // so a stray letter can't leak into the filter. Escape backs
+                // out of the question, not out of the picker.
+                if (win.soundPromptPath !== "") {
+                    if (event.key === Qt.Key_S || event.key === Qt.Key_Y)
+                        win.answerSound(true);
+                    else if (event.key === Qt.Key_M || event.key === Qt.Key_N
+                          || event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+                        win.answerSound(false);
+                    else if (event.key === Qt.Key_Escape)
+                        win.soundPromptPath = "";
+                    event.accepted = true;
+                    return;
+                }
                 if (event.key === Qt.Key_Escape) {
                     win.cancel();
                 } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
@@ -346,9 +380,47 @@ ShellRoot {
                     }
                 }
 
+                // Sound prompt for a video. Even with sound it is muted
+                // automatically whenever the focused workspace has a window.
+                Rectangle {
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: win.soundPromptPath !== ""
+                    Layout.preferredWidth: promptCol.implicitWidth + 40
+                    Layout.preferredHeight: promptCol.implicitHeight + 24
+                    radius: 10
+                    color: Qt.rgba(appTheme.surface.r, appTheme.surface.g, appTheme.surface.b, 0.9)
+                    border.width: 1
+                    border.color: appTheme.primary
+
+                    ColumnLayout {
+                        id: promptCol
+                        anchors.centerIn: parent
+                        spacing: 6
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "Play this live wallpaper with sound?"
+                            color: appTheme.onSurface
+                            font.family: "Fira Code"; font.pixelSize: 14
+                        }
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "s sound   m / ↵ muted   esc back"
+                            color: appTheme.primary
+                            font.family: "Fira Code"; font.pixelSize: 12
+                        }
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "sound auto-mutes while a window is on the focused workspace"
+                            color: appTheme.outline
+                            font.family: "Fira Code"; font.pixelSize: 10
+                        }
+                    }
+                }
+
                 // Key hints
                 Text {
                     Layout.alignment: Qt.AlignHCenter
+                    visible: win.soundPromptPath === ""
                     text: "alt+h/l move   ↵ apply   ⌫ up   type to filter   esc revert"
                     color: appTheme.outline
                     // 11, not the brief's 10.5: font.pixelSize is an int and
