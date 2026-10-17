@@ -241,17 +241,37 @@ move_ws_off_int() {
   focus_mon "$ext"
 }
 
-# Fallback: the pre-profile hardcoded path. Applied live via mon_set()
-# (hl.monitor), but it does NOT persist across a reload: nwg-displays'
-# generated ~/.config/hypr/monitors.lua is still require()'d after this
-# module runs, so a reload re-applies whatever that file last held over this
-# fallback's runtime geometry. That's fine — the fallback's whole purpose is
-# "some sane geometry now, on unrecognised hardware", not a persisted layout.
+# Does nwg-displays' generated ~/.config/hypr/monitors.lua already carry an
+# hl.monitor() for this output? With use-desc on it writes
+# `output = "desc:<description>"`, without it `output = "<connector>"`.
+lua_covers() {   # lua_covers <connector>
+  local f="$HOME/.config/hypr/monitors.lua" desc
+  [ -f "$f" ] || return 1
+  grep -qF "output = \"$1\"" "$f" && return 0
+  desc="$(hyprctl -j monitors all | jq -r --arg m "$1" '.[] | select(.name == $m) | .description')"
+  [ -n "$desc" ] && grep -qF "output = \"desc:$desc\"" "$f"
+}
+
+# Fallback: no profile for this state. If the generated monitors.lua already
+# places every connected output, Hyprland has applied it at parse time and that
+# IS the layout — leave its geometry alone. Forcing the hardcoded positions here
+# used to revert every nwg-displays Apply: Apply writes monitors.lua and runs
+# `hyprctl reload`, config.reloaded lands here, and mon_set() stomped the new
+# layout — moving eDP-1 to 0x0 while the external still sat there, which also
+# latched the "Monitor eDP-1 overlaps" warning. The hardcoded geometry is only
+# for outputs the file knows nothing about (unrecognised external, empty file).
 fallback_layout() {
-  local ext="$1" closed="$2"
+  local ext="$1" closed="$2" t
   if [ -n "$ext" ]; then
-    mon_set "$INT" "$INT_MODE" "$INT_POS_DOCKED"
-    mon_set "$ext" "$EXT_MODE" "$EXT_POS"
+    if lua_covers "$INT" && lua_covers "$ext"; then
+      # monitors.lua carries a static transform; re-assert the live rotation
+      # (see apply_profile) before any dpms flip.
+      t="$(int_transform)"
+      [ "$t" != 0 ] && hy "hl.monitor({ output = \"$INT\", transform = $t })"
+    else
+      mon_set "$INT" "$INT_MODE" "$INT_POS_DOCKED"
+      mon_set "$ext" "$EXT_MODE" "$EXT_POS"
+    fi
     if [ "$closed" = yes ]; then
       move_ws_off_int "$ext"; dpms_set off "$INT"
     else
@@ -259,7 +279,12 @@ fallback_layout() {
     fi
   else
     dpms_set on "$INT"
-    mon_set "$INT" "$INT_MODE" "$INT_POS_SOLO"
+    if lua_covers "$INT"; then
+      t="$(int_transform)"
+      [ "$t" != 0 ] && hy "hl.monitor({ output = \"$INT\", transform = $t })"
+    else
+      mon_set "$INT" "$INT_MODE" "$INT_POS_SOLO"
+    fi
   fi
 }
 
