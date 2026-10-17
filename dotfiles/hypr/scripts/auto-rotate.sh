@@ -22,6 +22,7 @@
 set -u
 
 INT="eDP-1"
+INT_MODE="1920x1080@144"   # keep in sync with monitor-auto.sh
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 TRANSFORM_FILE="$STATE_DIR/hypr-rotation"          # also read by monitor-auto.sh
 SENSOR_FILE="$STATE_DIR/hypr-rotation-sensor"      # last orientation the sensor reported
@@ -48,13 +49,15 @@ TABLET_MUTE=(
 # non-legacy parsers. Use eval.") and everything goes through hyprctl eval.
 hy() { hyprctl eval "$1" >/dev/null 2>&1; }
 
-# A bare output+transform rule is enough — Hyprland keeps the panel's existing
-# mode, position and scale, so this does not have to know or restate the layout
-# that monitor-auto.sh decided.
+# The mode has to be restated: hl.monitor only merges into an existing rule
+# with the same output string, and nwg-displays' monitors.lua names the panel
+# "desc:<description>", not "$INT" — so a bare output+transform rule starts
+# fresh with mode "preferred", which drops this panel from 144 Hz to 60 Hz
+# (see int_rule() in monitor-auto.sh).
 apply_transform() {
   local t="$1"
   echo "$t" > "$TRANSFORM_FILE"
-  hy "hl.monitor({ output = \"$INT\", transform = $t })"
+  hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", transform = $t })"
 }
 
 set_devices() {   # true|false

@@ -17,7 +17,8 @@
 # previous state at the instant Hyprland fires the switch event.
 
 INT="eDP-1"                 # internal laptop panel
-INT_MODE="1920x1080@144"
+INT_MODE="1920x1080@144"   # also in auto-rotate.sh; see int_rule() for why
+                            # every panel rule has to restate it
 EXT_MODE="preferred"        # never hardcode a mode: an invalid one silently
                             # falls back to 1024x768 (bit us with @100 on the LG)
 SETTLE=2                    # seconds to hold the lock after applying (see below)
@@ -57,6 +58,15 @@ esac
 # through `hyprctl eval` against the same hl.* API used in lua/monitors.lua.
 hy() { hyprctl eval "$1" >/dev/null; }
 
+# Every PARTIAL hl.monitor() on the panel must restate INT_MODE. hl.monitor only
+# merges into an existing rule with the SAME output string, and nwg-displays'
+# generated monitors.lua names the panel "desc:<description>", never "eDP-1" —
+# so a bare { output = "eDP-1", transform = t } starts a fresh rule whose mode
+# defaults to "preferred", which on this panel is 60 Hz, not 144 (verified in
+# Hyprland's LuaBindingsConfigRules.cpp, and in hyprland.log: every 60.06 Hz
+# modeset of eDP-1 followed one of these calls).
+int_rule() { hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", $1 })"; }
+
 # --- self-healing sanitiser for the disabled= landmine ----------------------
 # A GUI Apply with Active unticked writes `disabled = true` into
 # ~/.config/hypr/monitors.lua. Since Task 3 that file is require()'d on every
@@ -74,6 +84,15 @@ sanitize_disabled() {
   [ -f "$f" ] || return 0
   grep -qE 'disabled\s*=\s*true' "$f" || return 0
   sed -i --follow-symlinks -E 's/disabled\s*=\s*true/disabled = false/g' "$f"
+  # A rule nwg-displays wrote for an inactive output carries no mode, so the
+  # re-enabled panel would come back at its 60 Hz preferred mode on every
+  # config reload (see int_rule). Give the panel's rule INT_MODE if it has no
+  # mode of its own. Edits the resolved path: monitors.lua is a symlink into
+  # this repo, and perl -i would replace the link with a plain file.
+  INT="$INT" INT_MODE="$INT_MODE" \
+  INT_DESC="$(hyprctl -j monitors all | jq -r --arg m "$INT" '.[] | select(.name == $m) | .description')" \
+    perl -0pi -e 's/(hl\.monitor\(\{\s*output\s*=\s*"(?:\Q$ENV{INT}\E|desc:\Q$ENV{INT_DESC}\E)",)(?![^}]*\bmode\s*=)/$1\n    mode = "$ENV{INT_MODE}",/g' \
+    "$(readlink -f "$f")"
   # An output that `hyprctl -j monitors all` reports but the plain (non-all)
   # list omits is disabled — the same all-vs-plain distinction
   # check_int_not_disabled in monitor-verify.sh relies on. Reuse it here
@@ -81,7 +100,11 @@ sanitize_disabled() {
   for out in $(comm -23 \
                  <(hyprctl -j monitors all | jq -r '.[].name' | sort) \
                  <(hyprctl -j monitors     | jq -r '.[].name' | sort)); do
-    hy "hl.monitor({ output = \"$out\", disabled = false })"
+    if [ "$out" = "$INT" ]; then
+      int_rule "disabled = false"
+    else
+      hy "hl.monitor({ output = \"$out\", disabled = false })"
+    fi
   done
   notify-send -e -u critical "󰍹 Display" \
     "Removed a disabled= directive from the generated monitor config and re-enabled the output live — re-author that profile in nwg-displays with Active ticked" \
@@ -219,7 +242,7 @@ apply_profile() {   # apply_profile <profile-name> <dpms-want: on|off>
   # dpms_set would re-light a panel that was just blanked and fail
   # verification forever. Order matters here — do not swap these two lines.
   t="$(int_transform)"
-  [ "$t" != 0 ] && hy "hl.monitor({ output = \"$INT\", transform = $t })"
+  [ "$t" != 0 ] && int_rule "transform = $t"
   dpms_set "$dpms_want" "$INT"
   if "$SELF_DIR/monitor-verify.sh" "$name" >/dev/null 2>&1; then
     printf '%s' "$name" > "$STATE"
@@ -269,7 +292,7 @@ fallback_layout() {
       # monitors.lua carries a static transform; re-assert the live rotation
       # (see apply_profile) before any dpms flip.
       t="$(int_transform)"
-      [ "$t" != 0 ] && hy "hl.monitor({ output = \"$INT\", transform = $t })"
+      [ "$t" != 0 ] && int_rule "transform = $t"
     else
       mon_set "$INT" "$INT_MODE" "$INT_POS_DOCKED"
       mon_set "$ext" "$EXT_MODE" "$EXT_POS"
@@ -283,7 +306,7 @@ fallback_layout() {
     dpms_set on "$INT"
     if lua_covers "$INT"; then
       t="$(int_transform)"
-      [ "$t" != 0 ] && hy "hl.monitor({ output = \"$INT\", transform = $t })"
+      [ "$t" != 0 ] && int_rule "transform = $t"
     else
       mon_set "$INT" "$INT_MODE" "$INT_POS_SOLO"
     fi
