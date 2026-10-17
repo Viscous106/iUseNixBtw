@@ -1,25 +1,8 @@
 { config, lib, pkgs, modulesPath, ... }:
 
-# ══════════════════════════════════════════════════════════════════════════════
-# Internal NVMe install — encrypted, machine-specific.
-#
-# This is the counterpart to hosts/usb.nix, NOT a replacement.
-# That file stays exactly as it is: it describes the portable USB drive
-# (by-label, generic drivers, GRUB-as-removable, never touches NVRAM).
-#
-# This file describes the opposite situation — one fixed laptop, one internal
-# disk, LUKS2 on top of it — so the portability tricks are deliberately dropped:
-#
-#   by-label   → /dev/mapper/cryptroot and by-partlabel. With the USB enclosure
-#                plugged in, two filesystems answering to the same label is a
-#                coin flip; the mapper name is ours and can't be ambiguous.
-#                Nothing here needs a UUID, so the file is machine-independent
-#                text that install-nvme-encrypted.sh never has to rewrite.
-#   GRUB       → systemd-boot. Removable-media GRUB exists to make the USB boot
-#                anywhere; this disk never leaves the machine, and lanzaboote
-#                (Secure Boot, later) builds on systemd-boot.
-#   NVRAM off  → NVRAM on. Writing boot entries is correct on your own machine.
-# ══════════════════════════════════════════════════════════════════════════════
+# Internal NVMe install: LUKS2 + btrfs, systemd-boot, fixed hardware.
+# Uses /dev/mapper and by-partlabel instead of by-label, since the USB drive's
+# labels would collide when it is plugged in.
 
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
@@ -30,7 +13,7 @@
   # ── Boot ────────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot = {
     enable             = true;
-    configurationLimit = 3;    # matches the 3 generations nix.gc keeps; see configuration.nix
+    configurationLimit = 3;    # matches the 3 generations nix.gc keeps (system/core/nix.nix)
     editor             = false; # no cmdline editing at the menu ⇒ no init=/bin/sh
   };
 
@@ -39,15 +22,13 @@
     efiSysMountPoint     = "/boot";
   };
 
-  # systemd in the initrd: a sane LUKS prompt now, and the prerequisite for
-  # systemd-cryptenroll / TPM2 unlocking later.
+  # Better LUKS prompt; prerequisite for systemd-cryptenroll / TPM2 unlock.
   boot.initrd.systemd.enable = true;
 
   # ── Disk encryption ─────────────────────────────────────────────────────────
   boot.initrd.luks.devices."cryptroot" = {
-    # GPT partition name set by install-nvme-encrypted.sh. Not by-uuid, so this
-    # file needs no per-install edit; not by-label, because a LUKS label and the
-    # inner filesystem label can both surface under /dev/disk/by-label.
+    # GPT partlabel from install-nvme-encrypted.sh: no per-install UUID edit,
+    # and unambiguous unlike by-label.
     device           = "/dev/disk/by-partlabel/nixcrypt";
     allowDiscards    = true;   # TRIM through LUKS: leaks free-space layout to
                                # someone imaging the disk, keeps the SSD healthy
@@ -87,9 +68,8 @@
     options = [ "subvol=@snapshots" "noatime" "compress=zstd:3" "space_cache=v2" ];
   };
 
-  # Swap in its own subvolume: a swapfile inside @ would block snapshotting @,
-  # which is why the USB install's @/swap/swapfile is worth not repeating here.
-  # No compression — a compressed swapfile is not usable as swap.
+  # Own subvolume so a swapfile doesn't block snapshotting @. No compression:
+  # a compressed swapfile can't be used as swap.
   fileSystems."/swap" = {
     device  = "/dev/mapper/cryptroot";
     fsType  = "btrfs";
@@ -102,9 +82,7 @@
     options = [ "fmask=0077" "dmask=0077" ];   # keep the ESP out of world-read
   };
 
-  # Created with `btrfs filesystem mkswapfile` (sets NOCOW, which plain
-  # fallocate does not). zram from hardware-universal.nix still applies; this
-  # backs it, same reasoning as the portable profile.
+  # Disk swap behind zram; made with `btrfs filesystem mkswapfile` (sets NOCOW).
   swapDevices = [{ device = "/swap/swapfile"; }];
 
   # ── Platform ────────────────────────────────────────────────────────────────

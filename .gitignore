@@ -23,11 +23,9 @@ node_modules/
 flake.lock.backup
 
 # Local-only content
-home/OpenRGB/
-home/openrgb/
-home/scaler-content/
 dotfiles/OpenRGB/
 dotfiles/openrgb/
+home/scaler-content/
 .superpowers/
 
 # Runtime state apps write back through the live-edit symlinks
@@ -38,34 +36,6 @@ dotfiles/obs-studio/plugin_config/obs-websocket/
 dotfiles/obs-studio/plugin_config/rtmp-services/
 dotfiles/obs-studio/plugin_manager/
 dotfiles/obs-studio/basic/scenes/
-
-# TEMPORARY: home/<app> -> ../dotfiles/<app> links that keep the running session
-# working until the next switch. Delete them (and this block) after switching.
-/home/agy
-/home/btop
-/home/cava
-/home/claude
-/home/codex
-/home/gtk-3.0
-/home/hypr
-/home/hyprwhspr
-/home/keyd
-/home/nvim
-/home/nwg-displays
-/home/nwg-look
-/home/obs-studio
-/home/qt5ct
-/home/qt6ct
-/home/quickshell
-/home/rofi
-/home/spicetify
-/home/swappy
-/home/tmux
-/home/tmuxifier
-/home/web3
-/home/wl-kbptr
-/home/yazi
-/home/zsh
 
 # 0-byte mount stubs the Claude Code sandbox creates for deny-listed paths
 .bash_profile

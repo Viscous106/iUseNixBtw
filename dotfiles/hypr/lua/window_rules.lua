@@ -1,9 +1,3 @@
--- ~/.config/hypr/lua/window_rules.lua
--- Migrated from configs/WindowRules.conf
--- windowrule = <EFFECT>, match:<k> <v>  ->  hl.window_rule({ match = { k = "v" }, <effect> = <val> })
---   effect "on" -> true ; parameterised effects (opacity/size/move/tag) -> string value.
--- (window rules below are auto-generated from the .conf, then reviewed)
-
 hl.window_rule({
   match = { class = "^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr|[Ff]irefox-bin)$" },
   tag = "+browser",
@@ -468,6 +462,5 @@ hl.layer_rule({ match = { namespace = "notifications" }, blur = true })
 hl.layer_rule({ match = { namespace = "notifications" }, xray = true })
 hl.layer_rule({ match = { namespace = "quickshell:overview" }, blur = true })
 hl.layer_rule({ match = { namespace = "quickshell:overview" }, xray = true })
--- original had `layerrule = xray 0.5` (xray is boolean in the Lua API; the 0.5
--- is interpreted as ignore_alpha, the closest faithful equivalent)
+-- xray is boolean in Lua; the old 0.5 threshold maps to ignore_alpha.
 hl.layer_rule({ match = { namespace = "quickshell:overview" }, ignore_alpha = 0.5 })

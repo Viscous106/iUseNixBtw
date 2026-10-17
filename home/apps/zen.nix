@@ -2,7 +2,6 @@
 
 {
   imports = [
-    # Community flake — provides programs.zen-browser.*
     inputs.zen-browser.homeModules.beta
   ];
 
@@ -15,18 +14,15 @@
   # $BROWSER as `zen-browser`, which is not on PATH. Point it at the real name.
   home.sessionVariables.BROWSER = "zen-beta";
 
-  # ── Persistent Profile ─────────────────────────────────────────────────────
-  # Ensures the Zen profile is stored on the persistent partition
+  # Profile lives on /persist.
   xdg.configFile."zen".source = config.lib.file.mkOutOfStoreSymlink "/persist/home/${user.username}/.config/zen";
 
-  # ── Profile migration note ─────────────────────────────────────────────────
-  # Zen >= 18.18.6b expects config in ~/.config/zen (not ~/.zen).
+  # Zen >= 18.18.6b moved the profile from ~/.zen to ~/.config/zen.
   home.activation.migrateZenProfile =
     let
       oldDir = "$HOME/.zen";
       newDir = "$HOME/.config/zen";
     in
-    # entryAfter writeBoundary so home.file symlinks are already in place
     config.lib.dag.entryAfter [ "writeBoundary" ] ''
       if [ -d "${oldDir}" ] && [ ! -d "${newDir}" ] && [ ! -L "${newDir}" ]; then
         $DRY_RUN_CMD mkdir -p "${newDir}"

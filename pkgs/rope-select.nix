@@ -1,22 +1,6 @@
-# ── rope-select ─────────────────────────────────────────────────────────────
-# Wrapper for the animated region selector whose QML lives at
-# dotfiles/quickshell/rope-select/ and is symlinked live into
-# ~/.config/quickshell/rope-select (see home/desktop/session-tools.nix).
-#
-# Drop-in replacement for slurp: prints "X,Y WxH" and exits 0, or exits
-# non-zero on cancel. ScreenShot.sh and ScreenRecord.sh call it in place of
-# slurp; see dotfiles/quickshell/rope-select/select.sh for the contract.
-#
-# Same split as wallpaper-picker: the QML is deliberately NOT copied into the
-# store, so the rope physics can be retuned and re-run without a rebuild. What
-# the store owns is the dependency closure — launched from a Hyprland keybind
-# the process inherits Hyprland's PATH, which does not reliably carry
-# quickshell.
-#
-# slurp IS in runtimeInputs, and is not optional: select.sh falls back to it
-# whenever the overlay cannot answer, so a broken selector costs the animation
-# and not the screenshot. Leaving it to the ambient PATH would mean the one
-# code path that exists to survive a failure could itself fail.
+# rope-select: slurp-compatible animated region selector. QML stays live in
+# dotfiles/quickshell/rope-select (not the store) so it can change without a
+# rebuild; slurp is a required runtimeInput because select.sh falls back to it.
 {
   lib,
   writeShellApplication,

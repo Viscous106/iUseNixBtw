@@ -1,27 +1,8 @@
 { config, lib, pkgs, ... }:
 
 # ── Solidity / EVM development environment ───────────────────────────────────
-# Spec: docs/design/web3-dev-environment.md
-#
-# This owns everything Solidity-related that used to live as a bare package list
-# in dev-toolchains.nix. It is the one options-driven module in this config
-# (everything else is plain `config`), because the whole point here is that the
-# toolchain gets retuned from this file rather than by editing files inside
-# individual projects.
-#
-# Three things it exists to fix:
-#
-#   1. nixpkgs ships a single solc (0.8.33). Older course material needs 0.6.x.
-#      `solc.extra` pins as many additional compilers as wanted, each installed
-#      as `solc-<version>` so they coexist. See pkgs/solc-bin.nix.
-#
-#   2. Nothing switched toolchains on `cd`. direnv + nix-direnv does, and
-#      home/shell/git.nix already gitignores .direnv/.envrc — this config
-#      anticipated direnv before it was installed. starship.toml likewise
-#      already has a [direnv] prompt module.
-#
-#   3. Every new project meant hand-writing foundry.toml and re-remembering
-#      non-obvious flags. `web3-cli` stamps out a correct project instead.
+# Spec: docs/design/web3-dev-environment.md. Settings: my.web3 in home/default.nix.
+# Extra solc versions (nixpkgs ships one), direnv project shells, and web3-cli.
 
 let
   cfg = config.my.web3;
@@ -31,9 +12,7 @@ let
     lib.mapAttrsToList (version: sha256: pkgs.solc-bin { inherit version sha256; })
       cfg.solc.extra;
 
-  # Absolute path to whichever compiler `solc.default` names. Foundry reads this
-  # via FOUNDRY_SOLC, which means no project's foundry.toml ever has to hardcode
-  # a store path (verified: `forge config` reports the env-supplied compiler).
+  # Exported as FOUNDRY_SOLC so no foundry.toml hardcodes a store path.
   defaultSolcPath =
     if cfg.solc.default == "nixpkgs" then
       "${pkgs.solc}/bin/solc"
@@ -43,8 +22,7 @@ let
         sha256  = cfg.solc.extra.${cfg.solc.default};
       }}/bin/solc-${cfg.solc.default}";
 
-  # The project skeleton `web3-cli` copies. Kept out-of-store as a plain
-  # directory in this repo so it can be edited without a rebuild round-trip.
+  # Project skeleton web3-cli copies.
   templateDir = ../../dotfiles/web3/template;
 
   web3-cli = pkgs.writeShellApplication {
@@ -189,48 +167,30 @@ in
     ];
 
     home.packages = [
-      # forge/cast/anvil/chisel, built from source via rustPlatform and pinned
-      # by the flake lock — moved here from dev-toolchains.nix.
       pkgs.foundry
-      # Bare `solc` on PATH, for tooling that shells out to it directly.
       pkgs.solc
-      # Task runner for the generated justfile.
-      pkgs.just
+      pkgs.just # generated justfile
       web3-cli
     ] ++ extraSolcPkgs ++ cfg.extraTools;
 
     home.sessionVariables = {
-      # Makes `forge` outside any project shell use the configured default
-      # rather than trying to download one into ~/.svm. Project shells override
-      # it with their own pinned compiler.
+      # Stops forge downloading into ~/.svm; project shells override it.
       FOUNDRY_SOLC = defaultSolcPath;
 
-      # Read by the generated justfile, so the anvil port lives in this config
-      # instead of being duplicated into every project.
+      # Read by the generated justfile.
       WEB3_ANVIL_PORT = toString cfg.anvil.port;
     };
 
     programs.direnv = lib.mkIf cfg.direnv.enable {
       enable = true;
-      # Caches the dev shell so `cd` into a project is not a full nix evaluation
-      # every time.
       nix-direnv.enable = true;
 
-      # Drops direnv's "export +AR +AS +CC +CONFIG_SHELL ..." diff line. With a
-      # plain .envrc that line is a useful one-liner, but a nix devShell exports
-      # ~60 stdenv internals (buildPhase, depsHostHostPropagated, strictDeps...)
-      # that nothing here ever reads, so it wraps over several lines on every cd
-      # and buries the shellHook banner that actually says which toolchain
-      # loaded. Not `silent`: that sets DIRENV_LOG_FORMAT="" and would also kill
-      # the "loading"/"using flake"/"cache invalidated" lines, which are the ones
-      # worth seeing when a shell fails to build.
+      # Hide the huge stdenv "export +AR +AS ..." line. Not `silent`: that also
+      # hides the loading/error lines worth seeing when a shell fails.
       config.global.hide_env_diff = true;
     };
 
-    # web3-cli stages the project and allows direnv itself, but no child process
-    # can change its parent shell's working directory — so the final `cd` can
-    # only come from a shell function. Shadowing the command name (the same
-    # trick cp/mv/cd already use in zsh.nix) keeps it to one thing to remember.
+    # Shell wrapper so web3-cli can cd into the new project (a child can't).
     programs.zsh.initContent = ''
       web3-cli() {
         command web3-cli "$@" || return

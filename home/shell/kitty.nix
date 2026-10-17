@@ -5,7 +5,7 @@
     enable = true;
 
     settings = {
-      # ── Font — matches Arch exactly ─────────────────────────────────────
+      # ── Font ────────────────────────────────────────────────────────────
       font_family       = "FiraCode Nerd Font";
       bold_font         = "auto";
       italic_font       = "auto";
@@ -31,7 +31,7 @@
       cursor_text_color = "#1e1e2e";
       url_color        = "#f5e0dc";
 
-      # ── Window — opacity/scroll/cursor-trail match Arch ─────────────────
+      # ── Window ──────────────────────────────────────────────────────────
       background_opacity      = "0.9";
       dynamic_background_opacity = "1";
       window_padding_width    = 8;

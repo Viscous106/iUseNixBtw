@@ -1,9 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  # ── Media, graphics & audio tools ──────────────────────────────────────────
-  # Ported from Arch's explicitly-installed package list. See report for
-  # anything skipped (no nixpkgs equivalent) and redundancy notes.
+  # Media, graphics and audio tools.
   home.packages = with pkgs; [
     (mpv.override { scripts = [ mpvScripts.mpris ]; })  # media keys via MPRIS
     cava
@@ -18,23 +16,17 @@
     # mpv companions
     mpvpaper            # use mpv as a live-wallpaper renderer
 
-    # Spotify + spicetify (Arch's ~/.config/spicetify only has the
-    # Marketplace custom app installed — no config-xpui.ini/Themes were ever
-    # set up, so there's no active theme, just the base packages + app)
+    # Spotify + spicetify
     spotify
     spicetify-cli
 
     # PipeWire graph/patch tools
     qpwgraph             # PipeWire patchbay GUI
-    # NOTE: helvum was requested but has been REMOVED from nixpkgs
-    # (unmaintained upstream, vulnerable dependency — the `helvum` attr
-    # now throws). Upstream nixpkgs points to `crosspipe` as a
-    # replacement; not added automatically, see report.
 
     # Audio/video CLI utilities
     sox                  # audio processing swiss-army-knife
     ffmpegthumbnailer    # video thumbnail generator (file manager previews)
-    exiftool             # perl-image-exiftool -> nixpkgs attr is `exiftool`
+    exiftool
 
     # Screenshots / input-visualization
     silicon              # code screenshot tool
@@ -48,14 +40,13 @@
     decibels             # audio player
     showtime             # video player
     loupe                # image viewer
-    papers               # document viewer (formerly Evince/Papers)
+    papers               # document viewer
     simple-scan          # scanner front-end
     snapshot             # webcam/photo booth app
     sushi                # Nautilus quick-preview (GNOME Files)
 
     # PDF viewer
-    zathura              # nixpkgs' `zathura` already bundles the mupdf PDF
-                          # backend by default, no extra plugin package needed
+    zathura              # bundles the mupdf backend
 
     # PulseAudio prefs GUI
     paprefs

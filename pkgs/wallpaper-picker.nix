@@ -1,22 +1,6 @@
-# ── wallpaper-picker ────────────────────────────────────────────────────────
-# Wrapper for the Quickshell wallpaper selector whose QML lives at
-# dotfiles/quickshell/wallpaper-picker/ and is symlinked live into
-# ~/.config/quickshell/wallpaper-picker (see home/desktop/session-tools.nix).
-#
-# The QML is deliberately NOT copied into the store: keeping it out-of-store
-# means it can be edited and re-run without a rebuild, matching how rofi, qt6ct
-# and hypr configs are handled in this repo.
-#
-# What the store DOES own is the dependency closure. Launched from a Hyprland
-# keybind the process inherits Hyprland's PATH, which does not reliably carry
-# quickshell/awww/mpvpaper/jq — hence the explicit wrapping.
-#
-# hyprctl, which this wrapper, apply.sh and audio-follow.sh also call (to find
-# the focused monitor, and to follow focus for a sound-enabled video), is
-# deliberately NOT in runtimeInputs: writeShellApplication's generated wrapper
-# PREFIXES this closure onto PATH rather than replacing it, so hyprctl still
-# resolves from the session PATH where Hyprland already put it. If it is ever
-# unavailable there, wallpapers go on every monitor (see apply.sh).
+# wallpaper-picker: QML stays live in dotfiles/quickshell/wallpaper-picker (not
+# the store) so it can change without a rebuild. hyprctl is intentionally not a
+# runtimeInput: the wrapper prefixes PATH, so the session's hyprctl is used.
 {
   lib,
   writeShellApplication,

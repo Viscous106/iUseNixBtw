@@ -12,7 +12,7 @@
       };
 
       # ── Signing Settings (GPG) ────────────────────────────────────────────
-      gpg.format = "openpgp"; # Switch back to GPG
+      gpg.format = "openpgp";
       commit.gpgsign = true;
       tag.gpgsign = true;
 

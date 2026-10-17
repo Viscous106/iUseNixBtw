@@ -1,9 +1,7 @@
 { pkgs, ... }:
 
-# ── ydotoold — matches ~/.config/systemd/user/ydotoold.service on Arch,
-# which was enabled (default.target.wants/ydotoold.service). Needed by
-# hyprwhspr's paste-injection and by kanata-adjacent input scripts
-# (toggle_warpd.sh etc.) for synthetic input on Wayland.
+# Synthetic input on Wayland, for hyprwhspr paste-injection and input scripts
+# (toggle_warpd.sh etc.).
 {
   home.packages = [ pkgs.ydotool ];
 

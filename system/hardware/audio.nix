@@ -1,39 +1,11 @@
 { config, lib, pkgs, ... }:
 
-# ── Audio for this machine: ASUS TUF Gaming A15 (FA507NUR) ──────────────────
+# Audio for the ASUS TUF A15 (FA507NUR): Realtek ALC256 on AMD HD Audio.
 #
-# Hardware actually present (see /proc/asound/cards, lspci):
-#   card 0  NVIDIA AD107 HDMI/DP audio           01:00.1
-#   card 1  AMD Ryzen HD Audio + Realtek ALC256  05:00.6  ← speakers, jack, internal mic
-#           AMD ACP6x "Audio Coprocessor"        05:00.5  ← no card, see note at the bottom
-#
-# This file replaces modules/audio-glkrt5682max.nix, which shipped an ALSA UCM
-# profile for a Google Ampton Chromebook (Gemini Lake + RT5682). That board does
-# not exist on this laptop — nothing here ever loaded it, and it forced
-# ALSA_CONFIG_UCM2 system-wide at a snapshot of alsa-ucm-conf for no benefit.
-#
-# ── The microphone bug this fixes ───────────────────────────────────────────
-# The internal mic is an analog pin on the ALC256 (node 0x12, "Mic at Int"), and
-# PipeWire's ACP layer builds its 0-100% volume range by stacking TWO hardware
-# gain stages from analog-input-internal-mic.conf:
-#
-#     [Element Capture]              0..63  →  -17.25 .. +30.00 dB
-#     [Element Internal Mic Boost]   0..3   →    0.00 .. +30.00 dB   (volume = merge)
-#
-# So PipeWire at 100% drives +60 dB into an internal mic. Measured: 90% of
-# samples pinned to ±32768 — a hard-railed square wave, not speech. Anything
-# above ~40% clips. Pressing the mic-volume-up key walks straight into it,
-# because it is the top of the ordinary volume range.
-#
-# ACP reads its mixer paths from $ACP_PATHS_DIR when set, so we hand it a copy
-# of the upstream tree with the boost stage taken out of the volume range
-# (volume = off). The boost element still exists for the driver; it just stops
-# being part of what the volume slider moves. After this, 100% = +30 dB, which
-# measures -4.7 dBFS peak — loud, clean, no clipping anywhere on the dial.
-#
-# Same reasoning as the old UCM module for using an env var rather than an
-# overlay: overriding pkgs.pipewire rebuilds it and everything downstream.
-# Pointing ACP at a store path built with runCommand costs one tiny derivation.
+# Mic clipping fix: ACP stacks "Capture" (+30 dB) and "Internal Mic Boost"
+# (+30 dB) into one volume range, so anything above ~40% hard-clips. We point
+# ACP_PATHS_DIR at a copy of the mixer paths with the boost taken out of the
+# range (100% ≈ -4.7 dBFS peak). Env var, not an overlay, to avoid rebuilding pipewire.
 
 let
   acpPaths = pkgs.runCommand "acp-mixer-paths-alc256" { } ''
@@ -73,31 +45,21 @@ in
   systemd.user.services.wireplumber.environment.ACP_PATHS_DIR    = "${acpPaths}";
 
   # ── Bluetooth headset microphone (HFP) ────────────────────────────────────
-  # The earbuds connected A2DP-only: `Active Profile: a2dp-sink`, which reports
-  # `sources: 0` — playback, no mic. Every attempt to bring up the mic side
-  # failed in bluetoothd:
-  #   src/profile.c:ext_confirm() Hands-Free Voice gateway authorization failure
-  #   src/profile.c:record_cb()   Unable to get Hands-Free Voice gateway SDP record
-  # bluetoothd was not advertising the Hands-Free Audio Gateway profile, because
-  # its default plugin set does not enable it and nothing here asked for it.
-  # Enable spells out the profiles bluetoothd registers.
+  # bluetoothd's default plugin set doesn't register the Hands-Free gateway, so
+  # earbuds came up A2DP-only with no mic.
   hardware.bluetooth.settings = {
     General = {
       Enable = "Source,Sink,Media,Socket";
-      # Battery level reporting for headsets, and the newer LE features BlueZ
-      # keeps behind this flag.
+      # Headset battery reporting and newer LE features.
       Experimental = true;
-      # Re-pair silently instead of erroring when a "Just Works" device (most
-      # cheap earbuds) comes back with different keys.
+      # Re-pair silently when a "Just Works" device returns with new keys.
       JustWorksRepairing = "always";
     };
     Policy.AutoEnable = true;
   };
 
   services.pipewire.wireplumber.extraConfig = {
-    # Advertise the HFP/HSP roles and let WirePlumber drop out of A2DP into
-    # HFP on its own when an application opens the headset's microphone —
-    # which is exactly what a Meet/Zoom tab does.
+    # Auto-switch A2DP -> HFP when an app opens the headset mic.
     "10-bluez-headset" = {
       "monitor.bluez.properties" = {
         "bluez5.roles"              = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" "a2dp_sink" "a2dp_source" ];
@@ -108,12 +70,8 @@ in
       };
     };
 
-    # ── Keep the internal mic the fallback microphone ───────────────────────
-    # WirePlumber had no `default.configured.audio.source` at all, so the
-    # default source floated to whatever appeared last — in practice the
-    # bluez_input filter node of earbuds sitting in A2DP, i.e. a "microphone"
-    # with no capture stream behind it. Raising the built-in mic's session
-    # priority makes it the one that wins whenever nothing better is present.
+    # Make the internal mic the fallback default source, instead of an A2DP
+    # earbud node with no capture stream.
     "51-internal-mic-priority" = {
       "monitor.alsa.rules" = [
         {
@@ -124,10 +82,6 @@ in
     };
   };
 
-  # ── Not a bug: the AMD ACP6x has no card ──────────────────────────────────
-  # snd_pci_acp6x binds 05:00.5 and speculatively creates the acp_yc_mach.0
-  # platform device, but snd_soc_acp6x_mach declines to bind it (this model is
-  # not in the kernel's yc_acp_quirk_table). That is correct here: the DMIC path
-  # it would drive is unused on this board — the microphone is the ALC256 analog
-  # pin above. Nothing to fix; noted so the unbound device is not chased again.
+  # The AMD ACP6x (05:00.5) creating no card is expected: the board's mic is the
+  # ALC256 analog pin, not the ACP DMIC path.
 }

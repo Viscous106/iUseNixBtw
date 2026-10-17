@@ -1,18 +1,6 @@
-# ── codex-whoami ────────────────────────────────────────────────────────────
-# Reports which OpenAI org/project the Codex CLI is actually billing.
-#
-# Why this exists: `codex login status` and `codex doctor` only report the auth
-# *mode* (api_key vs ChatGPT plan). ~/.codex/auth.json stores nothing but
-# {auth_mode, OPENAI_API_KEY} — the owning org/project lives server-side only,
-# so the account can be identified solely by making a call and reading the
-# `openai-organization` / `openai-project` response headers.
-#
-# The trap this guards against: at runtime auth.json takes precedence over
-# $OPENAI_API_KEY. Verified by running `codex exec` with a deliberately invalid
-# OPENAI_API_KEY exported — the call still succeeded. The env var is consumed
-# once, by `codex login --with-api-key`, and ignored thereafter. So exporting a
-# different key does NOT move Codex to another account; only `codex logout` +
-# re-login does. Hence this reads auth.json, never the environment.
+# codex-whoami: which OpenAI org/project Codex bills, read from API response
+# headers. Uses auth.json, not $OPENAI_API_KEY: Codex ignores the env var after
+# `codex login`, so only logout + re-login switches accounts.
 {
   writeShellApplication,
   curl,
@@ -25,7 +13,7 @@ writeShellApplication {
 
   runtimeInputs = [
     curl
-    jq          # auth.json parsing; avoids a python3 dependency for two fields
+    jq
     coreutils
   ];
 

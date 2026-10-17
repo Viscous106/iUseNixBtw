@@ -1,34 +1,7 @@
-# ── Opera — repackaged from Opera's official .deb ───────────────────────────
-#
-# WHY THIS FILE EXISTS
-# nixpkgs removed the `opera` attribute on 2025-05-19 ("removed due to lack of
-# maintenance"); pkgs/top-level/aliases.nix:1899 now makes it a `throw`, so
-# `pkgs.opera` fails evaluation outright. There is no official nixpkgs Opera,
-# and no official Opera Flatpak (Flathub's com.opera.Opera is a community
-# redistribution, explicitly not affiliated with Opera). Opera's only official
-# Linux artifacts are the .deb and .rpm — so we repack the .deb.
-#
-# This follows the standard nixpkgs binary-repack pattern and is modelled
-# directly on pkgs/by-name/go/google-chrome/package.nix (same Chromium-deb
-# shape, already proven working on this machine via `google-chrome`).
-#
-# SOURCE URL
-# deb.opera.com's apt pool only ever carries the CURRENT release — a pin
-# against it 404s the moment Opera ships a point release, which would make
-# this derivation unbuildable. get.geo.opera.com/pub/opera/desktop/ is Opera's
-# archive and retains old versions (verified: 133.x, 134.x and several 135.x
-# point releases still resolve). It is also the host the AUR `opera` PKGBUILD
-# fetches from.
-#
-# NOTE: the two copies are DIFFERENT repacks of the same version — the archive
-# copy carries data.tar.zst, the apt-pool copy data.tar.xz — so `hash` below
-# and the zstd unpack are specific to the archive copy.
-#
-# TO UPDATE
-#   1. Pick the new version from https://get.geo.opera.com/pub/opera/desktop/
-#   2. Bump `version`, set `hash = lib.fakeHash;`
-#   3. `nix build .#nixosConfigurations.nix.pkgs.opera` — Nix prints the real
-#      hash in the mismatch error; paste it into `hash`.
+# Opera repacked from the official .deb (nixpkgs dropped `opera`); modelled on
+# nixpkgs' google-chrome. Fetch from get.geo.opera.com, not deb.opera.com: the
+# apt pool only keeps the current release, and its .deb uses .xz, not .zst.
+# Update: bump version, hash = lib.fakeHash, build, paste the real hash.
 {
   lib,
   stdenvNoCC,
@@ -38,8 +11,7 @@
   bintools,
   zstd,
 
-  # ── Directly linked libraries ────────────────────────────────────────────
-  # Derived from `readelf -d` over every ELF in the .deb, not from guesswork.
+  # ── Directly linked libraries (readelf -d over the .deb) ─────────────────
   alsa-lib,
   at-spi2-atk,
   at-spi2-core,

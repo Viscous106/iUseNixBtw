@@ -1,7 +1,3 @@
--- ~/.config/hypr/lua/decorations.lua
--- Migrated from configs/decorations.conf
--- col.active_border etc. -> general.col.active_border ; colors are plain strings.
-
 hl.config({
   general = {
     border_size = 2,

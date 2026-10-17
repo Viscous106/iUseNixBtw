@@ -3,7 +3,6 @@
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  # Matches nixosConfigurations.nix.
   networking.hostName = "nix";
 
   # ── Boot ──────────────────────────────────────────────────────────────────
@@ -61,12 +60,8 @@
     options = [ "fmask=0022" "dmask=0022" ];
   };
 
-  # zram stays (hardware-universal.nix); this disk swap backs it up.
-  # 3.7 GiB of RAM with zram as the only swap wasn't enough to evaluate this
-  # flake — nix peaked at 2.0 GiB RSS and earlyoom SIGTERMed it ("error:
-  # interrupted by the user"). zram is compressed RAM, not extra memory, so it
-  # can't cover that. /swap is its own subvolume (kept out of @snapshots) and
-  # the file was made with `btrfs filesystem mkswapfile`, which sets NOCOW.
+  # Disk swap behind zram: with 3.7 GiB RAM, evaluating this flake got OOM-killed.
+  # Made with `btrfs filesystem mkswapfile` (sets NOCOW).
   swapDevices = [{ device = "/swap/swapfile"; }];
 
   # ── CPU microcode — include both; kernel loads the right one ──────────────
@@ -74,17 +69,8 @@
   hardware.cpu.amd.updateMicrocode   = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   # ── SMART on the USB boot stick ───────────────────────────────────────────
-  # Host-specific, which is why it lives here and not in system/packages.nix
-  # (that module is shared with the internal-NVMe host, where /dev/sda does not
-  # exist and an explicitly-listed missing device makes smartd exit 16).
-  #
-  # This boot drive is an AVERTEK USB-NVMe stick behind a JMicron bridge.
-  # smartd's default USB-NVMe passthrough probe hangs on it and times the
-  # service out every boot; `smartctl -d sat` answers instantly. Listing just
-  # this device — rather than overriding defaults.autodetected globally — keeps
-  # autodetect's normal probe for every other drive, since forcing "-d sat"
-  # globally broke detection on nvme0n1 ("Unable to monitor any SMART enabled
-  # devices").
+  # The JMicron USB-NVMe bridge hangs smartd's default probe; `-d sat` works.
+  # Listed per device (not globally) so autodetect still works for other drives.
   services.smartd.devices = [
     { device = "/dev/sda"; options = "-d sat -a"; }
   ];

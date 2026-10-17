@@ -2,40 +2,17 @@
 
 {
   # ── Hyprland window manager ─────────────────────────────────────────────────
-  # Config is hyprland.lua (native Lua config, requires the hyprland flake
-  # input — nixpkgs' pinned version predates Lua support). Hyprland loads
-  # hyprland.lua INSTEAD of hyprland.conf when it exists, so no extraConfig.
+  # Config is hyprland.lua (needs the hyprland flake; nixpkgs predates Lua
+  # support). Hyprland loads it instead of hyprland.conf when present.
   wayland.windowManager.hyprland = {
     enable         = true;
-    # Pinned explicitly: home-manager's default flipped hyprlang -> lua for
-    # stateVersion >= 26.05. We must stay on "hyprlang" — under "lua" the module
-    # generates its own hypr/hyprland.lua, which would collide with the
-    # mkOutOfStoreSymlink for that exact path in xdg.configFile below.
+    # Must stay "hyprlang": under "lua" (the default for stateVersion >= 26.05)
+    # the module generates hypr/hyprland.lua, colliding with home/dotfiles.nix's link.
     configType     = "hyprlang";
-    # systemd.enable MUST stay false. It works by injecting an `exec-once` into
-    # ~/.config/hypr/hyprland.conf that runs `dbus-update-activation-environment`
-    # and `systemctl --user start hyprland-session.target`. But Hyprland loads
-    # hyprland.lua INSTEAD of hyprland.conf (see the binary's own log lines:
-    # "Using lua config found at" / "Lua config not found, using legacy config at"),
-    # so that exec-once was never executed and the whole systemd session bootstrap
-    # silently did nothing:
-    #   * hyprland-session.target never started, and since it BindsTo
-    #     graphical-session.target, graphical-session.target never activated;
-    #   * so every unit WantedBy/PartOf graphical-session.target (hypridle.service,
-    #     tray.target, and critically xdg-desktop-portal.service, which declares
-    #     Requisite=graphical-session.target) was permanently dead — that is what
-    #     broke browser screen sharing. startup_apps.lua now starts
-    #     nixos-fake-graphical-session.target to activate the target directly,
-    #     which fixes that without turning this option back on;
-    #   * and HYPRLAND_INSTANCE_SIGNATURE / XDG_SESSION_TYPE / DISPLAY never reached
-    #     the systemd + dbus activation environment.
-    # Arch has no such systemd wiring at all — everything is launched by the
-    # exec-once hooks in lua/startup_apps.lua, which now exports the full variable
-    # set itself. Setting this false is what makes NixOS match Arch exactly.
+    # The injected exec-once lives in hyprland.conf, which never runs since
+    # hyprland.lua wins; startup_apps.lua starts the session target and exports env.
     systemd.enable = false;
-    # Silences the "no settings/extraConfig" warning. Hyprland never reads the
-    # resulting hyprland.conf (hyprland.lua wins) — it exists only to keep the
-    # home-manager module quiet.
+    # Only silences the module's "no settings" warning; hyprland.conf is unused.
     extraConfig    = "# config lives in hyprland.lua, not here";
     package = pkgs.hyprland-pinned;  # overlays/default.nix
   };

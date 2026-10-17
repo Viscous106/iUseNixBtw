@@ -1,0 +1,49 @@
+{
+  "displays": [
+    {
+      "name": "eDP-1",
+      "description": "AU Optronics B156HAN15.H",
+      "x": 1920,
+      "y": 0,
+      "physical_width": 1920,
+      "physical_height": 1080,
+      "transform": "normal",
+      "scale": 1.5,
+      "scale_filter": null,
+      "refresh": 144.06,
+      "dpms": true,
+      "adaptive_sync": false,
+      "custom_mode": false,
+      "mirror": "",
+      "ten_bit": false,
+      "active": false
+    },
+    {
+      "name": "HDMI-A-1",
+      "description": "Samsung Electric Company LS24D300G H1AK500000",
+      "x": 0,
+      "y": 0,
+      "physical_width": 1920,
+      "physical_height": 1080,
+      "transform": "normal",
+      "scale": 1.0,
+      "scale_filter": null,
+      "refresh": 100.0,
+      "dpms": true,
+      "adaptive_sync": false,
+      "custom_mode": false,
+      "mirror": "",
+      "ten_bit": false,
+      "active": true
+    }
+  ],
+  "config": {
+    "view-scale": 0.15,
+    "snap-threshold": 10,
+    "indicator-timeout": 500,
+    "custom-mode": [],
+    "use-desc": true,
+    "confirm-timeout": 10,
+    "profile-bound-wallpapers": true
+  }
+}

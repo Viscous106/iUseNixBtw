@@ -1,8 +1,6 @@
 { ... }:
 
-# ── Battery notification timer — ported from Arch's
-# ~/.config/systemd/user/battery-notify.{service,timer} (enabled there).
-# Runs the already-vendored dotfiles/hypr/scripts/BatteryNotify.sh.
+# Runs dotfiles/hypr/scripts/BatteryNotify.sh every 2 minutes.
 {
   systemd.user.services.battery-notify = {
     Unit = {

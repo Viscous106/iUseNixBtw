@@ -1,8 +1,3 @@
--- ~/.config/hypr/lua/animations.lua
--- Migrated from configs/animations.conf (active profile: 00-default)
--- bezier  -> hl.curve(name, { type = "bezier", points = { {x1,y1}, {x2,y2} } })
--- animation = NAME, ONOFF, SPEED, CURVE[, STYLE] -> hl.animation({ leaf, enabled, speed, bezier, style })
-
 hl.config({ animations = { enabled = true } })
 
 hl.curve("wind",      { type = "bezier", points = { { 0.05, 0.9 },  { 0.1, 1.05 } } })
@@ -18,8 +13,7 @@ hl.animation({ leaf = "windowsIn",     enabled = true, speed = 5,   bezier = "wi
 hl.animation({ leaf = "windowsOut",    enabled = true, speed = 3,   bezier = "smoothOut", style = "slide" })
 hl.animation({ leaf = "windowsMove",   enabled = true, speed = 5,   bezier = "wind",      style = "slide" })
 hl.animation({ leaf = "border",        enabled = true, speed = 1,   bezier = "liner" })
--- NOTE: original .conf used speed=180, but the Lua engine caps animation speed at 100.
--- Clamped to 100 (fastest permitted); rotating-border loop is slightly quicker than before.
+-- 100 is the Lua API's max speed.
 hl.animation({ leaf = "borderangle",   enabled = true, speed = 100, bezier = "liner",     style = "loop" })
 hl.animation({ leaf = "fade",          enabled = true, speed = 3,   bezier = "smoothOut" })
 hl.animation({ leaf = "workspaces",    enabled = true, speed = 5,   bezier = "overshot" })

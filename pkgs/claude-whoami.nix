@@ -1,21 +1,6 @@
-# ── claude-whoami ───────────────────────────────────────────────────────────
-# Reports which Anthropic org/workspace Claude Code is actually talking to.
-# Companion to pkgs/codex-whoami.nix — same question, but the two CLIs resolve
-# credentials in OPPOSITE directions, which is the whole reason both exist:
-#
-#   codex   auth.json WINS; $OPENAI_API_KEY is read only by `codex login` and
-#           ignored at runtime. Exporting a different key changes nothing.
-#   claude  the ENVIRONMENT wins; a stale exported ANTHROPIC_API_KEY silently
-#           shadows the stored login and sends requests to whatever org that
-#           key belongs to. `claude auth status` reports it as `apiKeySource`.
-#
-# Unlike the OpenAI side, identity comes back on a FREE endpoint: /v1/models
-# returns `anthropic-organization-id` and `anthropic-workspace-id` headers, so
-# this costs nothing to run (codex-whoami must make a billed call).
-#
-# Note this box authenticates via CLAUDE_CODE_OAUTH_TOKEN (an `sk-ant-oat01…`
-# OAuth token from /persist/secrets/claude_api), not an `sk-ant-api03…` API
-# key — the two take different auth headers, hence the branching below.
+# claude-whoami: which Anthropic org/workspace Claude Code uses, via the free
+# /v1/models response headers. Unlike Codex, an exported ANTHROPIC_API_KEY
+# silently shadows the stored login, so this resolves from the environment.
 {
   writeShellApplication,
   curl,
@@ -32,9 +17,7 @@ writeShellApplication {
     coreutils
   ];
 
-  # `claude` is deliberately NOT a runtimeInput: it lives in home.packages and
-  # pinning it here would drag a second claude-code closure into the store just
-  # to read four JSON fields. Degrade gracefully when it is not on PATH.
+  # `claude` not a runtimeInput: avoids a second claude-code closure.
   text = ''
     if command -v claude >/dev/null 2>&1; then
       echo "── claude auth status ──"

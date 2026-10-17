@@ -4,50 +4,15 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    # A second nixpkgs, deliberately NOT following the one above, used for
-    # exactly one package: wivrn (see system/services/vr.nix).
-    #
-    # This breaks the one-snapshot rule the other inputs follow, so it needs a
-    # reason. WiVRn refuses to connect unless the PC server and the headset
-    # client are the *same* version, and the client is a Meta Store app that
-    # auto-updates outside our control — so the server version is not really
-    # ours to pin, it is dictated by whatever the Store ships. As of writing,
-    # the Store is on 26.9 while nixos-unstable still carries 26.6.2 (it waits
-    # on a full Hydra run); nixos-unstable-small has 26.9 and is Hydra-tested,
-    # unlike master.
-    #
-    # Scoped to one leaf package, so the cost is an extra eval, not a second
-    # system closure. If nixos-unstable later catches up to whatever the Store
-    # is on, delete this input and drop back to plain pkgs.wivrn.
+    # wivrn only (system/services/vr.nix). Must match the headset client's
+    # version, which the Meta Store auto-updates; unstable-small gets it sooner.
+    # Bump with `nix flake update nixpkgs-wivrn`; drop once nixos-unstable catches up.
     nixpkgs-wivrn.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
-    # A third nixpkgs, again on the Hydra-tested small channel, for exactly one
-    # package: claude-code (wired up in overlays/default.nix).
-    #
-    # Same one-snapshot exception as nixpkgs-wivrn above, different reason.
-    # claude-code ships several releases a week; our main snapshot only moves
-    # when the whole system does, so the CLI here was stuck on 2.1.245 while
-    # upstream was on 2.1.280. Claude Code's own `claude update` "fixes" that by
-    # installing a native build into ~/.local/bin, which then shadows the Nix
-    # binary on PATH — two CLIs, only one of them declarative. Pinning the CLI
-    # separately keeps it current without dragging the rest of the closure.
-    #
-    # Deliberately NOT reusing the nixpkgs-wivrn input even though both track
-    # nixos-unstable-small: wivrn's revision is dictated by whatever the Meta
-    # Store ships and must not move when claude-code is bumped. Two inputs mean
-    # bumping the CLI cannot break the headset.
-    #
-    # Pinned by full revision rather than by `nixos-unstable-small` branch name
-    # for the same reason caelestia-shell uses git+https: resolving a branch
-    # sends the github: fetcher to api.github.com, which 403s on the
-    # unauthenticated rate limit. A 40-char rev goes straight to codeload and
-    # never touches the API. The rev below is the nixos-unstable-small channel
-    # revision, i.e. one that has passed a full Hydra run. To bump:
-    #
+    # claude-code only (overlays/default.nix): it releases faster than the main
+    # snapshot moves. Separate from nixpkgs-wivrn so bumping it can't break the headset.
+    # Rev-pinned (avoids api.github.com rate limit), so `nix flake update` won't move it; bump with:
     #   curl -sL https://channels.nixos.org/nixos-unstable-small/git-revision
-    #
-    # and paste the result here (plain `nix flake update` cannot move a
-    # rev-pinned input).
     nixpkgs-claude.url = "github:NixOS/nixpkgs/94d35c7c05087e8b07373a403c55e97d99ff9af9";  # claude-code 2.1.296
 
     home-manager = {
@@ -67,24 +32,15 @@
       url = "github:jacopone/antigravity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned nixpkgs-unstable's Hyprland (0.54.3) predates native Lua config
-    # support (live Arch is on 0.56.2). Track Hyprland's own flake instead.
-    # nixpkgs.follows added: Hyprland's own independently-locked nixpkgs drifted
-    # to a snapshot where harfbuzz/graphite2/libdatrie ABIs no longer match,
-    # breaking the hyprland-guiutils (hyprland-welcome) link step. Following our
-    # nixpkgs keeps one consistent snapshot across the whole closure.
+    # Hyprland's own flake for native Lua config; nixpkgs.follows avoids
+    # ABI mismatches (harfbuzz etc.) from a second nixpkgs snapshot.
     hyprland = {
       url = "github:hyprwm/Hyprland/v0.56.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Quickshell-based desktop shell (bar + notifications + launcher + lock),
-    # replacing waybar/swaync. Fetched over git+https rather than github: because
-    # the github: fetcher goes through api.github.com and gets 403'd by the
-    # unauthenticated rate limit. Its own flake pins quickshell (from outfoxxed's
-    # git, it is a different build to nixpkgs' quickshell) plus the caelestia CLI
-    # and m3shapes; nixpkgs.follows keeps that whole closure on our single
-    # snapshot instead of instantiating a second nixpkgs.
+    # Desktop shell (bar, notifications, launcher, lock). git+https because the
+    # github: fetcher hits the unauthenticated api.github.com rate limit.
     caelestia-shell = {
       url = "git+https://github.com/caelestia-dots/shell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -94,30 +50,15 @@
       url = "github:sadjow/codex-cli-nix";
     };
 
-    # Prebuilt nix-locate database, regenerated upstream on every channel bump.
-    #
-    # pay-respects (home/shell/zsh.nix) owns command_not_found_handler, and
-    # the way it answers "command not found" is to ask nix-locate which package
-    # ships the missing binary. With no nix-locate on PATH it cannot even try —
-    # it just prints "nix-locate or nix-search is required to find packages"
-    # and gives up, for every missing command, not just the interesting ones.
-    #
-    # Plain pkgs.nix-index ships the tool but no database: you would have to
-    # run `nix-index` by hand, which crawls the whole channel, and re-run it
-    # every time nixpkgs moves — exactly the kind of imperative drift the rest
-    # of this config exists to avoid. This input ships the database as a flake
-    # output instead, so lookups work from first boot and the index moves with
-    # `nix flake update` like every other pin here.
+    # Prebuilt nix-locate database so pay-respects' command-not-found lookups
+    # work without running `nix-index` by hand.
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # claude-lend — metered guest access to Claude through a gateway on this
-    # machine (home/dev/claude-lend.nix). Local checkout, git+file rather
-    # than path: so only git-tracked files are copied in (no .git, no
-    # grants.db). Locked by narHash like any other input: after changing the
-    # checkout, `nix flake update claude-lend` to pick the change up.
+    # Local checkout (home/dev/claude-lend.nix); git+file copies only tracked files.
+    # After changing it: `nix flake update claude-lend`.
     claude-lend = {
       url = "git+file:///home/viscous/Viscous/I-have-claude-BTW";
       inputs.nixpkgs.follows = "nixpkgs";

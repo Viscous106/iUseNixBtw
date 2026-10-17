@@ -1,6 +1,4 @@
--- ~/.config/hypr/hyprland.lua
--- Entry point, migrated from hyprland.conf.
--- Hyprland loads this INSTEAD of hyprland.conf when it exists. Modules live in lua/.
+-- Hyprland entry point (loaded instead of hyprland.conf). Modules live in lua/.
 
 local HOME = os.getenv("HOME")
 -- make `require("lua.<module>")` resolve to ~/.config/hypr/lua/<module>.lua
@@ -16,8 +14,6 @@ require("lua.animations")
 require("lua.system_settings")
 require("lua.monitors")
 
--- nwg-displays' generated layout. MUST come after lua.monitors: that module
--- registers the hotplug/lid hooks, this file carries the geometry those hooks
--- select. Resolves to ~/.config/hypr/monitors.lua via package.path.
+-- nwg-displays' generated layout: ~/.config/hypr/monitors.lua (via package.path).
 require("monitors")
 

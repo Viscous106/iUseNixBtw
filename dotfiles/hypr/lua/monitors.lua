@@ -1,17 +1,5 @@
--- ~/.config/hypr/lua/monitors.lua
--- Monitor management is MANUAL ONLY. Nothing here runs scripts/monitor-auto.sh
--- on its own any more: no hyprland.start, config.reloaded, monitor.added /
--- monitor.removed hooks, and no Lid Switch binds. Every one of those re-ran the
--- auto layout behind nwg-displays' back and reverted whatever was just Applied
--- in the GUI (SUPER+ALT+M).
---
--- Who owns what now:
---   * Geometry: nwg-displays' generated ~/.config/hypr/monitors.lua, which
---     hyprland.lua requires after this module. Hyprland applies it at parse time.
---   * Auto-detect (extend / external only / laptop only, from lid + plugged
---     state): scripts/monitor-auto.sh, run ONLY by SUPER+ALT+R via
---     scripts/Refresh.sh. See monitor-auto.sh for the behavior table.
---   * Saved profiles: SUPER+ALT+SHIFT+M (scripts/monitor-pick.sh).
---
--- Consequence: closing the lid or hotplugging no longer re-lays-out anything
--- by itself. Press SUPER+ALT+R afterwards if you want the automatic layout.
+-- Monitor layout is manual only: no hotplug/lid hooks, since they reverted
+-- nwg-displays changes. Geometry comes from nwg-displays' ~/.config/hypr/monitors.lua.
+--   SUPER+ALT+M        nwg-displays GUI
+--   SUPER+ALT+SHIFT+M  saved profiles (scripts/monitor-pick.sh)
+--   SUPER+ALT+R        auto layout from lid/plug state (scripts/monitor-auto.sh)

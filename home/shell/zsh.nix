@@ -1,10 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  # ── ZSH Configuration ───────────────────────────────────────────────────────
-  # Prompt is Starship (not powerlevel10k — Arch switched away from p10k).
-  # Most of the actual config is the real scripts from Arch's modular
-  # ~/.config/zsh/scripts/, live-editable at /persist/nixos-config/dotfiles/zsh/.
+  # ── ZSH ─────────────────────────────────────────────────────────────────────
+  # Prompt is Starship; most config lives in dotfiles/zsh/scripts (sourced below).
   programs.zsh = {
     enable                = true;
     enableCompletion      = true;
@@ -14,14 +12,8 @@
 
     oh-my-zsh = {
       enable  = true;
-      plugins = [ "git" ]; # zsh-autosuggestions/zsh-syntax-highlighting
-                                        # are the standalone modules above instead
+      plugins = [ "git" ]; # autosuggestions/highlighting: HM options above
     };
-
-    # zsh-fzf-history-search used to live here (a bonus plugin, not from the
-    # Arch setup). Removed when atuin took over Ctrl+R — see
-    # home/shell/atuin.nix. It bound the same key, so keeping both meant
-    # whichever loaded last silently won.
 
     initContent = ''
       # ── Custom keybindings ──────────────────────────────────────────────────
@@ -46,41 +38,11 @@
       unset _f
 
       # ── rsync-based cp/mv (progress bars, resumable) ─────────────────────────
-      # Defined as functions, not shellAliases: an alias named cp/mv would
-      # alias-expand before a same-named function is ever looked up, silently
-      # shadowing it. Two rsync gotchas needed fixing too:
-      #   1. Without a trailing slash on a lone source dir, rsync always
-      #      nests it under dst (dst/src/...) even when dst doesn't exist
-      #      yet — unlike cp/mv, where dst becomes a renamed copy of src in
-      #      that case. Fixed by adding the trailing slash ourselves when
-      #      there's exactly one source dir and dst isn't an existing dir.
-      #   2. `mv --remove-source-files` deletes files but never the
-      #      now-empty source directory tree it leaves behind, so a plain
-      #      rsync alias doesn't really "move" a directory.
-      #   3. A missing source used to fall straight through to rsync,
-      #      which dumps a whole stats block and a cryptic "link_stat ...
-      #      No such file or directory" for what should just be a plain
-      #      "cannot stat" error like real cp/mv give — checked up front now.
-      #   4. Fewer than 2 args (bare `mv`, or a flag-only probe like
-      #      `mv --version`) has no real source/dest to work with. Zsh's
-      #      own _mv/_cp completion calls exactly that (`mv --version`) to
-      #      sniff GNU vs BSD, so this isn't hypothetical: with no guard,
-      #      dst became "--version", srcs was empty, rsync no-ops on
-      #      --version and exits 0, and the `find ... -delete` below — fed
-      #      zero paths, so it defaulted to the current directory — silently
-      #      ran `find -delete` over whatever dir the shell was in, hanging
-      #      (and deleting empty dirs) on every mv tab-complete.
-      #      Delegating these to the real binary keeps completion, --help,
-      #      and "missing operand" errors behaving like real cp/mv.
-      #   5. The `$# < 2` guard above only catches a flag-only probe, not a
-      #      real flagged call with 2+ remaining args. zsh's own compinit
-      #      runs exactly that on every login — `mv -f -- old new`, to
-      #      rotate .zcompdump — and with 4 args it sailed past that guard
-      #      straight into the srcs/dst split below, where "-f" and "--"
-      #      became "source paths" that obviously don't exist. Same
-      #      "cannot stat" false failure as gotcha 4, different shape: any
-      #      argument starting with "-" means this isn't a plain cp/mv we
-      #      can rsync, so bail to the real binary before the arg split.
+      # Functions, not aliases (an alias would shadow them). Any flag or <2 args
+      # goes to the real binary: zsh completion probes `mv --version` and
+      # compinit runs `mv -f -- a b`. A lone source dir gets a trailing / so it
+      # behaves like cp (dst becomes the copy, not dst/src). Missing sources
+      # fail with a plain "cannot stat" before rsync runs.
       _rsync_transfer() {
         local remove=$1 name=cp; shift
         [[ $remove == 1 ]] && name=mv
@@ -102,12 +64,8 @@
           srcs[1]="''${srcs[1]%/}/"
         fi
         if [[ $remove == 1 ]]; then
-          # Belt-and-braces for gotcha 4: `find` with zero paths falls back to
-          # the current directory, so the prune list is built from the source
-          # *directories* only and skipped entirely when empty. An earlier
-          # version of this swept every empty dir under cwd, which is what
-          # deleted refs/ out of the bare repos in ~/.cache/nix and left nix
-          # fetching flakes with "could not find repository".
+          # Prune empty dirs only under the source dirs: `find` with zero paths
+          # would default to cwd (this once deleted refs/ in ~/.cache/nix repos).
           local prune=()
           for s in "''${srcs[@]}"; do [[ -d $s ]] && prune+=("$s"); done
           rsync -ahP --info=progress2,stats2 --stats --remove-source-files "''${srcs[@]}" "$dst" || return
@@ -160,10 +118,8 @@
     '';
   };
 
-  # ── Aliases ported verbatim from ~/.config/zsh/scripts/alias.sh, plus a few
-  # Nix-side additions (cfg/rebuild/update, better ls/cat/grep/find) ─────────
+  # ── Aliases ─────────────────────────────────────────────────────────────────
   home.shellAliases = {
-    # From Arch's alias.sh
     ls      = "eza --icons";
     l       = "ls -l";
     la      = "ls -a";
@@ -171,8 +127,6 @@
     lt      = "ls --tree";
     bluefriends = "pactl load-module module-combine-sink sink_name=combined";
     ff      = "fastfetch";
-    # On Arch this managed ~/.dotfiles as a bare repo over $HOME. On NixOS the
-    # config itself is a normal git repo, so `config` just operates on it directly.
     config  = "git -C /persist/nixos-config";
     n       = "nvim";
     speed   = "speedtest";
@@ -183,7 +137,6 @@
     ca      = "config add";
     cl      = "config log --graph --all --decorate --oneline --format=format:'%C(bold 141)%h%C(reset) - %C(148)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold 117)- %an%C(reset)%C(bold 203)%d%C(reset)'";
 
-    # Nix-side additions, not from Arch's alias.sh, kept as harmless extras
     v       = "nvim";
     vi      = "nvim";
     cat     = "bat --style=numbers --color=always";
@@ -197,18 +150,10 @@
     gwa     = "git worktree add";
     gwr     = "git worktree remove";
     gwp     = "git worktree prune";
-    # Rescued from dotfiles/zsh/scripts/alias.sh before it was deleted: that file was
-    # never in the source loop above, so these two had never actually worked.
     gfa     = "git fetch --all && for branch in $(git branch --format=\"%(refname:short)\"); do git checkout $branch && git pull --rebase; done";
     cfg     = "nvim /persist/nixos-config/";
-    # No `#nix` on the end: that attribute is the portable-USB host, so running
-    # this while booted from the internal NVMe switched the laptop onto the USB
-    # profile — GRUB-as-removable instead of systemd-boot, and an fstab pointing
-    # /boot at by-label/EFI, which does not exist here. systemd promptly
-    # unmounted /boot and the next rebuild could not install a bootloader.
-    # Bare `--flake <dir>` resolves by hostname, which is correct on both:
-    # configuration.nix sets hostName "nix", hosts/nvme.nix
-    # mkForce's "laptop".
+    # No `#nix` suffix: that's the USB host and breaks the NVMe laptop's boot.
+    # Bare --flake picks by hostname (hosts/usb.nix "nix", hosts/nvme.nix "laptop").
     rebuild = "sudo nixos-rebuild switch --flake /persist/nixos-config";
     update  = "nix flake update /persist/nixos-config && rebuild";
     tx      = "tmuxifier";
@@ -216,7 +161,7 @@
     scrible = "tjournal";
   };
 
-  # ── zshenv / zprofile — ported verbatim from Arch ────────────────────────
+  # ── zshenv / zprofile ───────────────────────────────────────────────────
   programs.zsh.envExtra = ''
     export PATH="/run/wrappers/bin:$PATH"
     . "$HOME/.cargo/env"
@@ -230,40 +175,15 @@
     export PATH="$PATH:$HOME/.local/bin"
   '';
 
-  # ── Helper Tools (Native Integrations) ──────────────────────────────────────
+  # ── Helper tools ────────────────────────────────────────────────────────────
   programs.fzf.enable = true;
-  # Yield Ctrl-R to atuin explicitly instead of relying on load order.
-  #
-  # Both modules bind Ctrl-R, and home-manager now warns about the clash. It
-  # resolved itself in our favour anyway — fzf inits at mkOrder 910, atuin at
-  # the default 1000, so atuin bound last and won — but that is a race decided
-  # by two numbers neither module promises to keep.
-  #
-  # This is the supported way out. The option exports FZF_CTRL_R_COMMAND="",
-  # and fzf's generated init guards its binding with
-  # `if [[ ${FZF_CTRL_R_COMMAND-x} != "" ]]`: unset substitutes "x" and binds,
-  # set-but-empty substitutes "" and skips. fzf never defines the widget, so
-  # there is nothing left to race.
-  #
-  # Scoped to zsh, and only the history widget — Ctrl-T and the Alt-C cd widget
-  # (rebound to Alt-R in dotfiles/zsh/scripts/keybinds.sh) are untouched.
+  # Empty = fzf skips its Ctrl-R binding, so atuin owns it without a load-order
+  # race. Ctrl-T and Alt-C are untouched.
   programs.fzf.historyWidget.zsh.command = "";
   programs.zoxide.enable = true;
 
-  # nix-locate, the package-lookup backend pay-respects shells out to when a
-  # command is not found. The flake input (see flake.nix) carries a prebuilt
-  # database, so this needs no `nix-index` crawl and no cron job to refresh it.
-  #
-  # The module defaults `enable` and `symlinkToCacheHome` to true, which is what
-  # drops the database at ~/.cache/nix-index/files where nix-locate looks for
-  # it. Only the zsh integration has to be turned off by hand: it sources
-  # nix-index's own command-not-found.sh, which defines command_not_found_handler
-  # — the exact hook pay-respects claims in initExtra above. Both modules append
-  # to the same zsh init, so leaving this on means whichever lands last silently
-  # wins. We want the database, not a second handler racing for the hook.
+  # nix-index-database supplies the prebuilt DB pay-respects queries. Its zsh
+  # hook would define a second command_not_found_handler racing pay-respects'.
   programs.nix-index.enableZshIntegration = false;
-  # tmuxifier is a real nixpkgs package now (was vendored as a raw git clone
-  # from Arch before that was true) — see dotfiles/tmuxifier for just the
-  # personal layouts that vendoring left behind.
   home.packages = [ pkgs.starship pkgs.pay-respects pkgs.tmuxifier ];
 }

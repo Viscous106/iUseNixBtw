@@ -1,7 +1,4 @@
--- ~/.config/hypr/lua/startup_apps.lua
--- Migrated from configs/Startup_Apps.conf
--- exec-once -> hl.exec_cmd(...) inside the hyprland.start hook.
--- (Only the uncommented exec-once lines are carried over.)
+-- Login autostart (hyprland.start hook).
 
 local U = require("lua.user_defaults")
 local scriptsDir = U.scriptsDir
@@ -9,63 +6,30 @@ local scriptsDir = U.scriptsDir
 hl.on("hyprland.start", function()
   hl.exec_cmd("keyd-application-mapper -d")
 
-  -- Reapplies the last wallpaper through the same apply.sh the picker uses,
-  -- so login cannot diverge from what picking a wallpaper does. No Qt startup.
+  -- Reapply the last wallpaper via the picker's own apply path (no Qt startup).
   hl.exec_cmd("wallpaper-picker --restore")
 
-  -- environment / session
-  -- HYPRLAND_INSTANCE_SIGNATURE is what xdg-desktop-portal-hyprland uses to find
-  -- the compositor socket when dbus activates it — without it in the activation
-  -- environment the portal comes up unable to talk to Hyprland (screenshare and
-  -- the file picker break). XDG_SESSION_TYPE is what portals/toolkits check to
-  -- decide wayland vs x11. Both were previously missing on every session.
-  -- (DISPLAY is deliberately left out: XWayland may not be up yet at exec-once
-  -- time, and exporting an unset variable just errors.)
+  -- Session env for dbus/systemd. The portal needs HYPRLAND_INSTANCE_SIGNATURE to
+  -- find Hyprland; DISPLAY is left out since XWayland may not be up yet.
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
 
-  -- Activate graphical-session.target.
-  -- xdg-desktop-portal.service declares `Requisite=graphical-session.target`, and
-  -- Requisite (unlike Requires) does not START the dependency — it fails outright
-  -- if it is not ALREADY active. graphical-session.target is RefuseManualStart=yes,
-  -- so it can only be pulled in by another unit; with systemd.enable = false there
-  -- is no hyprland-session.target to do that. Net effect: the target stayed dead,
-  -- every portal D-Bus activation died with "Dependency failed for Portal service",
-  -- and org.freedesktop.portal.ScreenCast never existed — which is the interface
-  -- browser screen sharing (getDisplayMedia) calls, so "share entire screen" in
-  -- Chrome/Firefox failed on every proctoring and video-call site.
-  -- NixOS ships nixos-fake-graphical-session.target for exactly this case: it is
-  -- BindsTo=graphical-session.target, so starting it activates the target without
-  -- adopting any of the hyprland-session.target machinery systemd.enable = false
-  -- deliberately avoids. Nothing is enabled into the target, so the only effect
-  -- is that the portals can D-Bus activate on demand.
-  -- Must run AFTER the two env lines above: the portal backend reads
-  -- HYPRLAND_INSTANCE_SIGNATURE from the activation environment to find Hyprland.
+  -- xdg-desktop-portal is Requisite=graphical-session.target, which nothing starts
+  -- with systemd.enable = false; without it browser screen sharing fails. The fake
+  -- target activates it. Must run after the env imports above.
   hl.exec_cmd("systemctl --user start nixos-fake-graphical-session.target")
-  -- (removed) KeybindsLayoutInit.sh rebound SUPER+J/K via `hyprctl keyword bind`,
-  -- which the Lua config's non-legacy parser rejects. It had been a no-op for as
-  -- long as this config has been Lua: `hyprctl binds` shows no J or K bind at all.
 
-  -- bar + dropdown terminal
-  -- Caelestia (Quickshell) replaces waybar. It is one process for the whole
-  -- shell: bar, notification daemon, launcher and OSDs — which is why swaync
-  -- is no longer started below. Waybar and its config tree have been removed
-  -- entirely; recovering it means reverting the commit that deleted them.
+  -- Caelestia shell: bar, notifications, launcher and OSDs in one process.
   hl.exec_cmd("caelestia-shell")
-  -- ScreenState.bar starts false once bar.persistent is off, so the bar would
-  -- come up hidden. This shows it once, after waiting for the shell's IPC.
+  -- With bar.persistent off the bar starts hidden; this shows it once IPC is up.
   hl.exec_cmd(scriptsDir .. "/caelestia-bar-init.sh")
-  -- --prewarm: spawn it hidden in the scratchpad so the first SUPER+SHIFT+Return
-  -- is instant. Without the flag it slides into view at login.
+  -- --prewarm: start hidden so the first SUPER+SHIFT+Return is instant.
   hl.exec_cmd(scriptsDir .. "/Dropterminal.sh --prewarm kitty")
 
-  -- polkit agent
-  -- Polkit.sh hardcodes /usr/lib and /usr/libexec paths that don't exist on
-  -- NixOS; Polkit-NixOS.sh (already in this repo) finds the real /nix/store
-  -- path instead and is the one that actually works here.
+  -- polkit agent (NixOS variant resolves the agent from /nix/store)
   hl.exec_cmd(scriptsDir .. "/Polkit-NixOS.sh")
 
-  -- tray applets (idle/lock is handled by caelestia: general.idle in caelestia-quickshell.nix)
+  -- tray applets (idle/lock is caelestia's general.idle, home/desktop/caelestia.nix)
   hl.exec_cmd("nm-applet --indicator")
   hl.exec_cmd("kdeconnect")
   hl.exec_cmd("blueman-applet")
@@ -74,14 +38,11 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("wl-paste --type text --watch cliphist store")
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
-  -- convertible: accelerometer rotation + tablet-mode input muting.
-  -- `init` first, so the session always starts unrotated with the keyboard live
-  -- even if the last session died mid-fold; it then corrects itself if we
-  -- actually booted folded. The daemon self-locks, so a config reload that
-  -- re-fires hyprland.start will not stack a second one.
+  -- convertible: `init` resets rotation/keyboard in case the last session died
+  -- folded; the daemon self-locks, so reloads don't stack copies.
   hl.exec_cmd(scriptsDir .. "/auto-rotate.sh init")
   hl.exec_cmd(scriptsDir .. "/auto-rotate.sh daemon")
 
-  -- resume screen colour mode (monitor layout is handled automatically by lua/monitors.lua)
+  -- resume screen colour mode
   hl.exec_cmd(scriptsDir .. "/ScreenMode.sh init")
 end)

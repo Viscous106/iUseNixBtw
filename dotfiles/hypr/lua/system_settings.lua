@@ -1,8 +1,3 @@
--- ~/.config/hypr/lua/system_settings.lua
--- Migrated from configs/SystemSettings.conf
--- All keyword sections -> hl.config{}. The `gesture =` lines become hl.gesture() calls
--- (the modern equivalent); workspace_swipe_* stay under the gestures section.
-
 hl.config({
   dwindle = {
     preserve_split      = true,
@@ -93,9 +88,7 @@ hl.config({
 -- 3-finger horizontal swipe -> switch workspace
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
--- 4-finger up/down -> cursor zoom in/out.
--- The $(...) + awk is preserved verbatim inside a shell string (exec_cmd runs via sh -c,
--- so $2 is an awk field and $(...) evaluates at trigger time). Long-bracket = no escaping.
+-- 4-finger up/down -> cursor zoom in/out (runs via sh -c, so $(...) is evaluated per swipe).
 hl.gesture({
   fingers = 4, direction = "up",
   action = function()
