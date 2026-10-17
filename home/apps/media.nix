@@ -5,8 +5,7 @@
   home.packages = with pkgs; [
     (mpv.override { scripts = [ mpvScripts.mpris ]; })  # media keys via MPRIS
     cava
-    # Streaming / recording
-    obs-studio          # screen recording & streaming
+    # Streaming
     streamlink          # pull live streams into a local player
 
     # Downloaders

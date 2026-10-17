@@ -32,10 +32,6 @@ home/scaler-content/
 dotfiles/tmux/plugins/
 dotfiles/btop/themes/caelestia.theme
 dotfiles/spicetify/Themes/caelestia/
-dotfiles/obs-studio/plugin_config/obs-websocket/
-dotfiles/obs-studio/plugin_config/rtmp-services/
-dotfiles/obs-studio/plugin_manager/
-dotfiles/obs-studio/basic/scenes/
 
 # 0-byte mount stubs the Claude Code sandbox creates for deny-listed paths
 .bash_profile

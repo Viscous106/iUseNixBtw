@@ -41,7 +41,7 @@ esac
 # Feed the tmux status bar the same event we are about to toast. This script
 # already resolves $TMUX_PANE for the notification body, so the pane is known;
 # agent-state.sh turns it into a chip in status-right. See
-# home/tmux/scripts/agent-state.sh. Best-effort -- never block the notification.
+# dotfiles/tmux/scripts/agent-state.sh. Best-effort -- never block the notification.
 agent_state=$HOME/.config/tmux/scripts/agent-state.sh
 if [ -n "$state" ] && [ -x "$agent_state" ]; then
   "$agent_state" set "$state" || true

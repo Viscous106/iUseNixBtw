@@ -39,7 +39,6 @@ let
 
     # Apps
     "cava"                         = "cava";
-    "obs-studio"                   = "obs-studio";
     "spicetify"                    = "spicetify";
 
     # AI agents. Only static pieces: the rest of ~/.config/claude is runtime
