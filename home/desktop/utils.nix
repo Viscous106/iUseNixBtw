@@ -27,7 +27,6 @@
 
     # ── Disk / calculator / docs / accessibility ────────────────────────────
     gparted                   # partition editor
-    gnome-calculator          # GNOME calculator
     qalculate-gtk             # scientific/unit calculator
     yelp                      # GNOME help viewer
     gnome-tecla               # keyboard-layout viewer (`tecla` is unrelated)

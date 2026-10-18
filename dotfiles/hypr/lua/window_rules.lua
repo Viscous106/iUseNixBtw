@@ -1,8 +1,4 @@
 hl.window_rule({
-  match = { class = "^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr|[Ff]irefox-bin)$" },
-  tag = "+browser",
-})
-hl.window_rule({
   match = { class = "^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$" },
   tag = "+browser",
 })
@@ -264,10 +260,6 @@ hl.window_rule({
 })
 hl.window_rule({
   match = { class = "([Zz]oom|onedriver|onedriver-launcher)$" },
-  float = true,
-})
-hl.window_rule({
-  match = { class = "(org.gnome.Calculator)", title = "(Calculator)" },
   float = true,
 })
 hl.window_rule({

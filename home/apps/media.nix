@@ -37,9 +37,7 @@
 
     # GNOME Circle apps
     decibels             # audio player
-    showtime             # video player
     loupe                # image viewer
-    papers               # document viewer
     simple-scan          # scanner front-end
     snapshot             # webcam/photo booth app
     sushi                # Nautilus quick-preview (GNOME Files)
