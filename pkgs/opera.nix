@@ -121,11 +121,11 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "opera";
-  version = "135.0.5973.76";
+  version = "137.0.6036.63";
 
   src = fetchurl {
     url = "https://get.geo.opera.com/pub/opera/desktop/${finalAttrs.version}/linux/opera-stable_${finalAttrs.version}_amd64.deb";
-    hash = "sha256-bqqiFFVB+RGbGT3QrwTV8i+3+OiATKrLMPb2Hic1+wM=";
+    hash = "sha256-uw7cCBUIm+Z88NhP/Uxj6BLzaXw1S8qJNr+wkChR5+E=";
   };
 
   # Matches google-chrome: shebang patching misbehaves under strictDeps here.
