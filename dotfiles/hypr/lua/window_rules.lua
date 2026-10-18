@@ -7,19 +7,7 @@ hl.window_rule({
   tag = "+browser",
 })
 hl.window_rule({
-  match = { class = "^([Cc]hromium)$" },
-  tag = "+browser",
-})
-hl.window_rule({
-  match = { class = "^([Mm]icrosoft-edge(-stable|-beta|-dev|-unstable))$" },
-  tag = "+browser",
-})
-hl.window_rule({
   match = { class = "^(Brave-browser(-beta|-dev|-unstable)?)$" },
-  tag = "+browser",
-})
-hl.window_rule({
-  match = { class = "^([Tt]horium-browser|[Cc]achy-browser)$" },
   tag = "+browser",
 })
 hl.window_rule({
@@ -31,71 +19,19 @@ hl.window_rule({
   tag = "+browser",
 })
 hl.window_rule({
-  match = { title = "^(KooL Quick Cheat Sheet)$" },
-  tag = "+KooL_Cheat",
-})
-hl.window_rule({
-  match = { title = "^(KooL Hyprland Settings)$" },
-  tag = "+KooL_Settings",
-})
-hl.window_rule({
   match = { class = "^(nwg-displays|nwg-look)$" },
-  tag = "+KooL-Settings",
+  tag = "+nwg",
 })
 hl.window_rule({
   match = { class = "^(Alacritty|kitty|kitty-dropterm)$" },
   tag = "+terminal",
 })
 hl.window_rule({
-  match = { class = "^([Tt]hunderbird|org.gnome.Evolution)$" },
-  tag = "+email",
-})
-hl.window_rule({
-  match = { class = "^(eu.betterbird.Betterbird)$" },
-  tag = "+email",
-})
-hl.window_rule({
-  match = { class = "^(codium|codium-url-handler|VSCodium)$" },
-  tag = "+projects",
-})
-hl.window_rule({
-  match = { class = "^(VSCode|code-url-handler)$" },
-  tag = "+projects",
-})
-hl.window_rule({
-  match = { class = "^(jetbrains-.+)$" },
-  tag = "+projects",
-})
-hl.window_rule({
-  match = { class = "^(com.obsproject.Studio)$" },
-  tag = "+screenshare",
-})
-hl.window_rule({
   match = { class = "^([Dd]iscord|[Ww]ebCord|[Vv]esktop)$" },
   tag = "+im",
 })
 hl.window_rule({
-  match = { class = "^([Ff]erdium)$" },
-  tag = "+im",
-})
-hl.window_rule({
-  match = { class = "^([Ww]hatsapp-for-linux)$" },
-  tag = "+im",
-})
-hl.window_rule({
-  match = { class = "^(ZapZap|com.rtosta.zapzap)$" },
-  tag = "+im",
-})
-hl.window_rule({
   match = { class = "^(org.telegram.desktop|io.github.tdesktop_x64.TDesktop)$" },
-  tag = "+im",
-})
-hl.window_rule({
-  match = { class = "^(teams-for-linux)$" },
-  tag = "+im",
-})
-hl.window_rule({
-  match = { class = "^(im.riot.Riot|Element)$" },
   tag = "+im",
 })
 hl.window_rule({
@@ -111,24 +47,8 @@ hl.window_rule({
   tag = "+gamestore",
 })
 hl.window_rule({
-  match = { title = "^([Ll]utris)$" },
-  tag = "+gamestore",
-})
-hl.window_rule({
   match = { class = "^([Tt]hunar|org.gnome.Nautilus|[Pp]cmanfm-qt)$" },
   tag = "+file-manager",
-})
-hl.window_rule({
-  match = { class = "^(app.drey.Warp)$" },
-  tag = "+file-manager",
-})
-hl.window_rule({
-  match = { class = "^([Ww]aytrogen)$" },
-  tag = "+wallpaper",
-})
-hl.window_rule({
-  match = { class = "^([Aa]udacious)$" },
-  tag = "+multimedia",
 })
 hl.window_rule({
   match = { class = "^([Mm]pv|vlc)$" },
@@ -139,23 +59,7 @@ hl.window_rule({
   tag = "+settings",
 })
 hl.window_rule({
-  match = { class = "^(wihotspot(-gui)?)$" },
-  tag = "+settings",
-})
-hl.window_rule({
-  match = { class = "^([Bb]aobab|org.gnome.[Bb]aobab)$" },
-  tag = "+settings",
-})
-hl.window_rule({
-  match = { class = "^(gnome-disks|wihotspot(-gui)?)$" },
-  tag = "+settings",
-})
-hl.window_rule({
   match = { title = "(Kvantum Manager)" },
-  tag = "+settings",
-})
-hl.window_rule({
-  match = { class = "^(file-roller|org.gnome.FileRoller)$" },
   tag = "+settings",
 })
 hl.window_rule({
@@ -175,20 +79,8 @@ hl.window_rule({
   tag = "+settings",
 })
 hl.window_rule({
-  match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" },
-  tag = "+settings",
-})
-hl.window_rule({
   match = { class = "^([Rr]ofi)$" },
   tag = "+settings",
-})
-hl.window_rule({
-  match = { class = "^(gnome-system-monitor|org.gnome.SystemMonitor|io.missioncenter.MissionCenter)$" },
-  tag = "+viewer",
-})
-hl.window_rule({
-  match = { class = "^(evince)$" },
-  tag = "+viewer",
 })
 hl.window_rule({
   match = { class = "^(eog|org.gnome.Loupe)$" },
@@ -203,10 +95,6 @@ hl.window_rule({
   opacity = "1 override 1 override",
 })
 hl.window_rule({
-  match = { tag = "KooL_Cheat*" },
-  center = true,
-})
-hl.window_rule({
   match = { class = "([Tt]hunar)", title = "negative:(.*[Tt]hunar.*)" },
   center = true,
 })
@@ -215,11 +103,7 @@ hl.window_rule({
   center = true,
 })
 hl.window_rule({
-  match = { tag = "KooL-Settings*" },
-  center = true,
-})
-hl.window_rule({
-  match = { title = "^(Keybindings)$" },
+  match = { tag = "nwg*" },
   center = true,
 })
 hl.window_rule({
@@ -227,24 +111,8 @@ hl.window_rule({
   center = true,
 })
 hl.window_rule({
-  match = { class = "^([Ww]hatsapp-for-linux|ZapZap|com.rtosta.zapzap)$" },
-  center = true,
-})
-hl.window_rule({
-  match = { class = "^([Ff]erdium)$" },
-  center = true,
-})
-hl.window_rule({
   match = { title = "^(Picture-in-Picture)$" },
   move = "72% 7%",
-})
-hl.window_rule({
-  match = { tag = "KooL_Cheat*" },
-  float = true,
-})
-hl.window_rule({
-  match = { tag = "wallpaper*" },
-  float = true,
 })
 hl.window_rule({
   match = { tag = "settings*" },
@@ -255,11 +123,7 @@ hl.window_rule({
   float = true,
 })
 hl.window_rule({
-  match = { tag = "KooL-Settings*" },
-  float = true,
-})
-hl.window_rule({
-  match = { class = "([Zz]oom|onedriver|onedriver-launcher)$" },
+  match = { tag = "nwg*" },
   float = true,
 })
 hl.window_rule({
@@ -271,10 +135,6 @@ hl.window_rule({
   float = true,
 })
 hl.window_rule({
-  match = { class = "^([Ff]erdium)$" },
-  float = true,
-})
-hl.window_rule({
   match = { title = "^(Picture-in-Picture)$" },
   float = true,
 })
@@ -285,10 +145,6 @@ hl.window_rule({
 hl.window_rule({
   match = { title = "^(Authentication Required)$" },
   center = true,
-})
-hl.window_rule({
-  match = { class = "(codium|codium-url-handler|VSCodium)", title = "negative:(.*codium.*|.*VSCodium.*)" },
-  float = true,
 })
 hl.window_rule({
   match = { class = "^([Ss]team)$", title = "negative:^([Ss]steam)$" },
@@ -331,24 +187,8 @@ hl.window_rule({
   size = "70% 60%",
 })
 hl.window_rule({
-  match = { title = "^(SDDM Background)$" },
-  float = true,
-})
-hl.window_rule({
-  match = { title = "^(SDDM Background)$" },
-  center = true,
-})
-hl.window_rule({
-  match = { title = "^(SDDM Background)$" },
-  size = "16% 12%",
-})
-hl.window_rule({
   match = { tag = "browser*" },
   opacity = "0.99 0.8",
-})
-hl.window_rule({
-  match = { tag = "projects*" },
-  opacity = "0.9 0.8",
 })
 hl.window_rule({
   match = { tag = "im*" },
@@ -375,44 +215,16 @@ hl.window_rule({
   opacity = "0.82 0.75",
 })
 hl.window_rule({
-  match = { tag = "wallpaper*" },
-  opacity = "0.9 0.7",
-})
-hl.window_rule({
   match = { class = "^(gedit|org.gnome.TextEditor|mousepad)$" },
   opacity = "0.8 0.7",
-})
-hl.window_rule({
-  match = { class = "^(deluge)$" },
-  opacity = "0.9 0.8",
 })
 hl.window_rule({
   match = { title = "^(Picture-in-Picture)$" },
   opacity = "0.95 0.75",
 })
 hl.window_rule({
-  match = { class = "^(code)$" },
-  opacity = "0.9",
-})
-hl.window_rule({
-  match = { tag = "KooL_Cheat*" },
-  size = "65% 90%",
-})
-hl.window_rule({
-  match = { tag = "wallpaper*" },
-  size = "70% 70%",
-})
-hl.window_rule({
   match = { tag = "settings*" },
   size = "70% 70%",
-})
-hl.window_rule({
-  match = { class = "^([Ww]hatsapp-for-linux|ZapZap|com.rtosta.zapzap)$" },
-  size = "60% 70%",
-})
-hl.window_rule({
-  match = { class = "^([Ff]erdium)$" },
-  size = "60% 70%",
 })
 hl.window_rule({
   match = { title = "^(Picture-in-Picture)$" },
@@ -429,18 +241,6 @@ hl.window_rule({
 hl.window_rule({
   match = { tag = "games*" },
   fullscreen = true,
-})
-hl.window_rule({
-  match = { class = "^(jetbrains-.*)" },
-  no_initial_focus = true,
-})
-hl.window_rule({
-  match = { title = "^(wind.*)$" },
-  no_initial_focus = true,
-})
-hl.window_rule({
-  match = { class = "^(code)$" },
-  opacity = "0.8",
 })
 
 -- ============================ LAYER RULES ============================
