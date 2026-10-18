@@ -24,7 +24,7 @@ lib/import-dir.nix   auto-import helper
 system/              NixOS (both hosts)
   core/              nix settings + GC, base system, user account
   hardware/          kernel/firmware/power, audio, keyboard, touchscreen, ASUS
-  services/          databases, virtualisation, gaming, VR, proton, atuin server
+  services/          databases, virtualisation, gaming, Proton Drive mount, atuin server
   network.nix        NetworkManager/iwd, DNS, Tailscale, SSH, firewall
   desktop.nix        Hyprland, portals, fonts, Thunar, bluetooth
   packages.nix       system-wide CLI tools
@@ -34,7 +34,7 @@ home/                home-manager
   shell/             zsh, tmux, atuin, git, gpg, kitty, CLI tools
   dev/               neovim, toolchains, python, web3, AI agents
   apps/              browsers, media, misc
-  services/          user daemons (hyprwhspr, ydotoold, wayvr, battery)
+  services/          user daemons (hyprwhspr, ydotoold, battery)
   dotfiles.nix       every live-edit symlink, in one table
   default.nix        identity, web3 knobs, secrets activation
 
@@ -81,8 +81,6 @@ Exceptions, each explained in `flake.nix`:
   the system. `nix flake update` does not move it; bump with
   `curl -sL https://channels.nixos.org/nixos-unstable-small/git-revision`
   and paste the rev into `flake.nix`.
-- **`nixpkgs-wivrn`** — WiVRn must match the headset app's version, so it
-  tracks `nixos-unstable-small` separately.
 - **`hyprland`** — pinned to a release tag (Lua config needs ≥ 0.56). The glaze
   pin it needs is in `overlays/default.nix`.
 - **`atuin`** — patched locally (`pkgs/atuin-*.patch`), so it builds from source.
