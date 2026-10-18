@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   # All four listen on loopback only.
@@ -29,4 +29,7 @@
   };
 
   environment.systemPackages = [ pkgs.mongosh ];  # the mongodb module doesn't add it
+
+  # Installed but not started at boot: `sudo systemctl start postgresql` (or mysql, mongodb, redis).
+  systemd.services = lib.genAttrs [ "postgresql" "mysql" "mongodb" "redis" ] (_: { wantedBy = lib.mkForce [ ]; });
 }

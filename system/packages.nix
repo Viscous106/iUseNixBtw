@@ -29,7 +29,6 @@
     # Networking / diagnostics
     iptables        # CLI only; the active firewall is networking.firewall
     dnsmasq
-    nmap
     mtr
     net-tools
     netcat-openbsd
@@ -37,17 +36,6 @@
     wirelesstools
     wpa_supplicant  # wpa_cli for manual debugging
     wireguard-tools
-
-    # Security / pentesting
-    bettercap
-    thc-hydra       # the login cracker (pkgs.hydra is the Nix CI server)
-    proxychains-ng
-    torsocks
-
-    # Calendar / CalDAV
-    gcalcli
-    khal
-    vdirsyncer
 
     # Toys
     asciiquarium

@@ -76,16 +76,5 @@
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   networking.firewall.allowedTCPPorts   = [ 8443 ];  # claude-lend LAN listener
 
-  # ── LAN / privacy services ────────────────────────────────────────────────
-  services.tor = {
-    enable = true;
-    client.enable = true;  # SOCKS on 127.0.0.1:9050 for torsocks / proxychains
-  };
-
-  # WS-Discovery, so the file manager sees Windows-style hosts.
-  services.samba-wsdd = {
-    enable       = true;
-    discovery    = true;
-    openFirewall = true;
-  };
+  networking.modemmanager.enable = false;  # no cellular modem
 }

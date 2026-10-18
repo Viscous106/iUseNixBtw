@@ -31,7 +31,6 @@ home/scaler-content/
 # Runtime state apps write back through the live-edit symlinks
 dotfiles/tmux/plugins/
 dotfiles/btop/themes/caelestia.theme
-dotfiles/spicetify/Themes/caelestia/
 
 # 0-byte mount stubs the Claude Code sandbox creates for deny-listed paths
 .bash_profile

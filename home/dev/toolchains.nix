@@ -3,7 +3,6 @@
 # Language toolchains & dev CLI tools. Solidity/EVM lives in home/dev/web3.nix.
 {
   home.packages = with pkgs; [
-    mysql84     # client; the MariaDB server is system/services/databases.nix
     kind        # local kubernetes in docker
     kubectl
     vite
@@ -15,7 +14,6 @@
     # rustup, not pkgs.rustc/cargo: zsh.nix sources ~/.cargo/env, which
     # rustup-init creates.
     rustup
-    rustlings
     sccache
 
     # ── JVM ─────────────────────────────────────────────────────────────
@@ -40,7 +38,7 @@
     dart-sass
 
     # ── Embedded / keyboard firmware ────────────────────────────────────
-    arduino-cli  # qmk CLI: system/services/gaming.nix
+    arduino-cli
 
     # ── Git extras / VCS ────────────────────────────────────────────────
     git-filter-repo

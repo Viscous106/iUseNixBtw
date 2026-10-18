@@ -5,7 +5,7 @@
   users.users.${user.username} = {
     isNormalUser = true;
     shell        = pkgs.zsh;
-    extraGroups  = [ "wheel" "networkmanager" "video" "audio" "input" "libvirtd" ];
+    extraGroups  = [ "wheel" "networkmanager" "video" "audio" "input" ];
     # Applied only when the account is created, so `passwd` keeps working.
     initialHashedPassword = user.hashedPassword;
   };

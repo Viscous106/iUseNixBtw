@@ -19,8 +19,5 @@
     # Networking / testing utilities
     speedtest-cli   # not `speedtest`, an unrelated GTK4 app
     prettyping
-
-    # GIS
-    qgis
   ];
 }

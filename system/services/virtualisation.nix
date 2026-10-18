@@ -8,14 +8,8 @@
 
   virtualisation.podman.enable = true;  # no dockerCompat: real docker owns `docker`
 
-  virtualisation.libvirtd.enable = true;  # user is in the libvirtd group (core/users.nix)
-  programs.virt-manager.enable = true;
-
   environment.systemPackages = with pkgs; [
     docker-compose  # standalone `docker-compose` (docker compose works too)
     docker-buildx
-    lazydocker
-    distrobox
-    swtpm
   ];
 }

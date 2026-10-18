@@ -39,7 +39,6 @@ let
 
     # Apps
     "cava"                         = "cava";
-    "spicetify"                    = "spicetify";
 
     # AI agents. Only static pieces: the rest of ~/.config/claude is runtime
     # state. settings.json is linked by an activation script instead (see

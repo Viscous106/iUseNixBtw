@@ -11,12 +11,8 @@
   services.udev.packages = [ pkgs.openrgb ];
   boot.kernelModules     = [ "i2c-dev" ];
 
-  # QMK keyboards: udev access for flashing, plus the CLI.
-  hardware.keyboard.qmk.enable = true;
-
   environment.systemPackages = with pkgs; [
     openrgb
     openrgb-plugin-effects
-    qmk
   ];
 }

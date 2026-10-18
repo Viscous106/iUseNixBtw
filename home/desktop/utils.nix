@@ -28,10 +28,6 @@
     # ── Disk / calculator / docs / accessibility ────────────────────────────
     gparted                   # partition editor
     qalculate-gtk             # scientific/unit calculator
-    yelp                      # GNOME help viewer
-    gnome-tecla               # keyboard-layout viewer (`tecla` is unrelated)
-    orca                      # screen reader
-    appmenu-glib-translator   # global-menu (appmenu) translator for GTK apps
 
     # ── Misc utilities ───────────────────────────────────────────────────────
     arandr                    # GUI frontend for xrandr
