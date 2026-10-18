@@ -1,18 +1,10 @@
 { pkgs, ... }:
 
-# ── Proton suite — VPN, Mail Bridge, Drive, Pass ──────────────────────────────
+# ── Proton suite — VPN, Drive, Pass ──────────────────────────────
 {
   # ── VPN ─────────────────────────────────────────────────────────────────────
   # No NixOS module exists; the proton-vpn app (package below) drives
   # NetworkManager over D-Bus, using networkmanager-openvpn / built-in WireGuard.
-
-  # ── Mail Bridge ─────────────────────────────────────────────────────────────
-  # No keyring on this system: the bridge keeps its credentials in `pass` (GPG).
-  services.protonmail-bridge = {
-    enable   = true;
-    logLevel = "info";
-    path     = with pkgs; [ pass gnupg ];
-  };
 
   # ── Drive ───────────────────────────────────────────────────────────────────
   # No native client; rclone's protondrive backend. Type=notify so dependents
