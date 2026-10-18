@@ -13,5 +13,6 @@
     ghgrab
     nix-tree
     antigen
+    pass        # GPG password store; Proton Mail Bridge keeps its login here
   ];
 }

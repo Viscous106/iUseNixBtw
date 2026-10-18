@@ -5,7 +5,7 @@
   home.packages = with pkgs; [
     # Browsers
     firefox
-    google-chrome
+    google-chrome  # no keyring here: Chromium browsers fall back to their own password store
     brave
     epiphany        # GNOME Web
     tor-browser

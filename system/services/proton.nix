@@ -7,21 +7,12 @@
   # NetworkManager over D-Bus, using networkmanager-openvpn / built-in WireGuard.
 
   # ── Mail Bridge ─────────────────────────────────────────────────────────────
-  # User service (wantedBy graphical-session.target); stores credentials in the
-  # Secret Service keyring, hence gnome-keyring.
+  # No keyring on this system: the bridge keeps its credentials in `pass` (GPG).
   services.protonmail-bridge = {
     enable   = true;
     logLevel = "info";
-    path     = [ pkgs.gnome-keyring ];  # keyring must be on the unit's PATH
+    path     = with pkgs; [ pass gnupg ];
   };
-
-  # Unlocked by PAM `login`: there is no display manager.
-  services.gnome.gnome-keyring.enable            = true;
-  security.pam.services.login.enableGnomeKeyring = true;
-
-  # gcr-ssh-agent defaults on with gnome-keyring and conflicts with
-  # programs.ssh.startAgent (system/network.nix); keep the OpenSSH agent.
-  services.gnome.gcr-ssh-agent.enable = false;
 
   # ── Drive ───────────────────────────────────────────────────────────────────
   # No native client; rclone's protondrive backend. Type=notify so dependents

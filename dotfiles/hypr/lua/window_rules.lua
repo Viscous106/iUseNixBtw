@@ -395,10 +395,6 @@ hl.window_rule({
   opacity = "0.9 0.8",
 })
 hl.window_rule({
-  match = { class = "^(seahorse)$" },
-  opacity = "0.9 0.8",
-})
-hl.window_rule({
   match = { title = "^(Picture-in-Picture)$" },
   opacity = "0.95 0.75",
 })
