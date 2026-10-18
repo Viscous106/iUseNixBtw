@@ -28,7 +28,7 @@ hy() { hyprctl eval "$1" >/dev/null 2>&1; }
 apply_transform() {
   local t="$1"
   echo "$t" > "$TRANSFORM_FILE"
-  hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", transform = $t })"
+  hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", scale = 1, transform = $t })"
 }
 
 set_devices() {   # true|false

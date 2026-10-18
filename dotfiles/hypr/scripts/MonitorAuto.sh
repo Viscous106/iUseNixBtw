@@ -27,7 +27,8 @@ hy() { hyprctl eval "$1" >/dev/null; }
 
 # Partial panel rules must restate INT_MODE: nwg-displays names the panel "desc:...",
 # so an "eDP-1" rule starts fresh at "preferred" (60 Hz, not 144).
-int_rule() { hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", $1 })"; }
+# Every rule sets scale = 1: without it Hyprland auto-scales the 15.6" panel to 1.5.
+int_rule() { hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", scale = 1, $1 })"; }
 
 # A GUI Apply with Active unticked writes `disabled = true` into monitors.lua, which
 # kills the DP link and survives reboots; strip it and re-enable outputs live.
@@ -40,7 +41,7 @@ sanitize_disabled() {
   # perl -i would replace the symlink with a plain file.
   INT="$INT" INT_MODE="$INT_MODE" \
   INT_DESC="$(hyprctl -j monitors all | jq -r --arg m "$INT" '.[] | select(.name == $m) | .description')" \
-    perl -0pi -e 's/(hl\.monitor\(\{\s*output\s*=\s*"(?:\Q$ENV{INT}\E|desc:\Q$ENV{INT_DESC}\E)",)(?![^}]*\bmode\s*=)/$1\n    mode = "$ENV{INT_MODE}",/g' \
+    perl -0pi -e 's/(hl\.monitor\(\{\s*output\s*=\s*"(?:\Q$ENV{INT}\E|desc:\Q$ENV{INT_DESC}\E)",)(?![^}]*\bmode\s*=)/$1\n    mode = "$ENV{INT_MODE}",/g; s/(hl\.monitor\(\{\s*output\s*=\s*"(?:\Q$ENV{INT}\E|desc:\Q$ENV{INT_DESC}\E)",)(?![^}]*\bscale\s*=)/$1\n    scale = 1,/g' \
     "$(readlink -f "$f")"
   # Outputs in `monitors all` but not the plain list are disabled.
   for out in $(comm -23 \
@@ -49,7 +50,7 @@ sanitize_disabled() {
     if [ "$out" = "$INT" ]; then
       int_rule "disabled = false"
     else
-      hy "hl.monitor({ output = \"$out\", disabled = false })"
+      hy "hl.monitor({ output = \"$out\", scale = 1, disabled = false })"
     fi
   done
   notify-send -e -u critical "󰍹 Display" \
