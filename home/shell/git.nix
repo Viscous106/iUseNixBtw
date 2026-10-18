@@ -33,6 +33,8 @@
     ignores = [ ".direnv" ".envrc" "*.swp" "node_modules" ];
   };
 
+  programs.git.lfs.enable = true;  # wallpapers repo stores images in LFS
+
   programs.delta = {
     enable = true;
     options = {

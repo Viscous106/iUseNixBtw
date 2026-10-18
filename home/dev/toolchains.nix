@@ -42,7 +42,6 @@
 
     # ── Git extras / VCS ────────────────────────────────────────────────
     git-filter-repo
-    git-lfs
     mercurial
 
     # ── Static site / docs ──────────────────────────────────────────────

@@ -143,6 +143,21 @@ Then:
    `ssh-agent`, `AddKeysToAgent yes` — see the git history for why this isn't
    gnome-keyring).
 
+### Wallpapers
+
+`~/Pictures/wallpapers` is its own repo
+([gitlab.com/viscous106/wallpapers](https://gitlab.com/viscous106/wallpapers)),
+with images in Git LFS. `home/desktop/wallpapers.nix` clones it on activation
+if it is missing. On a fresh install the SSH key isn't restored yet, so that
+first attempt fails with a hint; once the key is back, either run `rebuild` or:
+
+```
+git clone git@gitlab.com:viscous106/wallpapers.git ~/Pictures/wallpapers
+```
+
+Git LFS is enabled declaratively (`programs.git.lfs` in `home/shell/git.nix`),
+so the clone fetches real images, not pointer files.
+
 ### Claude Code
 
 Two pieces are not restored by the install.
