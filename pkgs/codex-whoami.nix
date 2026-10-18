@@ -1,6 +1,5 @@
-# codex-whoami: which OpenAI org/project Codex bills, read from API response
-# headers. Uses auth.json, not $OPENAI_API_KEY: Codex ignores the env var after
-# `codex login`, so only logout + re-login switches accounts.
+# codex-whoami: OpenAI org/project Codex bills, from API response headers. Uses auth.json, since
+# Codex ignores $OPENAI_API_KEY after `codex login` (only logout + re-login switches).
 {
   writeShellApplication,
   curl,
@@ -40,9 +39,7 @@ writeShellApplication {
 
     echo "key      : ''${key:0:14}***''${key: -5}"
 
-    # gpt-5-nano with a 256-token ceiling: the cheapest request that still comes
-    # back 200. A lower ceiling 400s on reasoning models before any content is
-    # emitted, which would hide the headers we are after.
+    # Cheapest request that returns 200: a lower token ceiling 400s on reasoning models, hiding the headers.
     curl -sS -o /dev/null -D - https://api.openai.com/v1/chat/completions \
       -H "Authorization: Bearer $key" \
       -H "Content-Type: application/json" \

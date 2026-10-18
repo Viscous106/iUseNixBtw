@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
-# ExecStop for tmux.service (see home/dotfiles.nix).
-#
-# tmux-resurrect's save.sh never checks whether a tmux server is actually
-# running. When it isn't, every `tmux list-*` inside it fails, save.sh still
-# creates a save file (zero bytes), and still repoints
-# ~/.local/share/tmux/resurrect/last at that empty file -- silently destroying
-# the last good snapshot. That is what wiped session state on every boot.
+# ExecStop for tmux.service: resurrect's save.sh, run with no server, writes an empty save
+# and repoints `last` at it, destroying the last good snapshot.
 set -u
 
 : "${TMUX_BIN:=}"

@@ -2,8 +2,7 @@
 
 {
   # ── Hyprland window manager ─────────────────────────────────────────────────
-  # Config is hyprland.lua (needs the hyprland flake; nixpkgs predates Lua
-  # support). Hyprland loads it instead of hyprland.conf when present.
+  # hyprland.lua (needs the hyprland flake; nixpkgs predates Lua support), loaded instead of hyprland.conf.
   wayland.windowManager.hyprland = {
     enable         = true;
     # Must stay "hyprlang": under "lua" (the default for stateVersion >= 26.05)
@@ -17,9 +16,8 @@
     package = pkgs.hyprland-pinned;  # overlays/default.nix
   };
 
-  # The rest of ~/.config/hypr is linked live in home/dotfiles.nix. hyprlock.conf
-  # is a store copy instead, so @HOME@ can be substituted (hyprlock does not
-  # expand $HOME in paths); editing it needs a rebuild.
+  # A store copy, not linked live like the rest of ~/.config/hypr, so @HOME@ can be substituted
+  # (hyprlock doesn't expand $HOME); editing it needs a rebuild.
   xdg.configFile."hypr/hyprlock.conf" = {
     text = builtins.replaceStrings
       [ "@HOME@" ] [ "/home/${user.username}" ]

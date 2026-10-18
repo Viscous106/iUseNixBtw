@@ -5,16 +5,15 @@
   networking.useDHCP               = lib.mkDefault true;
   networking.networkmanager.enable = true;
   networking.networkmanager.wifi.backend = "iwd";
+  systemd.services.NetworkManager-wait-online.enable = false;  # kept ~6 s on the boot critical path
   networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
-  # Wi-Fi power save off: on this RTL8852BE it measured 2.3x average latency
-  # and ~7x jitter to the gateway. Costs a few hundred mW on battery.
-  # Next step if jitter returns: options rtw89_core disable_ps_mode=1.
+  # Power save off: 2.3x latency and ~7x jitter on this RTL8852BE.
+  # If jitter returns: options rtw89_core disable_ps_mode=1.
   networking.networkmanager.wifi.powersave = false;
 
-  # Regulatory domain IN (the kernel default "00" makes all 5 GHz scans
-  # passive, so every roam-scan stalls traffic longer). Set for cfg80211 at
-  # boot and again in iwd. Change both if the laptop is abroad for long.
+  # Regdomain IN: the default "00" makes 5 GHz scans passive, stalling roams.
+  # Set here and in iwd; change both if abroad for long.
   boot.extraModprobeConfig = ''
     options cfg80211 ieee80211_regdom=IN
   '';
@@ -26,9 +25,7 @@
       General.Country                    = "IN";
       P2P.Enable                         = false;  # avoids a spurious NM IPv4-forwarding warning
 
-      # The local 5 GHz APs sit right at the default -76 dBm trigger, so iwd
-      # roamed every minute; that churn also provoked rtw89 warning storms.
-      # Critical roaming (-82) still kicks in on a dying link.
+      # Local 5 GHz APs sit at the default -76 dBm trigger, causing roam churn and rtw89 warning storms.
       General.RoamThreshold5G   = -80;
       General.RoamThreshold     = -74;   # 2.4 GHz, default -70
       General.RoamRetryInterval = 300;   # default 60 s
@@ -36,10 +33,7 @@
   };
 
   # ── DNS ───────────────────────────────────────────────────────────────────
-  # Local cache + Cloudflare upstream. Before this there was no cache and every
-  # query went through tailscaled's proxy to the ISP resolver (~185-270 ms on
-  # misses vs ~42 ms for 1.1.1.1). Tailscale still gets ts.net via split DNS.
-  # DNSSEC/DoT off on purpose: both break captive portals on café wifi.
+  # Local cache + Cloudflare (ts.net still via split DNS); DNSSEC/DoT off since both break captive portals.
   services.resolved = {
     enable = true;
     settings.Resolve = {

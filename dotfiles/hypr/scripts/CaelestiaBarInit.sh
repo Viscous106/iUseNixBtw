@@ -1,7 +1,6 @@
 #!/run/current-system/sw/bin/bash
-# bar.persistent=false lets SUPER+SHIFT+T hide the bar, but ScreenState.bar starts
-# false, so show it once at login. Idempotent, so a config reload won't flip it.
-# Fresh login: quickshell needs a few seconds before IPC answers.
+# bar.persistent=false lets SUPER+SHIFT+T hide the bar, but it starts hidden: show it once at login
+# (idempotent across reloads), waiting for quickshell's IPC to answer.
 for _ in $(seq 1 60); do
     if caelestia shell drawers isOpen bar >/dev/null 2>&1; then
         break

@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
-# Behavioural cover for select.sh, the slurp-compatible front end.
-#
-# quickshell and slurp are both replaced by stubs on PATH, so these run headless
-# with no compositor and no real selector. What is being checked is the contract
-# select.sh owes its callers (ScreenShot.sh, ScreenRecord.sh), which is exactly
-# slurp's: geometry on stdout and exit 0, or a non-zero exit and nothing on
-# stdout. Getting that wrong does not show up as an error -- it shows up as
-# screenshots of the wrong region, or empty files in ~/Pictures/Screenshots.
+# Tests select.sh's slurp contract (geometry + exit 0, or non-zero and empty stdout) with stubbed quickshell/slurp.
 set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -57,9 +50,7 @@ mkdir -p "$WORK/bothcancel"
 stub "$WORK/bothcancel" quickshell 'exit 3'
 stub "$WORK/bothcancel" slurp 'exit 1'
 
-# Only the utilities select.sh itself uses. Deliberately NOT the system
-# profile: that carries the real quickshell and slurp, which would answer the
-# "not installed" cases below and make them pass no matter what select.sh did.
+# Only what select.sh uses: the system profile's real quickshell/slurp would mask the "not installed" cases.
 mkdir -p "$WORK/base"
 for b in bash mktemp head rm dirname; do
   ln -sf "$(command -v "$b")" "$WORK/base/$b"

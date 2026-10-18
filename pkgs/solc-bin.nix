@@ -1,8 +1,7 @@
 { lib, runCommandLocal, fetchurl }:
 
-# Pinned upstream solc release (nixpkgs ships only one; svm's ~/.svm is outside
-# the lock). Upstream binaries are static, so no patchelf; runCommandLocal skips
-# fixup/strip so it installs byte-for-byte. Used by home/dev/web3.nix.
+# Pinned upstream solc (nixpkgs ships one; ~/.svm is outside the lock). Static binaries, so
+# runCommandLocal installs them as-is with no patchelf/strip. Used by home/dev/web3.nix.
 
 { version, sha256 }:
 

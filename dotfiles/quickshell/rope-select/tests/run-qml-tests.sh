@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
-# Builds fixtures for, and runs, every headless QML test in this project:
-# selection_test.qml, rope_test.qml, theme_test.qml.
-#
-# theme_test.qml reads its inputs from RS_TEST_* environment variables. If one
-# is unset, Quickshell.env() returns an empty string and the test does NOT
-# skip -- it fails with a confusing mismatch that looks like a real component
-# defect. This script is the only committed thing that sets them.
-#
-# Does NOT cover Geom.qml or shell.qml. Both root at PanelWindow, which needs a
-# live Wayland compositor with layer-shell ("No PanelWindow backend loaded"
-# under QT_QPA_PLATFORM=offscreen). That is exactly why all the maths lives in
-# Selection.qml instead -- what is left in Geom is layout and painting, which
-# has to be checked by eye on a real session.
+# Runs the headless QML tests, setting the RS_TEST_* vars they need (unset ones fail confusingly, not skip).
+# Geom.qml and shell.qml need a live compositor (PanelWindow), so check those by eye.
 set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")/.." && pwd)"   # rope-select/ (config root)

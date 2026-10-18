@@ -1,7 +1,6 @@
 #!/run/current-system/sw/bin/bash
 
-# Git Worktree Switcher (Bare Repo Optimized)
-# Shows only folder names and branch names
+# Git worktree switcher for bare repos: fzf over folder and branch names.
 # Usage: worktree-switcher.sh [--nvim|--cd|--print-only]
 
 set -e

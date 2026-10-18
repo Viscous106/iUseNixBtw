@@ -1,6 +1,5 @@
-# wallpaper-picker: QML stays live in dotfiles/quickshell/wallpaper-picker (not
-# the store) so it can change without a rebuild. hyprctl is intentionally not a
-# runtimeInput: the wrapper prefixes PATH, so the session's hyprctl is used.
+# wallpaper-picker: QML lives in dotfiles/quickshell (no rebuild). hyprctl isn't a runtimeInput:
+# the wrapper prefixes PATH, so the session's hyprctl is used.
 {
   lib,
   writeShellApplication,
@@ -43,18 +42,11 @@ writeShellApplication {
       exit 1
     fi
 
-    # Qt's WebP (and other extra-format) image plugins live in qtimageformats,
-    # not in qtbase, and are not on any default plugin search path. Without
-    # this, QML Image fails to decode .webp wallpapers and the card renders
-    # blank. writeShellApplication has no makeWrapper hook to set this via
-    # --prefix (a makeWrapper --prefix would be the alternative), so it is
-    # exported here directly instead — the smaller change for a single plain
-    # env var, versus restructuring this derivation just to gain makeWrapper.
+    # Qt's WebP plugin is in qtimageformats, off the default plugin path; without it .webp cards render
+    # blank. Exported here because writeShellApplication has no makeWrapper.
     export QT_PLUGIN_PATH="${qt6.qtimageformats}/lib/qt-6/plugins''${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
 
-    # Wallpapers are per monitor: pin this session to the one focused when the
-    # picker was opened, before the overlay exists and can affect focus.
-    # Empty (no hyprctl) is fine — apply.sh then resolves it per call.
+    # Pin to the monitor focused at launch, before the overlay can shift focus; empty lets apply.sh decide.
     WP_OUTPUT="$(hyprctl -j monitors 2>/dev/null | jq -r '.[] | select(.focused) | .name' 2>/dev/null | head -1 || true)"
     export WP_OUTPUT
 

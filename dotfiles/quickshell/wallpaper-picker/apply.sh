@@ -1,23 +1,6 @@
 #!/usr/bin/env bash
-# Single apply path for the wallpaper picker.
-#
-# Both the QML UI (via Applier.qml) and `wallpaper-picker --restore` call this,
-# so what happens at login is byte-for-byte what happened when you picked it.
-#
-#   apply.sh [--output MON] <path> [--sound]
-#   apply.sh [--output MON] --current | --current-audio
-#   apply.sh --restore
-#
-# Wallpapers are per monitor. --output names the monitor; without it, the one
-# Hyprland has focused. If no monitor can be determined at all (no hyprctl),
-# the wallpaper goes on every monitor, as it did before wallpapers were per
-# monitor.
-#
-# --sound only matters for videos: without it mpv runs with no audio at all;
-# with it, audio-follow.sh keeps it muted unless its monitor is focused and
-# showing an empty workspace.
-#
-# Binaries are indirected through env vars so tests can stub them.
+# Single apply path for the picker UI and `wallpaper-picker --restore`, so login matches what was picked.
+# Per monitor (--output, else focused, else all); binaries come from env vars so tests can stub them.
 set -uo pipefail
 
 STATE_DIR="${WP_STATE_DIR:-$HOME/.local/state/wallpaper-picker}"
@@ -40,12 +23,7 @@ kind_of() {
 }
 
 # ── Monitors and per-monitor state ───────────────────────────────────────────
-#
-# State for monitor MON lives in $STATE_DIR/outputs/MON/{current,kind,audio}.
-# The files directly in $STATE_DIR are the pre-per-monitor ("every monitor")
-# state: a monitor with nothing of its own falls back to them, so existing
-# setups keep their wallpaper, and they are what an unknown-monitor apply
-# writes. Every function below takes MON, where "" means "every monitor".
+# State in $STATE_DIR/outputs/MON/; top-level files are the every-monitor fallback. MON "" = every monitor.
 
 monitors()        { "$HYPRCTL" -j monitors 2>/dev/null | jq -r '.[].name' 2>/dev/null; }
 focused_monitor() { "$HYPRCTL" -j monitors 2>/dev/null | jq -r '.[] | select(.focused) | .name' 2>/dev/null | head -1; }
@@ -71,17 +49,12 @@ record() { # record <mon> <path> <kind> <audio>
 
 # ── Applying ─────────────────────────────────────────────────────────────────
 
-# awww needs its daemon; starting it when absent is cheap and idempotent.
-# Also used by --restore when there's no recorded state, so awww-daemon can
-# restore its own cached wallpaper (mirrors the old wallpaper-restore.sh).
+# awww needs its daemon; starting it is cheap and idempotent, and lets it restore its own cached wallpaper.
 ensure_awww_daemon() {
   command -v "$AWWW" >/dev/null 2>&1 || return 0
   if ! "$AWWW" query >/dev/null 2>&1; then
     "${AWWW}-daemon" >/dev/null 2>&1 &
-    # Bounded poll instead of a fixed sleep: at login this runs on a cold,
-    # contended system where 0.4s is not always enough for the socket to come
-    # up, and a fixed sleep either wastes time or isn't enough. Proceed the
-    # moment the daemon answers; give up after ~3s.
+    # Bounded poll, not a fixed sleep: at login the socket can take longer than 0.4s; give up after ~3s.
     for _ in $(seq 30); do
       "$AWWW" query >/dev/null 2>&1 && break
       sleep 0.1
@@ -91,11 +64,8 @@ ensure_awww_daemon() {
 
 mpv_sock() { echo "$SOCK_DIR/wallpaper-picker-mpv-${1:-all}.sock"; }
 
-# The video wallpaper (and its focus-follower) on MON, plus any every-monitor
-# one, since that one covers MON too. Matched on the binaries' own names and
-# paths, so a test's stubs never touch the real ones.
-#   mpvpaper cmdline: mpvpaper -o <opts> <MON|*> <path>
-#   follower cmdline: bash audio-follow.sh <sock> [MON]
+# Stop MON's video + follower and any every-monitor one; matched by binary
+# name/path so test stubs never touch the real ones.
 stop_video() { # stop_video <mon>
   local mpv="${MPVPAPER##*/}"
   if [ -z "$1" ]; then
@@ -118,9 +88,7 @@ apply_image() { # apply_image <path> <mon>
 
 apply_video() { # apply_video <path> on|off <mon>
   command -v "$MPVPAPER" >/dev/null 2>&1 || die "mpvpaper not found; cannot set a video wallpaper"
-  # audio-follow.sh talks to mpv and Hyprland over socat. Without it the
-  # follower dies on its first unmute and the video stays muted forever --
-  # fail before touching anything, so the picker shows why there is no sound.
+  # audio-follow.sh needs socat or the video stays muted forever; fail early so the picker shows why.
   if [ "$2" = on ] && ! command -v "${SOCAT_BIN:-socat}" >/dev/null 2>&1; then
     die "socat not found; cannot play a video wallpaper with sound"
   fi
@@ -158,21 +126,13 @@ restore_one() { # restore_one <mon>
   local path
   path="$(read_state "$1" current)"
   if [ -n "$path" ] && [ -f "$path" ]; then
-    # Run in a subshell: apply_path can die() on failure (e.g. `awww img`
-    # erroring out), and die() calls `exit`, which would otherwise tear
-    # down this whole script before reaching the fallback and the `exit 0`
-    # in --restore -- exactly the blank-desktop, fail-loudly login regression
-    # this exists to avoid.
+    # Subshell: apply_path can die()/exit, which would skip the fallback and exit 0 and leave a blank desktop.
     if ! ( apply_path "$path" "$(recorded_audio "$1")" "$1" ); then
-      # apply_path failed with nothing behind it. Fall back to getting the
-      # daemon up so awww's own cached image paints something instead of
-      # leaving the desktop blank.
+      # Nothing behind it: start the daemon so awww's cached image paints instead of a blank desktop.
       ensure_awww_daemon >/dev/null 2>&1
     fi
   else
-    # nothing usable recorded (missing state, or the file it named is gone):
-    # not an error, but still get awww-daemon up so it can restore its own
-    # cached wallpaper instead of leaving a blank desktop.
+    # Nothing usable recorded: not an error, but start awww-daemon so it restores its cached wallpaper.
     ensure_awww_daemon >/dev/null 2>&1
   fi
 }

@@ -1,10 +1,8 @@
 # Package overrides and local packages, applied to both NixOS and home-manager
 # (home-manager uses useGlobalPkgs).
 inputs: final: prev: {
-  # Hyprland from its flake, used by both programs.hyprland and home-manager.
-  # wrapRuntimeDeps = false skips hyprland-guiutils, which fails to build
-  # upstream (libstdc++ ABI mismatch). Hyprland 0.56 needs glaze 7.x;
-  # nixpkgs has 8.x, so 7.2.0 is pinned for this build only.
+  # Hyprland flake build: wrapRuntimeDeps = false skips hyprland-guiutils (fails upstream), and
+  # glaze is pinned to 7.2.0 because Hyprland 0.56 needs 7.x (nixpkgs has 8.x).
   hyprland-pinned = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.override {
     wrapRuntimeDeps = false;
     glaze-hyprland = prev.glaze.overrideAttrs (old: {
@@ -33,10 +31,8 @@ inputs: final: prev: {
   claude-whoami    = final.callPackage ../pkgs/claude-whoami.nix { };
   solc-bin         = final.callPackage ../pkgs/solc-bin.nix { };         # pinned solc builds for web3.nix
 
-  # atuin with two local patches: stable row numbers in the search TUI
-  # (alt-1..9 are unbound in home/shell/atuin.nix) and deduplicated results.
-  # Not in the binary cache, so it builds locally; tests and opt-level are
-  # cut to keep that build short. Drop this attr to go back to stock atuin.
+  # atuin with stable row numbers and deduplicated results; builds locally, so tests/opt-level are cut.
+  # Drop this attr to go back to stock atuin.
   atuin = prev.atuin.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
       ../pkgs/atuin-number-all-rows.patch

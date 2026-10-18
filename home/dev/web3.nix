@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
 # ── Solidity / EVM development environment ───────────────────────────────────
-# Spec: docs/design/web3-dev-environment.md. Settings: my.web3 in home/default.nix.
-# Extra solc versions (nixpkgs ships one), direnv project shells, and web3-cli.
+# Spec: docs/design/web3-dev-environment.md; settings: my.web3 in home/default.nix.
 
 let
   cfg = config.my.web3;
@@ -49,21 +48,15 @@ let
       # Store files land read-only; make the new project writable.
       chmod -R u+w "$dest"
 
-      # .envrc is written here rather than shipped in templateDir on purpose.
-      # home/shell/git.nix gitignores ".envrc" globally, so a template copy
-      # never gets git-added — and a flake only copies *tracked* files into the
-      # store, so the template in the store would silently lack it and direnv
-      # would never load. Generating it sidesteps that entirely.
+      # Generated, not shipped in templateDir: .envrc is globally gitignored, so a flake's store copy would lack it.
       printf '%s\n' \
         '# Loads the dev shell from flake.nix on cd. Run: direnv allow (once).' \
         'use flake' > "$dest/.envrc"
 
       echo "Created $dest"
 
-      # A flake can only see git-tracked files. Created inside an existing repo,
-      # flake.nix is invisible to nix and direnv fails with "Path ... is not
-      # tracked by Git" on the first cd. Staging it here removes a step that
-      # has no judgement in it. Projects outside any repo skip this.
+      # A flake only sees git-tracked files, so stage flake.nix when created inside a repo
+      # (otherwise direnv fails with "not tracked by Git").
       if repo=$(git -C "$dest" rev-parse --show-toplevel 2>/dev/null); then
         rel=$(realpath --relative-to="$repo" "$dest")
         if git -C "$repo" add "$rel" 2>/dev/null; then
@@ -86,9 +79,7 @@ let
 
       echo ""
       echo "Next:"
-      # Changing the parent shell's directory is impossible from a child
-      # process, so this one step stays manual. The zsh wrapper defined in this
-      # same module does it for interactive use.
+      # A child process can't cd its parent; the zsh wrapper in this module does it interactively.
       echo "  cd $dest"
       echo "  just test"
     '';

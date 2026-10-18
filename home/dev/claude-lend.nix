@@ -1,8 +1,7 @@
 { config, inputs, ... }:
 
-# claude-lend: metered Claude gateway on :8787 (flake input, ~/Viscous/I-have-claude-BTW).
-# User service so only this account can read the token. One-time setup:
-#   claude setup-token > ~/.config/claude-lend-token && chmod 600 ~/.config/claude-lend-token
+# claude-lend (flake input): metered Claude gateway on :8787; a user service so only this account reads the token.
+# Setup: claude setup-token > ~/.config/claude-lend-token && chmod 600 ~/.config/claude-lend-token
 {
   imports = [ inputs.claude-lend.homeManagerModules.default ];
 

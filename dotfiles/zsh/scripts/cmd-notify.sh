@@ -1,26 +1,5 @@
-# Report long-running commands to the tmux footer.
-#
-# A command that finishes in a window I am not looking at gets a chip in
-# status-right: green tick on success, red cross on failure, plus the window
-# number and how long it took. Failures also raise a desktop toast. The chip
-# clears when I next select that window. All of the rendering lives in
-# dotfiles/tmux/scripts/agent-state.sh; this file only decides WHEN to call it.
-#
-# Why the threshold is enforced here and not in tmux: precmd runs after every
-# single command, so the check must be pure zsh with no subprocess. Reading a
-# tmux option would mean forking `tmux show` on every prompt. As written, `ls`
-# and `cd` cost two integer comparisons and nothing else -- agent-state.sh is
-# only exec'd once a command has actually earned a chip.
-#
-# Registered with add-zsh-hook, so it is additive alongside the other precmd
-# consumers (starship, zoxide's chpwd, atuin). Order does not matter: zsh
-# re-sets $? before calling each precmd hook, so every hook sees the real exit
-# status of the command regardless of what ran before it.
-#
-# Live-editable: dotfiles/zsh/scripts is an out-of-store symlink, so edits here
-# take effect in the next shell with no rebuild. Adding a NEW file to this
-# directory does need a rebuild though -- zsh.nix sources an explicit
-# allowlist, not a glob.
+# Long-running command finished in an unseen window -> tmux footer chip (rendered by agent-state.sh).
+# The threshold check is pure zsh because precmd runs after every command; no forks until it passes.
 
 zmodload zsh/datetime 2>/dev/null   # EPOCHSECONDS
 autoload -Uz add-zsh-hook

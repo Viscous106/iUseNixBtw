@@ -9,9 +9,7 @@
   };
 
   # ── Wayland-native Chromium / Electron ────────────────────────────────────
-  # Runs Chrome/Electron natively on Wayland so screen sharing uses the portal
-  # + PipeWire path (XWayland capture is black under Hyprland). Also needs the
-  # fake-graphical-session line in dotfiles/hypr/lua/startup_apps.lua.
+  # Native Wayland so screen sharing uses portal + PipeWire (XWayland capture is black); see startup_apps.lua.
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   xdg.portal = {

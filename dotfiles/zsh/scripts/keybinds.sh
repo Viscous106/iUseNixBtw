@@ -1,8 +1,5 @@
-# fzf's key bindings are NOT sourced here. `programs.fzf.enable` in
-# home/shell/zsh.nix already runs `source <(fzf --zsh)` at home-manager's
-# mkOrder 910. Re-sourcing it from this file would run it again at order 1000
-# — the same bucket as atuin's init — leaving Ctrl+R to whichever happened to
-# load last. Atuin owns Ctrl+R now; see home/shell/atuin.nix.
+# fzf's key bindings aren't sourced here: programs.fzf already does, and a second source
+# would race atuin's init for Ctrl+R (atuin owns it; home/shell/atuin.nix).
 
 # Move fzf-cd-widget from Alt+C to Alt+R. Still works: this file runs at order
 # 1000, after fzf has defined the widget at 910.

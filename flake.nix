@@ -4,15 +4,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    # wivrn only (system/services/vr.nix). Must match the headset client's
-    # version, which the Meta Store auto-updates; unstable-small gets it sooner.
+    # wivrn only (system/services/vr.nix): must match the headset client, which the Meta Store auto-updates.
     # Bump with `nix flake update nixpkgs-wivrn`; drop once nixos-unstable catches up.
     nixpkgs-wivrn.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
-    # claude-code only (overlays/default.nix): it releases faster than the main
-    # snapshot moves. Separate from nixpkgs-wivrn so bumping it can't break the headset.
-    # Rev-pinned (avoids api.github.com rate limit), so `nix flake update` won't move it; bump with:
-    #   curl -sL https://channels.nixos.org/nixos-unstable-small/git-revision
+    # claude-code only (overlays/default.nix), separate so bumps can't break the headset. Rev-pinned (api.github.com
+    # rate limit), so bump by hand: curl -sL https://channels.nixos.org/nixos-unstable-small/git-revision
     nixpkgs-claude.url = "github:NixOS/nixpkgs/94d35c7c05087e8b07373a403c55e97d99ff9af9";  # claude-code 2.1.296
 
     home-manager = {

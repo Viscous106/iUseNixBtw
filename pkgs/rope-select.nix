@@ -1,6 +1,5 @@
-# rope-select: slurp-compatible animated region selector. QML stays live in
-# dotfiles/quickshell/rope-select (not the store) so it can change without a
-# rebuild; slurp is a required runtimeInput because select.sh falls back to it.
+# rope-select: animated slurp-compatible region selector; QML lives in dotfiles/quickshell (no rebuild).
+# slurp is a runtimeInput because select.sh falls back to it.
 {
   lib,
   writeShellApplication,

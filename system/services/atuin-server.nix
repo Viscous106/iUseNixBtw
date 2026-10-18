@@ -1,8 +1,7 @@
 { ... }:
 
-# Self-hosted Atuin sync server for home/shell/atuin.nix (no reliance on the
-# hosted service's unwritten limits). Runs on both hosts, each syncing to localhost;
-# creates its own database in the shared postgres.
+# Self-hosted Atuin sync server for home/shell/atuin.nix; each host syncs to localhost
+# and it creates its own database in the shared postgres.
 
 {
   services.atuin = {

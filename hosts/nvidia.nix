@@ -2,8 +2,7 @@
 
 {
   # ── NVIDIA GPU (RTX 4050 Max-Q, Ada Lovelace) ────────────────────────────
-  # The internal display is wired only through the dGPU (no iGPU). Without the
-  # driver, Hyprland falls back to llvmpipe and pegs every core.
+  # The internal display is wired only to the dGPU; without the driver Hyprland falls back to llvmpipe.
   services.xserver.videoDrivers = lib.mkForce [ "nvidia" ];
 
   hardware.nvidia = {
@@ -12,9 +11,8 @@
     # NVIDIA recommends the open kernel modules for Turing and newer.
     open = true;
     nvidiaSettings = true;
-    # Patched to debounce AC power-source (_PSR) events: a flapping charger raced
-    # nvidia-drm init and hung boot. Drop once the charger is fixed or the patch
-    # stops applying to a driver bump.
+    # Patched to debounce AC _PSR events: a flapping charger raced nvidia-drm init and hung boot.
+    # Drop once the charger is fixed or the patch stops applying.
     package =
       let base = config.boot.kernelPackages.nvidiaPackages.stable;
       in base // {
@@ -25,8 +23,7 @@
   };
 
   # ── Disable runtime D3 (RTD3) on the dGPU ─────────────────────────────────
-  # Runtime D3 saves ~nothing without an iGPU and self-deadlocks on console_lock
-  # during suspend (black screen, hard power-off only).
+  # Saves ~nothing without an iGPU and self-deadlocks on console_lock during suspend.
   boot.extraModprobeConfig = ''
     options nvidia NVreg_DynamicPowerManagement=0x00
   '';

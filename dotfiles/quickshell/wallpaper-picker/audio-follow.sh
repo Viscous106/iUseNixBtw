@@ -1,21 +1,6 @@
 #!/usr/bin/env bash
-# Keeps a sound-enabled video wallpaper quiet while you're using an app.
-#
-#   audio-follow.sh <mpv-ipc-socket> [MON]
-#
-# Started by apply.sh only when a video was applied WITH sound. Rule: the
-# wallpaper is audible only while the focused workspace is empty (nothing to
-# look at but the desktop) AND is on MON, the monitor the video plays on --
-# so with a video on each monitor, at most the focused one is heard. Any
-# window on that workspace, or a focused window anywhere (e.g. a special
-# workspace overlaid on an empty one), mutes it. Without MON (a video on
-# every monitor) any focused monitor counts.
-#
-# Driven by Hyprland's socket2 event stream rather than polling, so it costs
-# nothing while idle. Exits when mpv's IPC socket stops answering (mpvpaper
-# killed by the next apply), or when Hyprland's socket closes.
-#
-# Binaries are indirected through env vars so tests can stub them.
+# Keeps a sound-enabled video wallpaper audible only while its monitor's focused workspace is empty.
+# Driven by Hyprland's socket2 (no polling); exits when mpv's IPC or Hyprland's socket closes.
 set -uo pipefail
 
 SOCK="${1:?usage: audio-follow.sh <mpv-ipc-socket> [MON]}"

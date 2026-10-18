@@ -1,19 +1,6 @@
 #!/usr/bin/env bash
-# Builds fixtures for, and runs, every headless QML test in this project:
-# theme_test.qml, library_test.qml, applier_test.qml, shell_test.qml.
-#
-# Every one of those tests reads its inputs from WP_TEST_* environment
-# variables (grep `Quickshell.env` in the test files themselves for the
-# ground truth) and asserts specific values derived from them. If a variable
-# is unset, Quickshell.env() returns an empty string and the test does NOT
-# skip -- it fails with a confusing assertion mismatch that looks like a real
-# component defect. This script is the only committed thing that sets them,
-# so it is also the only way to run these tests meaningfully.
-#
-# Does NOT run tests/shell_test.sh. That script drives the REAL shell.qml
-# under a live Wayland session and injects real key presses with wtype,
-# grabbing your keyboard for its duration -- run it deliberately, by hand,
-# not as part of an automated/headless suite.
+# Runs the headless QML tests, setting the WP_TEST_* vars they need (unset ones fail confusingly, not skip).
+# Not shell_test.sh: it drives the real shell.qml and grabs the keyboard, so run it by hand.
 set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")/.." && pwd)"   # wallpaper-picker/ (config root)
@@ -30,12 +17,7 @@ stub() { # stub <path> <body...>  -- write an executable script
   chmod +x "$path"
 }
 
-# ---------------------------------------------------------------------------
-# Fixtures: theme_test.qml
-#   WP_TEST_SCHEME  - full scheme, bare hex (no '#'), caelestia's format
-#   WP_TEST_NOKEY   - valid JSON, no "colours" key at all
-#   WP_TEST_PARTIAL - "colours" present, but missing keys (only background)
-# ---------------------------------------------------------------------------
+# Fixtures for theme_test.qml: full scheme (bare hex), no "colours" key, colours with only background.
 cat > "$WORK/scheme_good.json" <<'JSON'
 {"colours": {
   "background": "131317",
@@ -53,27 +35,15 @@ cat > "$WORK/scheme_partial.json" <<'JSON'
 {"colours": {"background": "010203"}}
 JSON
 
-# ---------------------------------------------------------------------------
-# Fixtures: library_test.qml
-#   WP_TEST_ROOT       - dir/ alpha, files one.png + clip.mp4
-#   WP_TEST_ROOT_SLASH - a second root, passed WITH a trailing slash
-# ---------------------------------------------------------------------------
+# Fixtures for library_test.qml: a root with alpha/, one.png, clip.mp4, and one passed with a trailing slash.
 mkdir -p "$WORK/lib_root/alpha"
 : > "$WORK/lib_root/one.png"
 : > "$WORK/lib_root/clip.mp4"
 
 mkdir -p "$WORK/lib_root_slash/child"
 
-# ---------------------------------------------------------------------------
-# Fixtures: applier_test.qml
-#   WP_TEST_STUB  - appends its argv[1] to WP_TEST_LOG
-#   WP_TEST_STUB2 - answers --current SLOWLY with a known path, logs other
-#                   invocations to WP_TEST_LOG2
-#   WP_TEST_STUB3 - answers --current / --current-audio with a video that
-#                   had sound -- but only when asked about monitor eDP-1 --
-#                   and logs every other invocation's full argv to WP_TEST_LOG3
-#   WP_TEST_LOG / WP_TEST_LOG2 / WP_TEST_LOG3 - the log files those stubs write to
-# ---------------------------------------------------------------------------
+# Fixtures for applier_test.qml: STUB logs argv[1]; STUB2 answers --current slowly; STUB3 answers
+# --current/--current-audio (video with sound) only for eDP-1. Each logs to its WP_TEST_LOG{,2,3}.
 stub "$WORK/stub1.sh" \
   'printf '"'"'%s\n'"'"' "$1" >> "$WP_TEST_LOG"' \
   'exit 0'
@@ -101,13 +71,7 @@ stub "$WORK/stub3.sh" \
 : > "$WORK/log2"
 : > "$WORK/log3"
 
-# ---------------------------------------------------------------------------
-# Fixtures: shell_test.qml
-#   WP_TEST_ROOT (shell variant) - two SAME-COUNT sibling folders A/ and B/,
-#                                  each holding 1.png + 2.png
-#   WP_TEST_OK / WP_TEST_FAIL / WP_TEST_SLOW - stubs that exit 0, exit 3, and
-#                                  exit 0 after a long sleep, respectively
-# ---------------------------------------------------------------------------
+# Fixtures for shell_test.qml: same-count sibling folders A/ and B/, and stubs that exit 0, exit 3, or sleep.
 mkdir -p "$WORK/shell_root/A" "$WORK/shell_root/B"
 : > "$WORK/shell_root/A/1.png"
 : > "$WORK/shell_root/A/2.png"
@@ -118,9 +82,7 @@ stub "$WORK/ok.sh"   'exit 0'
 stub "$WORK/fail.sh" 'exit 3'
 stub "$WORK/slow.sh" 'sleep 0.8' 'exit 0'
 
-# ---------------------------------------------------------------------------
 # Runner
-# ---------------------------------------------------------------------------
 run_test() { # run_test <label> <qml file> <timeout seconds>
   local label="$1" qml="$2" secs="$3"
   echo "=== $label ==="

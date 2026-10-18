@@ -3,13 +3,10 @@
 # ── Proton suite — VPN, Drive, Pass ──────────────────────────────
 {
   # ── VPN ─────────────────────────────────────────────────────────────────────
-  # No NixOS module exists; the proton-vpn app (package below) drives
-  # NetworkManager over D-Bus, using networkmanager-openvpn / built-in WireGuard.
+  # No NixOS module: the proton-vpn app drives NetworkManager over D-Bus.
 
   # ── Drive ───────────────────────────────────────────────────────────────────
-  # No native client; rclone's protondrive backend. Type=notify so dependents
-  # don't see an empty dir; no ExecStop since rclone unmounts on SIGTERM.
-  # rclone.conf must stay writable: the backend rewrites session tokens into it.
+  # rclone protondrive. Type=notify hides the empty dir; SIGTERM unmounts; rclone.conf must stay writable (token refresh).
   systemd.services.protondrive-mount = {
     description = "Proton Drive (rclone FUSE mount)";
     after       = [ "network-online.target" ];

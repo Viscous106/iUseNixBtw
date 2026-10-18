@@ -1,35 +1,6 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Portable NixOS — automated installer
-#
-# Run this booted from a NixOS installer ISO (minimal or graphical) to turn a
-# blank disk into a bootable copy of this exact system. Safe to run from
-# ANY machine — hosts/usb.nix already uses generic drivers and
-# filesystem-by-label, which is the whole point of this repo.
-#
-# Usage:
-#   git clone <this-repo-url> nixos-config && cd nixos-config
-#   sudo ./setup.sh
-#
-#   If `git` itself isn't on the ISO (some minimal variants omit it), grab it
-#   from Nix first: `nix-shell -p git --run 'git clone <this-repo-url> nixos-config'`.
-#   Everything setup.sh itself needs (partitioning/mkfs tools) is checked and
-#   self-provided via nix-shell below — no other manual setup required.
-#
-# What it does:
-#   1. Partitions the disk you choose (GPT: 1GiB EFI + rest as btrfs)  — DESTRUCTIVE
-#   2. Creates the @, @home, @nix, @persist, @snapshots btrfs subvolumes
-#   3. Mounts everything under /mnt exactly as hosts/usb.nix expects
-#   4. Copies this repo (the directory this script lives in) to /mnt/persist/nixos-config
-#   5. Prompts for the login username + password and writes them into the
-#      COPIED identity.nix, hashed with `mkpasswd -m sha-512` — the checkout you
-#      ran this from keeps its own values
-#   6. Runs `nixos-install --flake .../nixos-config#nix`
-#
-# What it deliberately does NOT do (see setup.md):
-#   - Restore secrets (SSH keys, GPG keys, git identity, API keys) — those
-#     never lived in git and must be copied back onto /persist/secrets by hand.
-# ==============================================================================
+# Portable NixOS installer: run from a NixOS ISO to turn a blank disk into this system. DESTRUCTIVE.
+# Usage: sudo ./setup.sh. Secrets aren't restored: copy them to /persist/secrets by hand (setup.md).
 set -euo pipefail
 
 # ── Sanity checks ────────────────────────────────────────────────────────────
@@ -39,13 +10,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # ── Dependency self-heal ─────────────────────────────────────────────────────
-# A first-time install can't assume anything beyond a bare NixOS ISO. If any
-# tool this script (or `nixos-install --flake`, which needs git to read a
-# flake's tracked files) uses isn't already on PATH, re-exec everything inside
-# a nix-shell that provides it — so this works the same on a minimal ISO as
-# a graphical one, without the user having to hunt down packages by hand.
-# Placed after the root check (not before) so the re-exec runs as root, since
-# `sudo` resets PATH and would otherwise drop a nix-shell set up beforehand.
+# Missing tools (incl. git for nixos-install) -> re-exec in nix-shell; after the root check since sudo resets PATH.
 declare -A _SETUP_CMD_TO_PKG=(
   [git]=git             [wipefs]=util-linux     [sgdisk]=gptfdisk
   [partprobe]=parted    [mkfs.fat]=dosfstools   [mkfs.btrfs]=btrfs-progs
@@ -164,10 +129,7 @@ else
 fi
 
 # ── GPU driver selection ─────────────────────────────────────────────────────
-# hosts/nvidia.nix hard-forces the NVIDIA driver for this repo's
-# reference machine (RTX 4050 Max-Q) — it is NOT auto-detected. Including it
-# on a laptop without that exact GPU can leave Hyprland with no working
-# display driver (CPU-rendered via llvmpipe at best, black screen at worst).
+# hosts/nvidia.nix forces NVIDIA for the RTX 4050 reference machine; other GPUs could get a black screen.
 echo
 echo "── GPU configuration ───────────────────────────────────────────────────"
 echo "hosts/nvidia.nix force-enables the NVIDIA driver (RTX 4050"
@@ -183,12 +145,7 @@ else
 fi
 
 # ── Login account ────────────────────────────────────────────────────────────
-# flake.nix imports ./identity.nix and hands it to every module as `user`;
-# system/core/users.nix then creates users.users.${user.username} with
-# initialHashedPassword = user.hashedPassword. Ask for both here and write them
-# into the COPIED identity.nix after cp below — the checkout this script runs from
-# keeps its original values, so `nixos-rebuild switch` on an existing machine
-# is unaffected.
+# Written into the COPIED identity.nix only, so the source checkout (and existing machines) stay unchanged.
 USER_NIX="$REPO_DIR/identity.nix"
 if [ ! -f "$USER_NIX" ]; then
   echo "$USER_NIX not found — flake.nix imports it for the username and password" >&2
@@ -252,9 +209,8 @@ sed -i \
   -e "s|^\([[:space:]]*\)hashedPassword[[:space:]]*=.*|\1hashedPassword = \"$ACCOUNT_HASH\";|" \
   /mnt/persist/nixos-config/identity.nix
 
-# A silent no-match here would quietly install this repo's committed username
-# and password hash instead of the ones just entered, so verify rather than
-# trust the sed. grep -F because a sha-512 hash is full of regex metacharacters.
+# Verify the sed: a silent no-match would install the committed username/hash instead.
+# grep -F because a sha-512 hash is full of regex metacharacters.
 if ! grep -qF "username = \"$ACCOUNT_USER\";" /mnt/persist/nixos-config/identity.nix \
   || ! grep -qF "hashedPassword = \"$ACCOUNT_HASH\";" /mnt/persist/nixos-config/identity.nix; then
   echo "Couldn't write the account into /mnt/persist/nixos-config/identity.nix — the" >&2

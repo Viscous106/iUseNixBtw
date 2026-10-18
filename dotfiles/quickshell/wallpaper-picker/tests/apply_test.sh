@@ -175,9 +175,7 @@ rm -f "$WP_STATE_DIR/current" "$WP_STATE_DIR/kind"
 check "failing awww img exits 1" "1" "$?"
 check "failing awww img writes no state" "" "$(cat "$WP_STATE_DIR/current" 2>/dev/null)"
 
-# Test --restore with no state file at all: exits 0, writes no state, and
-# still starts the awww daemon (regression: first login before anything has
-# ever been applied must not leave a blank desktop).
+# --restore with no state: exits 0, writes nothing, still starts awww (first login must not be blank).
 rm -f "$WP_STATE_DIR/current" "$WP_STATE_DIR/kind"
 printf '#!/usr/bin/env bash\necho "awww-daemon" >> "%s/calls"\n' "$work" > "$AWWW_BIN-daemon"
 chmod +x "$AWWW_BIN-daemon"
@@ -189,9 +187,7 @@ check "restore no-state exits 0"       "0"  "$?"
 check "restore no-state writes no state" "" "$(cat "$WP_STATE_DIR/current" 2>/dev/null)"
 check "restore no-state starts daemon" "1"  "$(grep -c '^awww-daemon' "$work/calls" 2>/dev/null || echo 0)"
 
-# Test --restore with a state file naming a path that no longer exists: same
-# expectations, and the stale state is left untouched (not cleared, not
-# reapplied).
+# --restore with state naming a missing file: same, and the stale state is left untouched.
 printf '%s' "$work/gone.png" > "$WP_STATE_DIR/current"
 : > "$work/calls"
 "$SUT" --restore >/dev/null 2>&1
@@ -203,16 +199,8 @@ rm -f "$AWWW_BIN-daemon"
 printf '#!/usr/bin/env bash\necho "awww $*" >> "%s/calls"\n' "$work" > "$AWWW_BIN"
 chmod +x "$AWWW_BIN"
 
-# Test --restore with valid state but a failing `awww img`: apply_path fails
-# (die() inside apply_image would, pre-fix, kill the whole script before the
-# trailing `exit 0` is ever reached), so this must still (a) fall back to
-# starting the daemon, so awww's own cached image paints something instead of
-# a blank desktop, and (b) exit 0 regardless -- a login hook must not fail
-# loudly. The awww stub's `query` answer is gated on a marker file the daemon
-# stub creates, so the daemon-start count stays deterministic: apply_image's
-# own internal ensure_awww_daemon call starts it once, and the --restore
-# fallback's ensure_awww_daemon call sees it already up and does not start it
-# again.
+# --restore with a failing `awww img`: must still fall back to starting the daemon and exit 0.
+# The stub's query gates on the daemon's marker file, so the daemon starts exactly once.
 printf '%s' "$img" > "$WP_STATE_DIR/current"
 printf 'image' > "$WP_STATE_DIR/kind"
 rm -f "$work/daemon-marker"

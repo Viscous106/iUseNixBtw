@@ -25,9 +25,8 @@ esac
 # The Lua parser rejects `hyprctl keyword` and plain `dispatch`; everything uses eval.
 hy() { hyprctl eval "$1" >/dev/null; }
 
-# Partial panel rules must restate INT_MODE: nwg-displays names the panel "desc:...",
-# so an "eDP-1" rule starts fresh at "preferred" (60 Hz, not 144).
-# Every rule sets scale = 1: without it Hyprland auto-scales the 15.6" panel to 1.5.
+# nwg-displays names the panel "desc:...", so an "eDP-1" rule starts at "preferred" (60 Hz): restate INT_MODE.
+# scale = 1 always, else Hyprland auto-scales the 15.6" panel to 1.5.
 int_rule() { hy "hl.monitor({ output = \"$INT\", mode = \"$INT_MODE\", scale = 1, $1 })"; }
 
 # A GUI Apply with Active unticked writes `disabled = true` into monitors.lua, which

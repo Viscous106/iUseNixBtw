@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-# Convertible / touch hardware: accelerometer for auto-rotation, and a re-probe
-# for an Elan I2C touchscreen (ELAN0001) whose first ACPI power-on leaves it in
-# reset so elants_i2c NAKs and never retries. Skipped if the device is absent.
+# Accelerometer for auto-rotation, and a re-probe for an Elan I2C touchscreen whose first ACPI
+# power-on leaves it in reset (elants_i2c never retries). Skipped if the device is absent.
 {
   # iio-sensor-proxy exposes orientation on D-Bus. The rotation itself runs in
   # the Hyprland session (dotfiles/hypr/scripts/AutoRotate.sh via lua/laptops.lua).

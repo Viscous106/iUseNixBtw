@@ -14,9 +14,8 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE")
 
-  -- xdg-desktop-portal is Requisite=graphical-session.target, which nothing starts
-  -- with systemd.enable = false; without it browser screen sharing fails. The fake
-  -- target activates it. Must run after the env imports above.
+  -- xdg-desktop-portal needs graphical-session.target, which nothing starts with systemd.enable = false;
+  -- without it screen sharing fails. Must run after the env imports above.
   hl.exec_cmd("systemctl --user start nixos-fake-graphical-session.target")
 
   -- Caelestia shell: bar, notifications, launcher and OSDs in one process.

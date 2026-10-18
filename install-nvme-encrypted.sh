@@ -1,32 +1,6 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Internal NVMe — encrypted install (LUKS2 + btrfs + systemd-boot)
-#
-# Counterpart to setup.sh. setup.sh builds the portable USB drive; this builds
-# the fixed, encrypted internal disk. Run it BOOTED FROM THE USB DRIVE — that
-# is what leaves the NVMe idle enough to wipe, and it means the Nix store is
-# already warm, so the install mostly copies locally instead of downloading.
-#
-#   sudo ./install-nvme-encrypted.sh
-#
-# What it does, in one unattended run after the confirmations:
-#   1. Wipes the target NVMe                                      — DESTRUCTIVE
-#   2. GPT: 1 GiB ESP (partlabel nixesp) + LUKS2 (partlabel nixcrypt)
-#   3. Generates a recovery passphrase into keyslot 1, backs up the LUKS header
-#   4. btrfs: @ @home @nix @persist @snapshots @swap + an 8 GiB NOCOW swapfile
-#   5. Copies this repo AND /persist/secrets onto the new root
-#   6. Copies /home across from a read-only snapshot of the USB's @home
-#   7. nixos-install --flake ...#laptop
-#
-# The partition names in step 2 are what hosts/nvme.nix
-# points at (/dev/disk/by-partlabel/...), which is why nothing in this script
-# ever has to rewrite UUIDs into a .nix file.
-#
-# Env overrides for re-runs after a failure:
-#   SKIP_PARTITION=1  /mnt is already set up the way this script leaves it
-#   SKIP_HOME=1       don't copy /home across (do it later by hand)
-#   TARGET=/dev/nvme0n1   skip autodetection
-# ==============================================================================
+# Encrypted internal-NVMe install (LUKS2 + btrfs + systemd-boot), run booted from the USB drive. DESTRUCTIVE.
+# Partlabels match hosts/nvme.nix. Re-run env: SKIP_PARTITION=1, SKIP_HOME=1, TARGET=/dev/nvme0n1.
 set -euo pipefail
 
 RECOVERY_NOTE=""
@@ -145,9 +119,7 @@ EOF
     "$LUKS"
 
   # ── Recovery keyslot ───────────────────────────────────────────────────────
-  # Written with no trailing newline, so feeding the file and typing the same
-  # characters at a prompt produce identical key material — it works both as a
-  # keyfile here and as a passphrase you can type in an emergency.
+  # No trailing newline, so the file works both as a keyfile and as a typed emergency passphrase.
   say "Adding a recovery passphrase to keyslot 1"
   RECOVERY="$(head -c 30 /dev/urandom | base32 | tr -d '=\n' | fold -w5 | paste -sd- -)"
   RECOVERY_FILE=/run/nvme-recovery.key

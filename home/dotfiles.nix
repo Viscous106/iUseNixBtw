@@ -40,9 +40,8 @@ let
     # Apps
     "cava"                         = "cava";
 
-    # AI agents. Only static pieces: the rest of ~/.config/claude is runtime
-    # state. settings.json is linked by an activation script instead (see
-    # home/dev/ai-agents.nix) because Claude rewrites it in place.
+    # Static pieces only (the rest of ~/.config/claude is runtime state); settings.json is
+    # linked by an activation script in home/dev/ai-agents.nix since Claude rewrites it.
     "claude/CLAUDE.md"             = "claude/CLAUDE.md";
     "claude/hooks"                 = "claude/hooks";
     "claude/helpers"               = "claude/helpers";

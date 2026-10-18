@@ -131,8 +131,7 @@
   services.upower.enable = true;
 
   # ── Power profiles ────────────────────────────────────────────────────────
-  # power-profiles-daemon, not TLP (they conflict): caelestia's profile switcher
-  # talks to ppd over DBus. USB autosuspend is handled by the udev rule below.
+  # power-profiles-daemon, not TLP (they conflict): caelestia's profile switcher uses it over DBus.
   services.power-profiles-daemon.enable = true;
 
   # ── zram swap (hosts add a disk swapfile behind it) ───────────────────────

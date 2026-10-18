@@ -1,20 +1,6 @@
 #!/usr/bin/env bash
-# End-to-end proof of shell.qml's dismissal invariant:
-#
-#   "there is no state in which the user cannot dismiss this window
-#    from the keyboard"
-#
-# The dangerous case is a revert that fails every time (awww down, or `original`
-# naming a file that has since moved). The window holds WlrKeyboardFocus.Exclusive,
-# so if a failing revert could keep cancelling the exit the user would be trapped
-# with no way to reach a terminal.
-#
-# This runs the REAL shell.qml against a fake HOME whose apply.sh always fails,
-# then presses Escape twice and asserts the process is gone well before the
-# 3000 ms exitGrace backstop could have fired — i.e. it exited *because of* the
-# second Escape, not because it timed out.
-#
-# Needs a live Wayland session (wtype). Run from anywhere.
+# E2E: the real shell.qml (exclusive keyboard focus) with an always-failing apply.sh must exit on the
+# second Escape, well before the 3000 ms exitGrace backstop. Needs a live Wayland session (wtype).
 set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")/.." && pwd)"

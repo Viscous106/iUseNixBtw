@@ -1,7 +1,5 @@
-# Opera repacked from the official .deb (nixpkgs dropped `opera`); modelled on
-# nixpkgs' google-chrome. Fetch from get.geo.opera.com, not deb.opera.com: the
-# apt pool only keeps the current release, and its .deb uses .xz, not .zst.
-# Update: bump version, hash = lib.fakeHash, build, paste the real hash.
+# Opera repacked from the official .deb (nixpkgs dropped it), modelled on google-chrome; get.geo.opera.com
+# because deb.opera.com keeps only the current .xz .deb. Update: bump version, lib.fakeHash, build, paste hash.
 {
   lib,
   stdenvNoCC,

@@ -1,6 +1,5 @@
-# claude-whoami: which Anthropic org/workspace Claude Code uses, via the free
-# /v1/models response headers. Unlike Codex, an exported ANTHROPIC_API_KEY
-# silently shadows the stored login, so this resolves from the environment.
+# claude-whoami: Claude Code's org/workspace via free /v1/models headers. Resolves from the
+# environment, since an exported ANTHROPIC_API_KEY silently shadows the stored login.
 {
   writeShellApplication,
   curl,
@@ -21,10 +20,7 @@ writeShellApplication {
   text = ''
     if command -v claude >/dev/null 2>&1; then
       echo "── claude auth status ──"
-      # `claude auth status` exits 1 when not logged in but still prints valid,
-      # useful JSON — so never gate on its exit code (the Anthropic CLI docs say
-      # as much: it reports status, it is not a health check). Capture the
-      # output unconditionally and decide based on whether it parses.
+      # `claude auth status` exits 1 when logged out but still prints JSON, so decide on whether it parses.
       status=$(claude auth status 2>/dev/null || true)
       if [ -n "$status" ] && echo "$status" | jq -e . >/dev/null 2>&1; then
         echo "$status" | jq -r '
@@ -40,10 +36,7 @@ writeShellApplication {
       echo
     fi
 
-    # Documented resolution order (first match wins), per the Anthropic SDK/CLI
-    # contract: ANTHROPIC_API_KEY → ANTHROPIC_AUTH_TOKEN → OAuth token/profile.
-    # An EMPTY ANTHROPIC_API_KEY still wins its slot and authenticates as empty,
-    # so test with -n, not merely "is it defined".
+    # Resolution order: ANTHROPIC_API_KEY → ANTHROPIC_AUTH_TOKEN → OAuth. An empty API key still wins, hence -n.
     if [ -n "''${ANTHROPIC_API_KEY:-}" ]; then
       src="ANTHROPIC_API_KEY"; cred="$ANTHROPIC_API_KEY"
       auth_args=(-H "x-api-key: $cred")

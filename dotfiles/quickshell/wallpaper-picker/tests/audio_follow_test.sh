@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# Tests audio-follow.sh against fakes: a socat listener stands in for mpv's
-# IPC socket (logging every command it receives), another for Hyprland's
-# event socket (replaying an append-only file), and HYPRCTL_BIN reads the "desktop" from two
-# files. Nothing touches the real session.
+# Tests audio-follow.sh against fakes (socat listeners for mpv IPC and Hyprland
+# events, file-backed HYPRCTL_BIN); nothing touches the real session.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SUT="$HERE/../audio-follow.sh"

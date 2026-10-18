@@ -1,8 +1,7 @@
 { pkgs, inputs, ... }:
 
-# VR: Quest 3 as a wireless desktop. WiVRn is the OpenXR runtime/transport;
-# the WayVR overlay lives in home/services/wayvr.nix. Envision is avoided on
-# NixOS (it fights the declarative WiVRn setup).
+# Quest 3 as a wireless desktop: WiVRn (OpenXR runtime), WayVR overlay in home/services/wayvr.nix.
+# No Envision: it fights the declarative WiVRn setup.
 let
   # Fresh nixpkgs import doesn't inherit nixpkgs.config; CUDA needs unfree.
   pkgsWivrn = import inputs.nixpkgs-wivrn {

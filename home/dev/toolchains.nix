@@ -11,8 +11,7 @@
     golangci-lint
 
     # ── Rust ────────────────────────────────────────────────────────────
-    # rustup, not pkgs.rustc/cargo: zsh.nix sources ~/.cargo/env, which
-    # rustup-init creates.
+    # rustup, not pkgs.rustc/cargo: zsh.nix sources ~/.cargo/env, which rustup-init creates.
     rustup
     sccache
 

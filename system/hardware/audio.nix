@@ -1,11 +1,7 @@
 { config, lib, pkgs, ... }:
 
-# Audio for the ASUS TUF A15 (FA507NUR): Realtek ALC256 on AMD HD Audio.
-#
-# Mic clipping fix: ACP stacks "Capture" (+30 dB) and "Internal Mic Boost"
-# (+30 dB) into one volume range, so anything above ~40% hard-clips. We point
-# ACP_PATHS_DIR at a copy of the mixer paths with the boost taken out of the
-# range (100% ≈ -4.7 dBFS peak). Env var, not an overlay, to avoid rebuilding pipewire.
+# ASUS TUF A15 audio. Mic clipping: ACP stacks Capture + Internal Mic Boost (+30 dB each), so ACP_PATHS_DIR
+# points at mixer paths without the boost (env var, not an overlay, to avoid rebuilding pipewire).
 
 let
   acpPaths = pkgs.runCommand "acp-mixer-paths-alc256" { } ''
@@ -45,8 +41,7 @@ in
   systemd.user.services.wireplumber.environment.ACP_PATHS_DIR    = "${acpPaths}";
 
   # ── Bluetooth headset microphone (HFP) ────────────────────────────────────
-  # bluetoothd's default plugin set doesn't register the Hands-Free gateway, so
-  # earbuds came up A2DP-only with no mic.
+  # bluetoothd's default plugins skip the Hands-Free gateway, so earbuds had no mic.
   hardware.bluetooth.settings = {
     General = {
       Enable = "Source,Sink,Media,Socket";

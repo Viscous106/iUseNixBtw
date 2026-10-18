@@ -15,7 +15,5 @@ export EDITOR=nvim
 
 export PATH="/run/wrappers/bin:$PATH"
 
-# tmuxifier itself comes from the nixpkgs package (home/shell/zsh.nix) now —
-# PATH and completions are already wired up by nix. Just point it at the
-# personal layouts that used to live inside the vendored clone.
+# tmuxifier comes from nixpkgs (PATH and completions wired); just point it at personal layouts.
 export TMUXIFIER_LAYOUT_PATH="$HOME/.config/tmuxifier/layouts"

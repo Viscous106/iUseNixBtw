@@ -17,9 +17,7 @@ in
     pkgs.github-copilot-cli  # `copilot` binary (`copilot-cli` is AWS's ECS tool)
   ];
 
-  # Claude rewrites settings.json atomically (tmp file beside the first symlink
-  # hop, then rename). A home-manager link puts that hop in the read-only
-  # store, so this links straight into the repo instead.
+  # Linked into the repo directly: Claude's atomic rewrite fails if the first symlink hop is in the store.
   # Skills/agents/commands come from the separate claude-skills repo (setup.md).
   home.activation.linkClaudeSettings = config.lib.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/claude

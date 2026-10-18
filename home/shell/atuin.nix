@@ -32,9 +32,8 @@
       # Nix owns the version.
       update_check = false;
 
-      # Disable alt-1..9 quick-select; row numbers are a plain index instead
-      # (pkgs/atuin-number-all-rows.patch). keymap.<mode> is undocumented but
-      # real; only emacs because zsh uses `bindkey -e`.
+      # Unbind alt-1..9 (row numbers are a plain index, pkgs/atuin-number-all-rows.patch).
+      # keymap.<mode> is undocumented but real; emacs only since zsh uses `bindkey -e`.
       keymap.emacs = {
         "alt-1" = "noop";
         "alt-2" = "noop";

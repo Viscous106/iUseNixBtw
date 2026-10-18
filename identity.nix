@@ -1,10 +1,5 @@
-# Who this install belongs to. Every module gets these as `user`.
-#
-# setup.sh rewrites both fields in the copy it installs (it prompts for a
-# username and password). Must stay git-tracked: flakes can't see untracked files.
-#
-# hashedPassword is only applied when the account is first created; on a
-# running system use `passwd`. New hash: `mkpasswd -m sha-512`.
+# Who this install belongs to (`user` in every module); setup.sh rewrites it, and it must stay git-tracked.
+# hashedPassword only applies at account creation; afterwards use `passwd` (new hash: mkpasswd -m sha-512).
 {
   username = "viscous";
 

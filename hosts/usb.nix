@@ -69,8 +69,7 @@
   hardware.cpu.amd.updateMicrocode   = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   # ── SMART on the USB boot stick ───────────────────────────────────────────
-  # The JMicron USB-NVMe bridge hangs smartd's default probe; `-d sat` works.
-  # Listed per device (not globally) so autodetect still works for other drives.
+  # The JMicron USB-NVMe bridge hangs smartd's default probe; `-d sat` per device keeps autodetect for others.
   services.smartd.devices = [
     { device = "/dev/sda"; options = "-d sat -a"; }
   ];

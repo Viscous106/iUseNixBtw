@@ -3,11 +3,8 @@
 {
   home.packages = [ pkgs.tmux ];
 
-  # Declared here so tmux-continuum never writes its own tmux.service, whose
-  # KillMode/ExecStop kill every session on any unit restart.
-  # oneshot + RemainAfterExit: ExecStop (save) runs only on a real stop, not
-  # when the server exits by itself. Saving through the guarded wrapper avoids
-  # writing an empty save that the next restore would load.
+  # Declared here so tmux-continuum doesn't install its own unit, which kills every session on restart.
+  # oneshot + RemainAfterExit: the guarded save runs only on a real stop and never writes an empty save.
   systemd.user.services.tmux = {
     Unit = {
       Description   = "tmux default session (detached)";

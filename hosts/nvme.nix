@@ -1,8 +1,7 @@
 { config, lib, pkgs, modulesPath, ... }:
 
-# Internal NVMe install: LUKS2 + btrfs, systemd-boot, fixed hardware.
-# Uses /dev/mapper and by-partlabel instead of by-label, since the USB drive's
-# labels would collide when it is plugged in.
+# Internal NVMe install: LUKS2 + btrfs, systemd-boot. /dev/mapper and by-partlabel, not
+# by-label, since the USB drive's labels would collide.
 
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];

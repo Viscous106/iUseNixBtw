@@ -17,8 +17,7 @@
 
     initContent = ''
       # ── Custom keybindings ──────────────────────────────────────────────────
-      # Kitty/tmux Ctrl+Backspace CSI-u fix + Nix-side additions — not from
-      # Arch, no equivalent there, kept as harmless standalone terminal fixes.
+      # Kitty/tmux Ctrl+Backspace CSI-u fix and other standalone terminal fixes.
       bindkey -e                     # Emacs mode (standard shell feel)
       bindkey '\ed' clear-screen     # Alt+D to clear screen
       bindkey '^H' backward-kill-word # Ctrl+Backspace (standard)
@@ -38,11 +37,7 @@
       unset _f
 
       # ── rsync-based cp/mv (progress bars, resumable) ─────────────────────────
-      # Functions, not aliases (an alias would shadow them). Any flag or <2 args
-      # goes to the real binary: zsh completion probes `mv --version` and
-      # compinit runs `mv -f -- a b`. A lone source dir gets a trailing / so it
-      # behaves like cp (dst becomes the copy, not dst/src). Missing sources
-      # fail with a plain "cannot stat" before rsync runs.
+      # Functions, not aliases; any flag or <2 args goes to the real binary (completion and compinit probe mv).
       _rsync_transfer() {
         local remove=$1 name=cp; shift
         [[ $remove == 1 ]] && name=mv
@@ -78,17 +73,8 @@
       cp() { _rsync_transfer 0 "$@" }
       mv() { _rsync_transfer 1 "$@" }
 
-      # ── cd with a zoxide fallback ────────────────────────────────────────────
-      # A real path still goes to builtin cd, so flags, `cd -`, `cd old new`
-      # and CDPATH all behave exactly as before. Only a lone argument that
-      # isn't a usable path falls through to a zoxide jump, so `cd nixos-config`
-      # lands in /persist/nixos-config instead of erroring; if zoxide has no
-      # match either, builtin cd runs again just to print its normal error.
-      # A function, not an alias, for the same reason as cp/mv above, and
-      # deliberately not `zoxide init --cmd cd`: that variant replaces `z`/`zi`
-      # and hands cd's whole argument handling over to zoxide. It has to come
-      # after shell-init.sh has sourced `zoxide init zsh` (the scripts loop
-      # above), which is where `z` is defined.
+      # cd with a zoxide fallback for a lone non-path arg (not `zoxide init --cmd cd`, which takes over
+      # z/zi and all of cd's args). Needs `z`, so it must follow the scripts loop above.
       cd() {
         if (( $# == 1 )) && [[ -n $1 && $1 != -* ]]; then
           builtin cd -- "$1" 2>/dev/null && return
@@ -100,10 +86,7 @@
       }
 
       # ── Pay-respects ─────────────────────────────────────────────────────────
-      # `thefuck` was removed from nixpkgs (Python 3.12+ incompatible) — Arch
-      # still has it, but nixpkgs forces pay-respects as the replacement here.
-      # This eval is what installs command_not_found_handler; the nix-locate it
-      # consults for "which package has this binary" is wired up below.
+      # nixpkgs dropped thefuck; this eval installs command_not_found_handler (nix-locate wired below).
       if command -v pay-respects >/dev/null 2>&1; then
         eval "$(pay-respects zsh --alias)"
       fi
