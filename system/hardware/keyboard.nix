@@ -16,11 +16,7 @@
 
     keyboards.default = {
       # ids from `keyd monitor`; the trailing hash disambiguates shared vendor:product ids.
-      ids = [
-        "*"
-        "-2333:6666:e7fb73a9"   # ydotoold virtual device — keyd would re-remap
-                                # hyprwhspr's injected keystrokes
-      ];
+      ids = [ "*" ];
 
       settings = {
         # ── Main layer ──────────────────────────────────────────────────────
@@ -58,6 +54,18 @@
         };
       };
     };
+
+    # Wispr Flow's virtual keyboard sends US key positions (its paste is the US V key);
+    # move each letter to its Dvorak position so its Ctrl+V/C land as Ctrl+v/c.
+    keyboards.wispr-flow = {
+      ids = [ "1234:5678:0626f29d" ];
+      settings.main = {
+        b = "n"; c = "i"; d = "h"; e = "d"; f = "y"; g = "u"; h = "j"; i = "g";
+        j = "c"; k = "v"; l = "p"; n = "l"; o = "s"; p = "r"; q = "x"; r = "o";
+        s = "semicolon"; t = "k"; u = "f"; v = "dot"; w = "comma"; x = "b";
+        y = "t"; z = "slash";
+      };
+    };
   };
 
   # ── TTY console keyboard ──────────────────────────────────────────────────
@@ -74,7 +82,7 @@
     options = "";      # keyd handles caps/mod remapping at kernel level
   };
 
-  # /dev/uinput for the input group (keyd, ydotool, input-remapper).
+  # /dev/uinput for the input group (keyd, Wispr Flow, input-remapper).
   services.udev.extraRules = ''
     KERNEL=="uinput", GROUP="input", MODE="0660"
   '';

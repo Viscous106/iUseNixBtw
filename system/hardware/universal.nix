@@ -126,6 +126,13 @@
   # amd-pstate-epp only offers performance/powersave; ppd drives EPP from powersave.
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 
+  # Lid close stays awake: resume from suspend leaves a black screen.
+  services.logind.settings.Login = {
+    HandleLidSwitch              = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked        = "ignore";
+  };
+
   # Caelestia's bar needs UPower on DBus to show a battery instead of a
   # power-profile icon. Reports state only; independent of ppd.
   services.upower.enable = true;

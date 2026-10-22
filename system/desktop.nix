@@ -68,6 +68,10 @@
   # Persists Thunar's settings (view mode, zoom, sidebar), which otherwise reset.
   programs.xfconf.enable = true;
 
+  # ── Accessibility bus ─────────────────────────────────────────────────────
+  # Wispr Flow reads the focused app over AT-SPI on Hyprland.
+  services.gnome.at-spi2-core.enable = true;
+
   # ── Bluetooth ─────────────────────────────────────────────────────────────
   hardware.bluetooth.enable      = true;
   hardware.bluetooth.powerOnBoot = true;

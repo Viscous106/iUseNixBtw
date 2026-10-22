@@ -12,7 +12,6 @@ SENSOR_FILE="$STATE_DIR/hypr-rotation-sensor"      # last orientation the sensor
 TABLET_FILE="$STATE_DIR/hypr-tablet-mode"          # exists == folded
 
 # keyd grabs the keyboard and re-emits via virtual devices, so those must go too.
-# ydotoold's virtual device stays: it's synthetic input, not palm-pressable.
 TABLET_MUTE=(
   at-translated-set-2-keyboard
   keyd-virtual-keyboard

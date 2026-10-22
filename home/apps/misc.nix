@@ -16,6 +16,9 @@
     # Journal
     tui-journal     # `tjournal`; aliased as `scrible` in home/shell/zsh.nix
 
+    # Dictation
+    wispr-flow      # pkgs/wispr-flow.nix; `wispr-flow --doctor` checks input access
+
     # Networking / testing utilities
     speedtest-cli   # not `speedtest`, an unrelated GTK4 app
     prettyping

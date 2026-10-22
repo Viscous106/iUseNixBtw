@@ -234,6 +234,19 @@ hl.window_rule({
   match = { title = "^(Picture-in-Picture)$" },
   keep_aspect_ratio = true,
 })
+-- Wispr Flow's pill lives in a transparent overlay; undecorated so only the pill shows.
+hl.window_rule({
+  match = { class = "^(wispr-flow)$", initial_title = "^(Flow Status Indicator)$" },
+  float = true,
+  pin = true,
+  no_focus = true,
+  no_blur = true,
+  no_shadow = true,
+  no_anim = true,
+  border_size = 0,
+  rounding = 0,
+  move = "(monitor_w*0.5-window_w*0.5) (monitor_h-window_h)",
+})
 hl.window_rule({
   match = { tag = "games*" },
   no_blur = true,

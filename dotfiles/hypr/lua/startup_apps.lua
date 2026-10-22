@@ -33,6 +33,9 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("kdeconnect")
   hl.exec_cmd("blueman-applet")
 
+  -- Dictation on Meta+Ctrl+D, bound inside Wispr (162+72+91: it reads keys by position, Dvorak d = H).
+  hl.exec_cmd("wispr-flow --hidden")
+
   -- clipboard history
   hl.exec_cmd("wl-paste --type text --watch cliphist store")
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
