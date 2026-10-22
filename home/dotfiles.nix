@@ -26,7 +26,6 @@ let
     "qt5ct"                        = "qt5ct";
     "qt6ct"                        = "qt6ct";
     "keyd/app.conf"                = "keyd/app.conf";
-    "hyprwhspr/config.json"        = "hyprwhspr/config.json";
 
     # Shell / terminal
     "zsh/starship.toml"            = "zsh/starship.toml";

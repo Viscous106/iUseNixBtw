@@ -8,5 +8,7 @@ hl.monitor({
 })
 hl.monitor({
     output = "desc:AU Optronics B156HAN15.H",
-    disabled = true
+    scale = 1,
+    mode = "1920x1080@144",
+    disabled = false
 })

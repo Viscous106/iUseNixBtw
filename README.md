@@ -34,7 +34,7 @@ home/                home-manager
   shell/             zsh, tmux, atuin, git, gpg, kitty, CLI tools
   dev/               neovim, toolchains, python, web3, AI agents
   apps/              browsers, media, misc
-  services/          user daemons (hyprwhspr, ydotoold, battery)
+  services/          user daemons (ydotoold, battery)
   dotfiles.nix       every live-edit symlink, in one table
   default.nix        identity, web3 knobs, secrets activation
 
