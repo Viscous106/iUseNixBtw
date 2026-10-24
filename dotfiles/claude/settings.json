@@ -132,7 +132,7 @@
       "Bash(gh auth *)"
     ]
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {

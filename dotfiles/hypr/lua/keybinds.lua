@@ -1,21 +1,21 @@
 -- opts: repeating = hold to repeat, locked = works on lock screen, mouse = drag bind.
 
-local U   = require("lua.user_defaults")
+local U = require("lua.user_defaults")
 local mod = U.mainMod
-local sd  = U.scriptsDir
-local term  = U.term
+local sd = U.scriptsDir
+local term = U.term
 local files = U.files
 
 ------------------------------------------------------------------ meta (SUPER)
-hl.bind(mod .. " + SPACE",  hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mod .. " + SPACE", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(term))
-hl.bind(mod .. " + Print",  hl.dsp.exec_cmd(sd .. "/ScreenShot.sh --area"))
-hl.bind(mod .. " + tab",    hl.dsp.focus({ workspace = "m+1" }))
+hl.bind(mod .. " + Print", hl.dsp.exec_cmd(sd .. "/ScreenShot.sh --area"))
+hl.bind(mod .. " + tab", hl.dsp.focus({ workspace = "m+1" }))
 hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 hl.bind(mod .. " + period", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. " + comma",  hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true }) -- left click move
+hl.bind(mod .. " + comma", hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true }) -- left click move
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true }) -- right click resize
 hl.bind(mod .. " + B", hl.dsp.exec_cmd([[xdg-open "https://"]]))
 hl.bind(mod .. " + C", hl.dsp.exec_cmd("qalculate-gtk"))
@@ -38,16 +38,26 @@ hl.bind(mod .. " + V", hl.dsp.exec_cmd("caelestia clipboard"))
 -- Wallpaper picker (docs/design/wallpaper-picker.md)
 hl.bind(mod .. " + W", hl.dsp.exec_cmd("wallpaper-picker"))
 -- move focus
-hl.bind(mod .. " + left",  hl.dsp.focus({ direction = "l" }))
+hl.bind(mod .. " + left", hl.dsp.focus({ direction = "l" }))
 hl.bind(mod .. " + right", hl.dsp.focus({ direction = "r" }))
-hl.bind(mod .. " + up",    hl.dsp.focus({ direction = "u" }))
-hl.bind(mod .. " + down",  hl.dsp.focus({ direction = "d" }))
+hl.bind(mod .. " + up", hl.dsp.focus({ direction = "u" }))
+hl.bind(mod .. " + down", hl.dsp.focus({ direction = "d" }))
 -- workspaces 1..10 by number-row keycode (layout-independent)
-local ws_codes = { ["code:14"]=1, ["code:17"]=2, ["code:13"]=3, ["code:18"]=4, ["code:12"]=5,
-                   ["code:19"]=6, ["code:11"]=7, ["code:20"]=8, ["code:15"]=9, ["code:16"]=10 }
+local ws_codes = {
+	["code:14"] = 1,
+	["code:17"] = 2,
+	["code:13"] = 3,
+	["code:18"] = 4,
+	["code:12"] = 5,
+	["code:19"] = 6,
+	["code:11"] = 7,
+	["code:20"] = 8,
+	["code:15"] = 9,
+	["code:16"] = 10,
+}
 for code, ws in pairs(ws_codes) do
-  hl.bind(mod .. " + " .. code, hl.dsp.focus({ workspace = tostring(ws) }))
-  hl.bind(mod .. " + SHIFT + " .. code, hl.dsp.window.move({ workspace = tostring(ws), follow = true }))
+	hl.bind(mod .. " + " .. code, hl.dsp.focus({ workspace = tostring(ws) }))
+	hl.bind(mod .. " + SHIFT + " .. code, hl.dsp.window.move({ workspace = tostring(ws), follow = true }))
 end
 
 ------------------------------------------------------------ meta SHIFT (SUPER SHIFT)
@@ -73,10 +83,10 @@ hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(sd .. "/ScreenShot.sh --now"))
 hl.bind(mod .. " + SHIFT + H", hl.dsp.exec_cmd(sd .. "/ToggleWlKbptr.sh right"))
 hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd(sd .. "/ScreenRecord.sh"))
 -- resize active (repeating)
-hl.bind(mod .. " + SHIFT + left",  hl.dsp.window.resize({ x = -50, y = 0 }),  { repeating = true })
-hl.bind(mod .. " + SHIFT + right", hl.dsp.window.resize({ x = 50,  y = 0 }),  { repeating = true })
-hl.bind(mod .. " + SHIFT + up",    hl.dsp.window.resize({ x = 0,   y = -50 }), { repeating = true })
-hl.bind(mod .. " + SHIFT + down",  hl.dsp.window.resize({ x = 0,   y = 50 }),  { repeating = true })
+hl.bind(mod .. " + SHIFT + left", hl.dsp.window.resize({ x = -50, y = 0 }), { repeating = true })
+hl.bind(mod .. " + SHIFT + right", hl.dsp.window.resize({ x = 50, y = 0 }), { repeating = true })
+hl.bind(mod .. " + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -50 }), { repeating = true })
+hl.bind(mod .. " + SHIFT + down", hl.dsp.window.resize({ x = 0, y = 50 }), { repeating = true })
 
 ------------------------------------------------------------- meta ALT (SUPER ALT)
 hl.bind(mod .. " + ALT + SPACE", hl.dsp.exec_cmd("hyprctl dispatch workspaceopt allfloat"))
@@ -97,10 +107,10 @@ hl.bind(mod .. " + ALT + S", hl.dsp.exec_cmd("pavucontrol"))
 -- random wallpaper (also regenerates the colour scheme)
 hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd("caelestia wallpaper -r"))
 -- swap windows
-hl.bind(mod .. " + ALT + left",  hl.dsp.window.swap({ direction = "l" }))
+hl.bind(mod .. " + ALT + left", hl.dsp.window.swap({ direction = "l" }))
 hl.bind(mod .. " + ALT + right", hl.dsp.window.swap({ direction = "r" }))
-hl.bind(mod .. " + ALT + up",    hl.dsp.window.swap({ direction = "u" }))
-hl.bind(mod .. " + ALT + down",  hl.dsp.window.swap({ direction = "d" }))
+hl.bind(mod .. " + ALT + up", hl.dsp.window.swap({ direction = "u" }))
+hl.bind(mod .. " + ALT + down", hl.dsp.window.swap({ direction = "d" }))
 
 ----------------------------------------------------------- meta CTRL (SUPER CTRL)
 hl.bind(mod .. " + CTRL + backspace", hl.dsp.exec_cmd("caelestia shell drawers toggle session"))
@@ -109,10 +119,10 @@ hl.bind(mod .. " + CTRL + C", hl.dsp.exec_cmd("qalculate-gtk"))
 hl.bind(mod .. " + CTRL + O", hl.dsp.exec_cmd("hyprctl setprop active opacity toggle"))
 hl.bind(mod .. " + CTRL + R", hl.dsp.exec_cmd("caelestia scheme"))
 -- move windows
-hl.bind(mod .. " + CTRL + left",  hl.dsp.window.move({ direction = "l" }))
+hl.bind(mod .. " + CTRL + left", hl.dsp.window.move({ direction = "l" }))
 hl.bind(mod .. " + CTRL + right", hl.dsp.window.move({ direction = "r" }))
-hl.bind(mod .. " + CTRL + up",    hl.dsp.window.move({ direction = "u" }))
-hl.bind(mod .. " + CTRL + down",  hl.dsp.window.move({ direction = "d" }))
+hl.bind(mod .. " + CTRL + up", hl.dsp.window.move({ direction = "u" }))
+hl.bind(mod .. " + CTRL + down", hl.dsp.window.move({ direction = "d" }))
 hl.bind(mod .. " + CTRL + S", hl.dsp.exec_cmd(sd .. "/ScreenShot.sh --area"))
 
 --------------------------------------------------------------------- CTRL ALT
@@ -125,17 +135,17 @@ hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(sd .. "/Volume.sh --dec"), { rep
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(sd .. "/Volume.sh --toggle-mic"), { locked = true })
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd(sd .. "/Volume.sh --toggle"), { locked = true })
 hl.bind("XF86KbdBrightnessDown", hl.dsp.exec_cmd(sd .. "/BrightnessKbd.sh --dec"), { repeating = true })
-hl.bind("XF86KbdBrightnessUp",   hl.dsp.exec_cmd(sd .. "/BrightnessKbd.sh --inc"), { repeating = true })
+hl.bind("XF86KbdBrightnessUp", hl.dsp.exec_cmd(sd .. "/BrightnessKbd.sh --inc"), { repeating = true })
 -- Decrement is a trailing minus (10%-); a leading "-" is rejected.
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("caelestia shell brightness set 10%-"), { repeating = true })
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("caelestia shell brightness set +10%"), { repeating = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("caelestia shell brightness set +10%"), { repeating = true })
 hl.bind("code:202", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"), { locked = true })
-hl.bind("XF86Sleep",  hl.dsp.exec_cmd("systemctl suspend"), { locked = true })
+hl.bind("XF86Sleep", hl.dsp.exec_cmd("systemctl suspend"), { locked = true })
 hl.bind("XF86RFKill", hl.dsp.exec_cmd(sd .. "/AirplaneMode.sh"), { locked = true })
 -- XF86AudioPlayPause isn't a valid keysym; Pause and Play both toggle.
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("caelestia shell mpris playPause"), { locked = true })
-hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("caelestia shell mpris playPause"), { locked = true })
-hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("caelestia shell mpris next"), { locked = true })
-hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("caelestia shell mpris previous"), { locked = true })
-hl.bind("XF86AudioStop",  hl.dsp.exec_cmd("caelestia shell mpris stop"), { locked = true })
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("caelestia shell mpris playPause"), { locked = true })
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("caelestia shell mpris next"), { locked = true })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("caelestia shell mpris previous"), { locked = true })
+hl.bind("XF86AudioStop", hl.dsp.exec_cmd("caelestia shell mpris stop"), { locked = true })
 hl.bind("XF86Launch4", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.local/bin/cycle_aura_mode.sh"), { locked = true })
