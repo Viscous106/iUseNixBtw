@@ -4,7 +4,7 @@ return {
   version = '^1.0.0',
   lazy = false,
   enabled = true,
-  dependencies = { 'benlubas/image.nvim' },
+  dependencies = { '3rd/image.nvim' },
   -- :MoltenInstall is not a thing — molten registers its commands through
   -- the pynvim remote-plugin manifest, which :UpdateRemotePlugins writes.
   build = ':UpdateRemotePlugins',
