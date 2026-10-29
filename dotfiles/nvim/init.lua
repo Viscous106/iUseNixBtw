@@ -9,6 +9,7 @@ vim.fn.serverstart()
 require 'config.options'
 require 'config.keymaps'
 require 'config.autocmds'
+require 'config.skeletons'
 require 'config.lazy'
 require 'config.notebook'
 
