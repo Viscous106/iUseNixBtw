@@ -30,6 +30,7 @@ inputs: final: prev: {
   codex-whoami     = final.callPackage ../pkgs/codex-whoami.nix { };
   claude-whoami    = final.callPackage ../pkgs/claude-whoami.nix { };
   solc-bin         = final.callPackage ../pkgs/solc-bin.nix { };         # pinned solc builds for web3.nix
+  wispr-flow       = final.callPackage ../pkgs/wispr-flow.nix { };       # dictation, run by home/services/wispr-flow.nix
 
   # atuin with stable row numbers and deduplicated results; builds locally, so tests/opt-level are cut.
   # Drop this attr to go back to stock atuin.
