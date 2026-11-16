@@ -24,7 +24,7 @@ lib/import-dir.nix   auto-import helper
 system/              NixOS (both hosts)
   core/              nix settings + GC, base system, user account
   hardware/          kernel/firmware/power, audio, keyboard, touchscreen, ASUS
-  services/          databases, virtualisation, gaming, Proton Drive mount, atuin server
+  services/          databases, virtualisation, vm-spin (Windows SSD in QEMU), gaming, Proton Drive mount, atuin server
   network.nix        NetworkManager/iwd, DNS, Tailscale, SSH, firewall
   desktop.nix        Hyprland, portals, fonts, Thunar, bluetooth
   packages.nix       system-wide CLI tools
