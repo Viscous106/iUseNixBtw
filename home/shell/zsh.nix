@@ -108,6 +108,7 @@
     la      = "ls -a";
     lla     = "ls -la";
     lt      = "ls --tree";
+    memSync = "rclone sync /run/media/viscous/one-for-all/Memories Gdrive:Memories --backup-dir Gdrive:Memories_Archive/$(date +%Y%m%d_%H%M%S) --progress";
     bluefriends = "pactl load-module module-combine-sink sink_name=combined";
     ff      = "fastfetch";
     config  = "git -C /persist/nixos-config";

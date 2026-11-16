@@ -132,7 +132,7 @@
       "Bash(gh auth *)"
     ]
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -277,7 +277,7 @@
       "effortLevel": "high"
     },
     "claude-sonnet-5-5": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     }
   },
   "tui": "fullscreen",

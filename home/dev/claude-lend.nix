@@ -11,9 +11,5 @@
 
     # String, not a path: a path literal would copy the secret into the store.
     tokenFile = "${config.home.homeDirectory}/.config/claude-lend-token";
-
-    # HTTPS for LAN guests; firewall port opened in system/network.nix.
-    lan.enable = true;
-    lan.port   = 8443;
   };
 }
