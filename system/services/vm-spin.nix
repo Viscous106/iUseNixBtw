@@ -54,11 +54,12 @@ let
         -drive if=pflash,format=raw,file="$state/OVMF_VARS.fd" \
         -drive if=none,id=win,file="$dev",format=raw,cache=none,aio=native \
         -device nvme,drive=win,serial=vmspin,bootindex=0 \
+        -device qemu-xhci \
         -drive file=fat:rw:"$state/esp",format=raw,if=none,id=esp \
         -device usb-storage,drive=esp,bootindex=1 \
         -chardev socket,id=tpm,path="$run/tpm.sock" -tpmdev emulator,id=tpm0,chardev=tpm \
         -device tpm-tis,tpmdev=tpm0 \
-        -device qemu-xhci -device usb-tablet -device usb-kbd \
+        -device usb-tablet -device usb-kbd \
         -device VGA,vgamem_mb=64 -display gtk \
         -audiodev pipewire,id=snd -device ich9-intel-hda -device hda-duplex,audiodev=snd \
         -nic user,model=e1000e
