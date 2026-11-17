@@ -321,5 +321,8 @@
       "no additional routine-under-<user>/ prefix qualifiers found"
     ]
   },
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "env": {
+    "CLAUDE_CODE_SCROLL_SPEED": "10"
+  }
 }
