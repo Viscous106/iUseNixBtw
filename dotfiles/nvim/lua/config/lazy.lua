@@ -80,17 +80,12 @@ require('lazy').setup({
   },
   require 'config.plugins.treesitter',
 
-  -- Markdown plugins
-  { 'preservim/vim-markdown', ft = 'markdown' },
-  {
-    'iamcco/markdown-preview.nvim',
+  { -- in-buffer markdown rendering; buffers open raw, <leader>md flips to rendered
+    'MeanderingProgrammer/render-markdown.nvim',
     ft = 'markdown',
-    build = 'cd app && yarn install --frozen-lockfile',
-    config = function()
-      vim.g.mkdp_filetypes = { 'markdown' }
-      vim.g.mkdp_browser = 'zen-beta'
-      vim.api.nvim_set_keymap('n', '<leader>md', '<Plug>MarkdownPreviewToggle', { noremap = true, silent = true })
-    end,
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+    keys = { { '<leader>md', '<cmd>RenderMarkdown buf_toggle<cr>', ft = 'markdown', desc = 'Toggle [M]ark[d]own render' } },
+    opts = { enabled = false },
   },
 
   require 'kickstart.plugins.debug',
