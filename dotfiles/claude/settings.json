@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_SCROLL_SPEED": "10"
+  },
   "permissions": {
     "allow": [
       "Bash(git status *)",
@@ -132,7 +135,7 @@
       "Bash(gh auth *)"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -321,8 +324,5 @@
       "no additional routine-under-<user>/ prefix qualifiers found"
     ]
   },
-  "voiceEnabled": true,
-  "env": {
-    "CLAUDE_CODE_SCROLL_SPEED": "10"
-  }
+  "voiceEnabled": true
 }
